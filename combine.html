@@ -138,6 +138,60 @@
         </div>
     </div>
     
+	<script>
+    const settings = document.getElementById('suggestions');
+    settings.addEventListener('click', () => {
+        document.getElementById('popupTitle').textContent = "Suggestions?";
+        const popupBody = document.getElementById('popupBody');
+        popupBody.innerHTML =` 
+            <h4 style="text-align: center">Any Game you want to see added or <br> any Improvement you might want?</h4>
+                <iframe 
+                src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
+                style="width:100%; height:290px; border:none; display:block;"
+                loading="lazy">
+                </iframe>
+            `;
+            popupBody.contentEditable = false;
+            document.getElementById('popupOverlay').style.display = "flex";
+});
+
+    const retro = document.getElementById('retro');
+    retro.addEventListener('click', () => {
+        document.getElementById('popupTitle').textContent = "Retro Bowl";
+        const popupBody = document.getElementById('popupBody');
+        popupBody.innerHTML =` 
+            <h4 style="text-align: center">
+        <a href="rb.html">
+            <button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button>
+        </a>
+        <a href="college.html">
+            <button class="settings-button" style="width: 40%;">RB College</button>
+        </a></h4>
+            `;
+            popupBody.contentEditable = false;
+            document.getElementById('popupOverlay').style.display = "flex";
+});
+
+    const mine = document.getElementById('minecraft');
+    mine.addEventListener('click', () => {
+        document.getElementById('popupTitle').textContent = "Minecraft (Use JavaScript Version)";
+        const popupBody = document.getElementById('popupBody');
+        popupBody.innerHTML =` 
+            <h4 style="text-align: center">
+        <a href="1.12.html">
+            <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+        </a>
+        <a href="1.8.html">
+            <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+        </a></h4>
+            `;
+            popupBody.contentEditable = false;
+            document.getElementById('popupOverlay').style.display = "flex";
+});
+        function closePopup() {
+        document.getElementById('popupOverlay').style.display = "none";
+    }
+</script>
 
     
 </body>
@@ -788,13 +842,8 @@ Feedback is always appreciated and helps us provide information our visitors are
 </span></p></div>
 </div><div class="ptl_portlet_vertical"><div class="ptl_top_portlet" style="display:none;"></div><div id="ctl00_ContentPlaceHolder1_ctl28_divContent"><div class="line">&nbsp;</div>
 <h2 class="title">QUICK LINKS</h2></div>
-</div> 
-	        <a>
-            <button id="minecraft" class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft</button>
-        </a>
-	<div class="ptl_portlet_vertical"><div class="ptl_top_portlet" style="display:none;"></div><div id="ctl00_ContentPlaceHolder1_ctl31_divContent"><ul class="quick-links">
+</div><div class="ptl_portlet_vertical"><div class="ptl_top_portlet" style="display:none;"></div><div id="ctl00_ContentPlaceHolder1_ctl31_divContent"><ul class="quick-links">
     <li><a title="Gn-Math" href="https://tmorris01.github.io/gnlinks/esky.html" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: center;">Gn-Math</a></li>
-	    <li><a><button id="minecraft" title="Minecraft 1.8" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: center;">Minecraft</button></a></li>
     <li><a title="Minecraft 1.12" href="https://tmorris01.github.io/gnlinks/1.12.html" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: center;">Minecraft 1.12</a></li>
     <li><a title="Minecraft 1.8" href="https://tmorris01.github.io/gnlinks/1.8.html" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: center;">Minecraft 1.8</a></li>
     <li><a title="Drive Mad" href="https://tmorris01.github.io/gnlinks/drive-mad-new" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: center;">Drive Mad</a></li>
@@ -994,17 +1043,7 @@ Sys.Application.add_init(function() {
         window.isMobile = 0 == 1;
     </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9c61a48c88406181","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"db425491991d400fa7b5aef612539c3e"}' crossorigin="anonymous"></script
-<div id="popupOverlay">
-        <div class="popup">
-            <div class="popup-header">
-                <h3 id="popupTitle">Title</h3>
-                <button id="popupClose" onclick="closePopup()">×</button>
-            </div>
-            <div id="popupBody">
-                Content will be here
-            </div>
-        </div>
-    </div>
+
 </body>
 </html>
     </div>
@@ -1053,61 +1092,6 @@ Sys.Application.add_init(function() {
             }, 500);
         }, 4000);
         }
-    }
-</script>
-
-	<script>
-    const settings = document.getElementById('suggestions');
-    settings.addEventListener('click', () => {
-        document.getElementById('popupTitle').textContent = "Suggestions?";
-        const popupBody = document.getElementById('popupBody');
-        popupBody.innerHTML =` 
-            <h4 style="text-align: center">Any Game you want to see added or <br> any Improvement you might want?</h4>
-                <iframe 
-                src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
-                style="width:100%; height:290px; border:none; display:block;"
-                loading="lazy">
-                </iframe>
-            `;
-            popupBody.contentEditable = false;
-            document.getElementById('popupOverlay').style.display = "flex";
-});
-
-    const retro = document.getElementById('retro');
-    retro.addEventListener('click', () => {
-        document.getElementById('popupTitle').textContent = "Retro Bowl";
-        const popupBody = document.getElementById('popupBody');
-        popupBody.innerHTML =` 
-            <h4 style="text-align: center">
-        <a href="rb.html">
-            <button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button>
-        </a>
-        <a href="college.html">
-            <button class="settings-button" style="width: 40%;">RB College</button>
-        </a></h4>
-            `;
-            popupBody.contentEditable = false;
-            document.getElementById('popupOverlay').style.display = "flex";
-});
-
-    const mine = document.getElementById('minecraft');
-    mine.addEventListener('click', () => {
-        document.getElementById('popupTitle').textContent = "Minecraft (Use JavaScript Version)";
-        const popupBody = document.getElementById('popupBody');
-        popupBody.innerHTML =` 
-            <h4 style="text-align: center">
-        <a href="1.12.html">
-            <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
-        </a>
-        <a href="1.8.html">
-            <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
-        </a></h4>
-            `;
-            popupBody.contentEditable = false;
-            document.getElementById('popupOverlay').style.display = "flex";
-});
-        function closePopup() {
-        document.getElementById('popupOverlay').style.display = "none";
     }
 </script>
 
