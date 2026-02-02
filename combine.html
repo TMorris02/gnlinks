@@ -1014,12 +1014,12 @@ Sys.Application.add_init(function() {
             const s1 = document.getElementById("site1");
             const s2 = document.getElementById("site2");
             
-            if (s1.style.display === "none") {
-                s1.style.display = "block";
-                s2.style.display = "none";
-            } else {
-                s1.style.display = "none";
+            if (s2.style.display === "none") {
                 s2.style.display = "block";
+                s1.style.display = "none";
+            } else {
+                s2.style.display = "none";
+                s1.style.display = "block";
             }
         }
     </script>
