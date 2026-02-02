@@ -24,8 +24,16 @@
 			height: 70px;
         }
 
-        #site1 { display: none; }
+        #site1, #site2 { display: none; }
     </style>
+	<script>
+    // This runs immediately as the browser reads the head
+    (function() {
+        const savedSite = localStorage.getItem("selectedSite") || "site2";
+        // Create a style rule to show the correct one instantly
+        document.write('<style>#' + savedSite + '{ display: block !important; }</style>');
+    })();
+</script>
 </head>
 <body class="dark-mode">
 
