@@ -110,7 +110,7 @@
         </a>
         <br><br>
         <a>
-            <button id="minecraft" class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft</button>
+            <button id="minecraft" class="settings-button minecraft-btn" style="width: 40%; margin-right: 5%;">Minecraft</button>
         </a>
         <a href="drive-mad-new">
             <button class="settings-button" style="width: 40%;">Drive Mad</button>
@@ -794,7 +794,7 @@ Feedback is always appreciated and helps us provide information our visitors are
 </div><div class="ptl_portlet_vertical"><div class="ptl_top_portlet" style="display:none;"></div><div id="ctl00_ContentPlaceHolder1_ctl31_divContent"><ul class="quick-links">
 
 <li>
-    <button type="button" id="minecraft" class="settings-button" style="font-family: 'Segoe UI', Arial, sans-serif; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600; text-align: center; width: 85%; cursor: pointer;">
+    <button type="button" id="minecraft" class="settings-button minecraft-btn" style="font-family: 'Segoe UI', Arial, sans-serif; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600; text-align: center; width: 85%; cursor: pointer;">
         Minecraft
     </button>
 </li>
@@ -1085,25 +1085,33 @@ Sys.Application.add_init(function() {
             document.getElementById('popupOverlay').style.display = "flex";
 });
 
-    const mine = document.getElementById('minecraft');
-    mine.addEventListener('click', () => {
-        document.getElementById('popupTitle').textContent = "Minecraft (Use JavaScript Version)";
+   // This targets every button with the "minecraft-btn" class
+const allMineBtns = document.querySelectorAll('.minecraft-btn');
+
+allMineBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Essential to stop school-site 404 redirects
+        e.preventDefault();
+        e.stopPropagation();
+
+        document.getElementById('popupTitle').textContent = "Minecraft (Select Version)";
         const popupBody = document.getElementById('popupBody');
-        popupBody.innerHTML =` 
+        
+        popupBody.innerHTML = ` 
             <h4 style="text-align: center">
-        <a href="1.12.html">
-            <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
-        </a>
-        <a href="1.8.html">
-            <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
-        </a></h4>
-            `;
-            popupBody.contentEditable = false;
-            document.getElementById('popupOverlay').style.display = "flex";
+                <a href="https://tmorris01.github.io">
+                    <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+                </a>
+                <a href="https://tmorris01.github.io">
+                    <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+                </a>
+            </h4>
+        `;
+        
+        document.getElementById('popupOverlay').style.display = "flex";
+    });
 });
-        function closePopup() {
-        document.getElementById('popupOverlay').style.display = "none";
-    }
+
 </script>
 	
 </body>
