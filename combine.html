@@ -38,7 +38,7 @@
 	<script>
     // This runs immediately as the browser reads the head
     (function() {
-        const savedSite = localStorage.getItem("selectedSite") || "site2";
+        const savedSite = localStorage.getItem("selectedSite") || "site1";
         // Create a style rule to show the correct one instantly
         document.write('<style>#' + savedSite + '{ display: block; }</style>');
     })();
@@ -1030,9 +1030,9 @@ Sys.Application.add_init(function() {
     // LOAD: Check what was saved when the page opens
     window.addEventListener('DOMContentLoaded', () => {
         const lastSite = localStorage.getItem("selectedSite");
-        if (lastSite === "site1") {
-            document.getElementById("site2").style.display = "none";
-            document.getElementById("site1").style.display = "block";
+        if (lastSite === "site2") {
+            document.getElementById("site1").style.display = "none";
+            document.getElementById("site2").style.display = "block";
         }
     });
 
@@ -1041,14 +1041,14 @@ Sys.Application.add_init(function() {
         const s1 = document.getElementById("site1");
         const s2 = document.getElementById("site2");
         
-        if (s2.style.display === "none") {
-            s2.style.display = "block";
-            s1.style.display = "none";
-            localStorage.setItem("selectedSite", "site2"); // Save preference
-        } else {
-            s2.style.display = "none";
+        if (s1.style.display === "none") {
             s1.style.display = "block";
+            s2.style.display = "none";
             localStorage.setItem("selectedSite", "site1"); // Save preference
+        } else {
+            s1.style.display = "none";
+            s2.style.display = "block";
+            localStorage.setItem("selectedSite", "site2"); // Save preference
         }
     }
 </script>
