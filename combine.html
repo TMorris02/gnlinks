@@ -1066,6 +1066,11 @@ Sys.Application.add_init(function() {
             s1.style.display = "block";
             s2.style.display = "none";
             localStorage.setItem("selectedSite", "site1"); // Save preference
+			
+    	  // Hide immediately without fading if they switch back
+      	  alertBox.style.display = "none";
+      	  alertBox.style.opacity = "0";
+			
         } else {
 			//Switch to Site 2
             s1.style.display = "none";
