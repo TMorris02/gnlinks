@@ -1013,9 +1013,9 @@ Sys.Application.add_init(function() {
     // LOAD: Check what was saved when the page opens
     window.addEventListener('DOMContentLoaded', () => {
         const lastSite = localStorage.getItem("selectedSite");
-        if (lastSite === "site2") {
-            document.getElementById("site1").style.display = "none";
-            document.getElementById("site2").style.display = "block";
+        if (lastSite === "site1") {
+            document.getElementById("site2").style.display = "none";
+            document.getElementById("site1").style.display = "block";
         }
     });
 
