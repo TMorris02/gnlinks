@@ -1009,19 +1009,32 @@ Sys.Application.add_init(function() {
 </html>
     </div>
 
-    <script>
-        function toggleSites() {
-            const s1 = document.getElementById("site1");
-            const s2 = document.getElementById("site2");
-            
-            if (s2.style.display === "none") {
-                s2.style.display = "block";
-                s1.style.display = "none";
-            } else {
-                s2.style.display = "none";
-                s1.style.display = "block";
-            }
+<script>
+    // LOAD: Check what was saved when the page opens
+    window.addEventListener('DOMContentLoaded', () => {
+        const lastSite = localStorage.getItem("selectedSite");
+        if (lastSite === "site2") {
+            document.getElementById("site1").style.display = "none";
+            document.getElementById("site2").style.display = "block";
         }
-    </script>
+    });
+
+    // TOGGLE: Switch sites and SAVE the choice
+    function toggleSites() {
+        const s1 = document.getElementById("site1");
+        const s2 = document.getElementById("site2");
+        
+        if (s2.style.display === "none") {
+            s2.style.display = "block";
+            s1.style.display = "none";
+            localStorage.setItem("selectedSite", "site2"); // Save preference
+        } else {
+            s2.style.display = "none";
+            s1.style.display = "block";
+            localStorage.setItem("selectedSite", "site1"); // Save preference
+        }
+    }
+</script>
+
 </body>
 </html>
