@@ -67,6 +67,18 @@
     <!-- FLOATING TOGGLE BUTTON -->
     <button class="main-toggle-btn" onclick="toggleSites()"><img src="https://static.thenounproject.com/png/441049-200.png" alt="Anonymous" title="Anonymous Mode" style="width: 40px; height: 40px;"></button>
 	<div id="alert">↓↓ Scroll down for games ↓↓<br>Dont click any other links!</div>
+
+	 <div id="popupOverlay">
+        <div class="popup">
+            <div class="popup-header">
+                <h3 id="popupTitle">Title</h3>
+                <button id="popupClose" onclick="closePopup()">×</button>
+            </div>
+            <div id="popupBody">
+                Content will be here
+            </div>
+        </div>
+    </div>
 	
     <!-- WEBSITE 1 -->
     <div id="site1">
@@ -126,17 +138,7 @@
     <button class="invisible-button" style="cursor: default; left: 0px;"></button>
 </a>
 	
- <div id="popupOverlay">
-        <div class="popup">
-            <div class="popup-header">
-                <h3 id="popupTitle">Title</h3>
-                <button id="popupClose" onclick="closePopup()">×</button>
-            </div>
-            <div id="popupBody">
-                Content will be here
-            </div>
-        </div>
-    </div>
+
     
 
 
@@ -998,18 +1000,6 @@ Sys.Application.add_init(function() {
     </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9c61a48c88406181","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"db425491991d400fa7b5aef612539c3e"}' crossorigin="anonymous"></script
 
-<div id="popupOverlay">
-        <div class="popup">
-            <div class="popup-header">
-                <h3 id="popupTitle">Title</h3>
-                <button id="popupClose" onclick="closePopup()">×</button>
-            </div>
-            <div id="popupBody">
-                Content will be here
-            </div>
-        </div>
-    </div>
-	
 </body>
 </html>
     </div>
