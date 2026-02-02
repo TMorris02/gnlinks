@@ -24,6 +24,23 @@
 			height: 70px;
         }
 
+		#alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers it horizontally */
+    background-color: #ffa500;
+    color: black;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 10001; /* Higher than your button */
+    display: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    text-align: center;
+    min-width: 250px;
+}
+		
         #site1, #site2 { display: none; }
 		#site1 {
     background-color: #0f172a !important;
@@ -48,7 +65,8 @@
 
     <!-- FLOATING TOGGLE BUTTON -->
     <button class="main-toggle-btn" onclick="toggleSites()"><img src="https://static.thenounproject.com/png/441049-200.png" alt="Anonymous" title="Anonymous Mode" style="width: 40px; height: 40px;"></button>
-
+	<div id="alert">↓↓ Scroll down for games ↓↓<br>Dont click any other links!</div>
+	
     <!-- WEBSITE 1 -->
     <div id="site1">
 <!DOCTYPE html>
@@ -1040,15 +1058,25 @@ Sys.Application.add_init(function() {
     function toggleSites() {
         const s1 = document.getElementById("site1");
         const s2 = document.getElementById("site2");
+		const alertBox = document.getElementById("alert");
         
         if (s1.style.display === "none") {
+			//Switch to Site 1
             s1.style.display = "block";
             s2.style.display = "none";
             localStorage.setItem("selectedSite", "site1"); // Save preference
         } else {
+			//Switch to Site 2
             s1.style.display = "none";
             s2.style.display = "block";
             localStorage.setItem("selectedSite", "site2"); // Save preference
+			
+			alertBox.style.display = "block";
+
+        // Hide it after 4 seconds
+        setTimeout(() => {
+            alertBox.style.display = "none";
+        }, 4000);
         }
     }
 </script>
