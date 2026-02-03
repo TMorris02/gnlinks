@@ -100,18 +100,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode" style="background-color: #0f172a";>
-    <header>
-        <div class="header-content">
-            <div class="logo" style="font-size: 6rem">Links</div>
-			<div class="logo" style="font-size: 1.5rem; text-align:left; align-items:left;">Press <strong>`</strong> to quickly leave site</div>
-            <div class="control-buttons" style="display: flex; flex-direction: column; align-items: center;">
-                <button id="suggestions" class="control-button" style="font-size: 6rem; margin-right: 4.0%; margin-top: 2.5rem;" title="Suggestions?">
-                    <img src="https://static.thenounproject.com/png/3370196-200.png" alt="suggestions?" style="width:8rem; height:auto;">
-                </button>
-                <div class="button-label" style="margin-left: auto; font-size: 1.5rem; margin-top: 1.0rem;">Suggestions?</div>
-            </div>
+<header style="padding: 10px 5%;">
+    <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap;">
+        
+        <!-- Logo: Font size scales with screen width -->
+        <div class="logo" style="font-size: clamp(3rem, 15vw, 6.5rem); line-height: 1;">Links</div>
+
+        <!-- Buttons Container -->
+        <div class="control-buttons" style="display: flex; flex-direction: column; align-items: center; min-width: 80px;">
+            <button id="suggestions" class="control-button" 
+                style="background: none; border: none; padding: 0; cursor: pointer; width: clamp(4rem, 12vw, 8rem);" 
+                title="Suggestions?">
+                <img src="https://static.thenounproject.com/png/3370196-200.png" 
+                     alt="suggestions?" 
+                     style="width: 100%; height: auto; filter: invert(1);"> 
+            </button>
+            <div class="button-label" style="font-size: clamp(0.8rem, 3vw, 1.5rem); margin-top: 0.5rem; text-align: center;">Suggestions?</div>
         </div>
-    </header>
+
+    </div>
+</header>
     <center>
         <br> <br>
         <a href="https://tmorris01.github.io/gnlinks/esky.html">
