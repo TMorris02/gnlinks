@@ -60,6 +60,14 @@
         // Create a style rule to show the correct one instantly
         document.write('<style>#' + savedSite + '{ display: block; }</style>');
     })();
+
+	document.addEventListener('keydown', function(e) {
+        // "Backquote" is the name for the ` key
+        if (e.code === 'Backquote') {
+            window.location.href = 'eskymos.com'; // URL
+        }
+    });
+		
 </script>
 </head>
 <body class="dark-mode">
