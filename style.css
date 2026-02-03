@@ -87,12 +87,13 @@ header {
     z-index: 100;
     box-shadow: var(--shadow-lg);
     backdrop-filter: blur(20px);
+    width: 100%;
 }
 
 .header-content {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.25rem 1rem;
+    /*margin: 0 auto;*/
+    padding: 1.25rem 5%/*1rem*/;
     display: flex;
     align-items: center;
     justify-content: space-between;
