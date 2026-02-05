@@ -128,7 +128,7 @@
         <a href="https://tmorris01.github.io/gnlinks/esky.html"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
         <br><br>
         <a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%; margin-right: 5%;">Minecraft</button></a>
-        <a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%;">Drive Mad</button></a>
+        <a><button class="settings-button drive-btn" style="width: 40%;">Drive Mad</button></a>
         <br><br>
         <a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button class="settings-button" style="width: 40%; margin-right: 5%;">RocketGoal.io</button></a>
         <a href="https://tmorris01.github.io/gnlinks/monkeymart.html"><button class="settings-button" style="width: 40%;">Monkey Mart</button></a>
@@ -805,9 +805,11 @@ Feedback is always appreciated and helps us provide information our visitors are
         Minecraft
     </button></a>
 </li>
-	<li><a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button type="button" title="Drive Mad" style="cursor: pointer; font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: left; width: 100%; background-color: transparent;">
-		Drive Mad
-	</button></a></li>
+<li>
+    <a><button type="button" class="drive-btn" style="font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600; text-align: left; width: 100%; cursor: pointer; background-color: transparent;">
+        Drive Mad
+    </button></a>
+</li>
     <li><a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button type="button" title="Rocketgoal.io" style="cursor: pointer; font-family: 'Segoe UI', Arial, sans-serif; text-decoration: none; color: Black; border: 0; padding: 0.875rem 1.5rem; font-size: 35px; font-weight: 600;text-align: left; width: 100%; background-color: transparent;">
 		Rocket Goal
 	</button></a></li>
@@ -1083,6 +1085,33 @@ Sys.Application.add_init(function() {
             document.getElementById('popupOverlay').style.display = "flex";
 });
 
+  // This targets every button with the "drive-btn" class
+const drive = document.querySelectorAll('.drive-btn');
+
+drive.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Essential to stop school-site 404 redirects
+        e.preventDefault();
+        e.stopPropagation();
+
+        document.getElementById('popupTitle').textContent = "Drive Mad";
+        const popupBody = document.getElementById('popupBody');
+        
+        popupBody.innerHTML = ` 
+            <h4 style="text-align: center">
+                <a href="https://tmorris01.github.io/gnlinks/drive-mad-new">
+                    <button class="settings-button" style="width: 40%; margin-right: 5%;">Drive Mad</button>
+                </a>
+                <a href="https://tmorris01.github.io/gnlinks/drive-mad-classic">
+                    <button class="settings-button" style="width: 40%;">Drive Mad Classic</button>
+                </a>
+            </h4>
+        `;
+        
+        document.getElementById('popupOverlay').style.display = "flex";
+    });
+});
+		
    // This targets every button with the "retro-btn" class
 const retro = document.querySelectorAll('.retro-btn');
 
