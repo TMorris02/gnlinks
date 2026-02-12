@@ -1,1 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Escanaba Area Public Schools</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* Floating Button Style */
+.main-toggle-btn {
+position: fixed;
+bottom: 20px;
+left: 20px;
+z-index: 9999; /* Ensures it stays on top */
+padding: 0px;
+background-color: #FFA500;
+color: white;
+border: none;
+border-radius: 50%;
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+width: 70px;
+height: 70px;
+}
+
+#alert {
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%); /* Centers it horizontally */
+background-color: #ffa500;
+color: black;
+padding: 15px 25px;
+border-radius: 10px;
+font-weight: bold;
+z-index: 10001; /* Higher than your button */
+display: none;
+box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+text-align: center;
+min-width: 250px;
+transition: opacity 0.5s ease; /* This handles the smooth fade */
+cursor: pointer;
+}
+
+#site1, #site2 { display: none; }
+#site1 {
+background-color: #0f172a !important;
+min-height: 100vh;
+width: 100%;
+position: absolute; /* Ensures it layers correctly */
+top: 0;
+left: 0;
+}
+
+</style>
+<script>
+// This runs immediately as the browser reads the head
+(function() {
+const savedSite = localStorage.getItem("selectedSite") || "site1";
+// Create a style rule to show the correct one instantly
+document.write('<style>#' + savedSite + '{ display: block; }</style>');
+})();
+
+document.addEventListener('keydown', function(e) {
+// "Backquote" is the name for the ` key
+if (e.code === 'Backquote') {
+window.location.href = 'https://www.eskymos.com/'; // URL
+}
+});
+
+</script>
+</head>
+<body class="dark-mode">
+
+<!-- FLOATING TOGGLE BUTTON -->
+<button class="main-toggle-btn" onclick="toggleSites()"><img src="https://static.thenounproject.com/png/441049-200.png" alt="Anonymous" title="Anonymous Mode" style="width: 40px; height: 40px;"></button>
+<div id="alert" onclick="scrollToGames()">↓↓ Scroll down for games ↓↓<br>Dont click any other links!</div>
+
+<div id="popupOverlay">
+<div class="popup">
+<div class="popup-header">
+<h3 id="popupTitle">Title</h3>
+<button id="popupClose" onclick="closePopup()">×</button>
+</div>
+<div id="popupBody">
+Content will be here
+</div>
+</div>
+</div>
+
+<!-- WEBSITE 1 -->
+<div id="site1">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Escanaba Area Public Schools</title>
+<link rel="icon" type="image/png" href="https://www.eskymofanclub.org/wp-content/uploads/Escanaba-512.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode" style="background-color: #0f172a";>
+<header style="padding: 10px 5%; background-color: #0f172a;">
+<div class="header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+
+<!-- Logo: Uses clamp to stay perfectly sized on any screen -->
+<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white; line-height: 1; text-align:left">Links</div>
+
+<!-- Suggestions Section -->
+<div class="control-buttons" style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
+<button id="suggestions" class="control-button" 
+style="background: none; border: none; cursor: pointer; padding: 0; margin-top: clamp(1rem, 5vw, 2.5rem);">
+<img src="https://static.thenounproject.com/png/3370196-200.png" 
+alt="suggestions?" 
+style="width: clamp(4rem, 10vw, 8rem); height: auto;"> 
+</button>
+<!-- Label: Now uses color: #ffa500 to match your buttons and stay visible -->
+<div class="button-label" style="font-size: clamp(0.8rem, 2.5vw, 1.5rem); margin-top: 5px; font-weight: bold; text-align: center;">
+Suggestions?
+</div>
+</div>
+
+</div>
+</header>
+<center>
+<br><br>
+<a href="https://tmorris01.github.io/gnlinks/esky.html"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
+<br><br>
+<a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%; margin-right: 5%;">Minecraft</button></a>
+<a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%;">Drive Mad</button></a>
+<br><br>
+<a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button class="settings-button" style="width: 40%; margin-right: 5%;">RocketGoal.io</button></a>
+<a href="https://tmorris01.github.io/gnlinks/monkeymart.html"><button class="settings-button" style="width: 40%;">Monkey Mart</button></a>
+<br><br>
+<a><button id="retro" class="settings-button retro-btn" style="width: 40%; margin-right: 5%;">Retro Bowl</button></a>
+<a href="https://tmorris01.github.io/gnlinks/subway-surfers.html"><button class="settings-button" style="width: 40%;">Subway Surfers</button></a>
+<br><br>
+<!-- Future buttons go here -->
+</center>
+<a href="https://noodlelover1.github.io/coreus/" target="_blank">
+<button class="invisible-button" style="cursor: default"></button>
+</a>
+<a href="https://tmorris01.github.io/gnlinks/text22.html" target="_blank">
+<button class="invisible-button" style="cursor: default"></button>
+</a>
+
+
+
+</body>
+</html>
+</div>
+
+<!-- WEBSITE 2 -->
+<div id="site2">
+
+</div>
+
+<script>
+// LOAD: Check what was saved when the page opens
+window.addEventListener('DOMContentLoaded', () => {
+const lastSite = localStorage.getItem("selectedSite");
+if (lastSite === "site2") {
+document.getElementById("site1").style.display = "none";
+document.getElementById("site2").style.display = "block";
+}
+});
+
+// TOGGLE: Switch sites and SAVE the choice
+function toggleSites() {
+const s1 = document.getElementById("site1");
+const s2 = document.getElementById("site2");
+const alertBox = document.getElementById("alert");
+
+if (s1.style.display === "none") {
+//Switch to Site 1
+s1.style.display = "block";
+s2.style.display = "none";
+localStorage.setItem("selectedSite", "site1"); // Save preference
+
+// Hide immediately without fading if they switch back
+alertBox.style.display = "none";
+alertBox.style.opacity = "0";
+
+} else {
+//Switch to Site 2
+s1.style.display = "none";
+s2.style.display = "block";
+localStorage.setItem("selectedSite", "site2"); // Save preference
+
+alertBox.style.display = "block";
+setTimeout(() => { alertBox.style.opacity = "1"; }, 10); // Tiny delay to ensure transition triggers
+
+// Hide it after 5 seconds
+setTimeout(() => {
+alertBox.style.opacity = "0"; 
+// 3. Fully hide after the 0.5s transition finishes
+setTimeout(() => { 
+if(alertBox.style.opacity === "0") alertBox.style.display = "none"; 
+}, 500);
+}, 5000);
+}
+}
+</script>
+
+<script>
+const settings = document.getElementById('suggestions');
+settings.addEventListener('click', () => {
+document.getElementById('popupTitle').textContent = "Suggestions?";
+const popupBody = document.getElementById('popupBody');
+popupBody.innerHTML =` 
+           <h4 style="text-align: center">Any Game you want to see added or <br> any Improvement you might want?</h4>
+               <iframe 
+               src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
+               style="width:100%; height:290px; border:none; display:block;"
+               loading="lazy">
+               </iframe>
+           `;
+popupBody.contentEditable = false;
+document.getElementById('popupOverlay').style.display = "flex";
+});
+
+// This targets every button with the "retro-btn" class
+const retro = document.querySelectorAll('.retro-btn');
+
+retro.forEach(btn => {
+btn.addEventListener('click', (e) => {
+// Essential to stop school-site 404 redirects
+e.preventDefault();
+e.stopPropagation();
+
+document.getElementById('popupTitle').textContent = "Retro Bowl";
+const popupBody = document.getElementById('popupBody');
+
+popupBody.innerHTML = ` 
+           <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/rb.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/college.html">
+                   <button class="settings-button" style="width: 40%;">RB College</button>
+               </a>
+           </h4>
+       `;
+
+document.getElementById('popupOverlay').style.display = "flex";
+});
+});
+
+// This targets every button with the "minecraft-btn" class
+const allMineBtns = document.querySelectorAll('.minecraft-btn');
+
+allMineBtns.forEach(btn => {
+btn.addEventListener('click', (e) => {
+// Essential to stop school-site 404 redirects
+e.preventDefault();
+e.stopPropagation();
+
+document.getElementById('popupTitle').textContent = "Minecraft (Select Version)";
+const popupBody = document.getElementById('popupBody');
+
+popupBody.innerHTML = ` 
+           <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/1.12.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/1.8.html">
+                   <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+               </a>
+           </h4>
+       `;
+
+document.getElementById('popupOverlay').style.display = "flex";
+});
+});
+
+function closePopup() {
+document.getElementById('popupOverlay').style.display = "none";
+}
+
+function scrollToGames() {
+const gameSection = document.getElementById('quick-link-scroll');
+if (gameSection) {
+gameSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+}
+
+
+</script>
+
+</body>
+</html>
 
