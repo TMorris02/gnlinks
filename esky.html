@@ -1534,11 +1534,11 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
     // Option A: Update URL and RELOAD the page to the new ID
-    // window.location.search = `?id=${randomNumber}`;
+    window.location.search = `?id=${randomNumber}`;
 
     // Option B: Update URL WITHOUT reloading (useful for single-page apps)
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${randomNumber}`;
-    window.history.pushState({path:newUrl}, '', newUrl);
+    // const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${randomNumber}`;
+    // window.history.pushState({path:newUrl}, '', newUrl);
 });
     
     </script>
