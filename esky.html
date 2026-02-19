@@ -700,6 +700,9 @@ footer {
                 </select>
             </div>
             <div class="control-buttons">
+                <button id="random" class="control-button" title="Select Random Game">
+                    <img src="https://cdn.creazilla.com/icons/3251536/perspective-dice-random-icon-md.png" alt="random">
+                </button>
              <a href="https://tmorris01.github.io/gnlinks/">
                 <button id="home" class="control-button" title="Go to Home Page">
                     <img src="https://image2url.com/r2/default/images/1768575858641-7bd74adf-2632-4120-bd89-92e4ef3c3f7e.png" alt="home">
@@ -1522,7 +1525,23 @@ XMLHttpRequest.prototype.open = function (method, url) {
 
 HTMLCanvasElement.prototype.toDataURL = function (...args) {
     return "";
-};</script>
+};
+
+     document.getElementById('random').addEventListener('click', function() {
+    // Generate a random number between 2 and 720
+    const min = 2;
+    const max = 720;
+    const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // Option A: Update URL and RELOAD the page to the new ID
+    // window.location.search = `?id=${randomNumber}`;
+
+    // Option B: Update URL WITHOUT reloading (useful for single-page apps)
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${randomNumber}`;
+    window.history.pushState({path:newUrl}, '', newUrl);
+});
+    
+    </script>
     <script>
         const search = new URLSearchParams(window.location.search);
         const privacy = search.get('privacy');
