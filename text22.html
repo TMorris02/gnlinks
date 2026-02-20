@@ -3,575 +3,467 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home</title>
-<link rel="icon" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
-<script>
-/* Show the saved site instantly before paint to avoid flash */
-(function() {
-    var s = localStorage.getItem('selectedSite') || 'site2';
-    document.write('<style>#' + s + '{display:block!important}</style>');
-})();
-</script>
-
+<title>Home - Escanaba Area Public Schools</title>
+<link rel="stylesheet" href="style.css">
 <style>
-/* ── RESET ── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { height: 100%; }
-
-body {
-    font-family: 'Google Sans', 'Segoe UI', Roboto, sans-serif;
-    height: 100%;
-    overflow: hidden;
-    background: #0f172a;
-}
-
-/* ════════════════════════════════════
-   TOGGLE BUTTON (always visible)
-   ════════════════════════════════════ */
+/* Floating Button Style */
 .main-toggle-btn {
-    position: fixed;
-    bottom: 20px; left: 20px;
-    z-index: 9999;
-    width: 60px; height: 60px;
-    border-radius: 50%; border: none;
-    background: #FFA500;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.35);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.15s, box-shadow 0.15s;
-}
-.main-toggle-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-.main-toggle-btn img { width: 34px; height: 34px; }
-
-/* ════════════════════════════════════
-   POPUP (shared between sites)
-   ════════════════════════════════════ */
-#popupOverlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 10000;
-    align-items: center; justify-content: center;
-}
-#popupOverlay.active { display: flex; }
-
-.popup {
-    background: #1e293b;
-    border-radius: 14px;
-    width: min(480px, 92vw);
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-.popup-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px;
-    background: #0f172a;
-    border-bottom: 1px solid #334155;
-}
-.popup-header h3 { color: #f1f5f9; font-size: 16px; font-weight: 600; }
-#popupClose {
-    background: none; border: none; color: #94a3b8;
-    font-size: 22px; cursor: pointer; line-height: 1;
-    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; transition: background 0.15s;
-}
-#popupClose:hover { background: #334155; color: #f1f5f9; }
-#popupBody { padding: 20px; color: #cbd5e1; }
-
-/* ════════════════════════════════════
-   SITE WRAPPERS
-   ════════════════════════════════════ */
-#site1, #site2 {
-    display: none;
-    position: fixed; inset: 0;
-    overflow: auto;
+position: fixed;
+bottom: 20px;
+left: 20px;
+z-index: 9999; /* Ensures it stays on top */
+padding: 0px;
+background-color: #FFA500;
+color: white;
+border: none;
+border-radius: 50%;
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+width: 70px;
+height: 70px;
 }
 
-/* ════════════════════════════════════
-   SITE 1 — Links / Games
-   ════════════════════════════════════ */
+
+#site1, #site2 { display: none; }
 #site1 {
-    background: #0f172a;
-    color: #f1f5f9;
-    overflow-y: auto;
+background-color: #0f172a !important;
+min-height: 100vh;
+width: 100%;
+position: absolute; /* Ensures it layers correctly */
+top: 0;
+left: 0;
 }
 
-/* Site1 header */
-.s1-header {
-    padding: 16px 5%;
-    display: flex; justify-content: space-between; align-items: center;
-    background: #0f172a;
-}
-.s1-logo {
-    font-size: clamp(2.8rem, 10vw, 5.5rem);
-    font-weight: 700;
-    color: #f1f5f9;
-    line-height: 1;
-}
-.s1-suggest-btn {
-    background: none; border: none; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-}
-.s1-suggest-btn img { width: clamp(3.5rem, 8vw, 6rem); height: auto; filter: invert(1) opacity(0.7); }
-.s1-suggest-btn span { font-size: clamp(0.75rem, 2vw, 1.1rem); color: #FFA500; font-weight: 600; }
-
-/* Site1 buttons */
-.s1-content { padding: 0 5% 40px; text-align: center; }
-
-.settings-button {
-    display: inline-block;
-    padding: 14px 0;
-    background: linear-gradient(135deg, #1e3a5f, #1a56a0);
-    color: #f1f5f9;
-    border: 1px solid #2563a8;
-    border-radius: 10px;
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-    font-family: inherit;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-.settings-button:hover {
-    background: linear-gradient(135deg, #1a56a0, #2563eb);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(37,99,235,0.4);
-}
-.settings-button:active { transform: translateY(0); }
-
-.s1-row { margin-bottom: 18px; display: flex; justify-content: center; gap: 3%; }
-.s1-row a, .s1-row button { text-decoration: none; }
-.s1-full  { width: 85%; }
-.s1-half  { width: 40%; }
-
-.invisible-button {
-    position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none;
-}
-
-/* ════════════════════════════════════
-   SITE 2 — Classroom
-   ════════════════════════════════════ */
-#site2 {
-    background: #f3f4f6;
-    display: flex; flex-direction: column;
-    overflow: hidden;
-}
-
-/* Classroom header */
-.cr-header {
-    background: #f3f4f6;
-    padding: 8px 24px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; flex-shrink: 0;
-    z-index: 200; position: relative;
-}
-.cr-header-left { display: flex; align-items: center; gap: 16px; }
-.menu-icon {
-    width: 18px; height: 13px; cursor: pointer;
-    display: flex; flex-direction: column; justify-content: space-between;
-}
-.menu-icon span { width: 100%; height: 2px; background: #5f6368; border-radius: 2px; }
-.cr-logo { display: flex; align-items: center; gap: 6px; font-size: 22px; color: #202124; text-decoration: none; }
-.cr-logo-icon { width: 32px; height: 32px; }
-.cr-logo-icon img { width: 32px; height: 32px; }
-.cr-header-right { display: flex; align-items: center; gap: 16px; }
-.icon-btn {
-    width: 40px; height: 40px; border-radius: 50%; border: none;
-    background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #5f6368; transition: background 0.2s;
-}
-.icon-btn:hover { background: #e8eaed; }
-.profile-pic {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2); cursor: pointer;
-}
-
-/* Classroom layout */
-.cr-layout { display: flex; flex: 1; overflow: hidden; }
-
-.cr-sidebar {
-    width: 72px; min-width: 72px; background: #f3f4f6;
-    flex-shrink: 0; display: flex; flex-direction: column;
-    align-items: center; padding-top: 8px; gap: 4px; z-index: 100;
-}
-.cr-sidebar-item {
-    width: 56px; height: 40px; border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: #444746;
-    transition: background 0.2s; text-decoration: none;
-}
-.cr-sidebar-item:hover { background: #e2e4e7; }
-.cr-sidebar-item.active { background: #c2e7ff; color: #001d35; }
-.cr-sidebar-item svg { width: 22px; height: 22px; }
-.cr-sidebar-item.gap-above { margin-top: 12px; }
-.cr-sidebar-item.gap-below { margin-bottom: 12px; }
-
-.cr-container {
-    flex: 1; background: #fff;
-    border-top-left-radius: 24px;
-    padding: 24px; overflow-y: auto;
-}
-
-/* Cards grid */
-.classes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 300px));
-    gap: 24px; margin-top: 24px;
-}
-.class-card {
-    background: white; border-radius: 8px; overflow: visible;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    cursor: pointer; transition: box-shadow 0.3s, transform 0.2s;
-    text-decoration: none; color: inherit; display: block; position: relative;
-}
-.class-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.23); transform: translateY(-2px); }
-.class-card-inner { border-radius: 8px; overflow: hidden; }
-
-.class-header {
-    height: 110px; padding: 14px 16px; color: white;
-    position: relative; display: flex; align-items: flex-start; overflow: hidden;
-}
-.class-header.theme-blue   { background: linear-gradient(135deg, #1a73e8, #4285f4); }
-.class-header.theme-green  { background: linear-gradient(135deg, #0f9d58, #34a853); }
-.class-header.theme-orange { background: linear-gradient(135deg, #f4511e, #fb8c00); }
-.class-header.theme-red    { background: linear-gradient(135deg, #d93025, #ea4335); }
-.class-header.theme-teal   { background: linear-gradient(135deg, #00897b, #26a69a); }
-.class-header.theme-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-.class-header.theme-pink   { background: linear-gradient(135deg, #c2185b, #e91e63); }
-.class-header.theme-indigo { background: linear-gradient(135deg, #3949ab, #5c6bc0); }
-
-.class-header-text { flex: 1; min-width: 0; }
-.class-name { font-size: 20px; font-weight: 500; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.class-section { font-size: 13px; opacity: 0.9; }
-
-.teacher-icon {
-    width: 60px; height: 60px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 500;
-    position: absolute; right: 16px; top: calc(110px - 30px); z-index: 3;
-}
-.class-body { padding: 44px 16px 12px; min-height: 120px; }
-.class-footer {
-    padding: 8px 12px; border-top: 1px solid #e0e0e0;
-    display: flex; justify-content: flex-end; align-items: center; gap: 4px;
-}
-.footer-btn {
-    width: 40px; height: 40px; border-radius: 50%; border: none;
-    background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #5f6368; transition: background 0.2s;
-}
-.footer-btn:hover { background: #f1f3f4; }
-
-/* ── Edit Overlay + Drawer ── */
-.edit-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.32);
-    z-index: 300; opacity: 0; pointer-events: none;
-    transition: opacity 0.25s;
-}
-.edit-overlay.open { opacity: 1; pointer-events: all; }
-
-.edit-drawer {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 400px; background: #fff;
-    z-index: 400;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-    display: flex; flex-direction: column;
-    box-shadow: 4px 0 28px rgba(0,0,0,0.18);
-}
-.edit-drawer.open { transform: translateX(0); }
-
-.drawer-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 20px 16px; border-bottom: 1px solid #e8eaed; flex-shrink: 0;
-}
-.drawer-title { font-size: 18px; font-weight: 500; color: #202124; }
-.drawer-close {
-    width: 36px; height: 36px; border-radius: 50%; border: none;
-    background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #5f6368; transition: background 0.2s;
-}
-.drawer-close:hover { background: #f1f3f4; }
-.drawer-body { flex: 1; overflow-y: auto; padding: 12px 20px 20px; }
-
-.edit-row { border: 1px solid #e8eaed; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-.edit-row-top {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px; cursor: pointer; user-select: none;
-    transition: background 0.15s;
-}
-.edit-row-top:hover { background: #f8f9fa; }
-.edit-row-swatch { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
-.edit-row-info { flex: 1; min-width: 0; }
-.edit-row-classname { font-size: 14px; font-weight: 500; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.edit-row-teacher { font-size: 12px; color: #5f6368; margin-top: 2px; }
-.edit-row-chevron { width: 20px; height: 20px; color: #80868b; flex-shrink: 0; transition: transform 0.2s; }
-.edit-row.open .edit-row-chevron { transform: rotate(180deg); }
-
-.edit-row-body { max-height: 0; overflow: hidden; transition: max-height 0.28s ease; border-top: 0 solid #e8eaed; }
-.edit-row.open .edit-row-body { max-height: 520px; border-top-width: 1px; }
-.edit-row-fields { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-
-.field-label { font-size: 11px; font-weight: 600; color: #80868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-.field-input {
-    height: 38px; border: 1px solid #dadce0; border-radius: 8px;
-    padding: 0 12px; font-size: 14px; font-family: 'Google Sans', sans-serif;
-    color: #202124; outline: none; transition: border-color 0.2s, box-shadow 0.2s; display: block;
-}
-.field-input.full { width: 100%; }
-.field-input.short { width: 72px; text-align: center; font-size: 18px; font-weight: 500; }
-.field-input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
-
-.color-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-.swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; position: relative; transition: transform 0.15s; }
-.swatch:hover { transform: scale(1.15); }
-.swatch.selected::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2.5px solid #202124; }
-.swatch-blue   { background: linear-gradient(135deg, #1a73e8, #4285f4); }
-.swatch-green  { background: linear-gradient(135deg, #0f9d58, #34a853); }
-.swatch-orange { background: linear-gradient(135deg, #f4511e, #fb8c00); }
-.swatch-red    { background: linear-gradient(135deg, #d93025, #ea4335); }
-.swatch-teal   { background: linear-gradient(135deg, #00897b, #26a69a); }
-.swatch-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-.swatch-pink   { background: linear-gradient(135deg, #c2185b, #e91e63); }
-.swatch-indigo { background: linear-gradient(135deg, #3949ab, #5c6bc0); }
-
-.drawer-footer {
-    padding: 12px 20px; border-top: 1px solid #e8eaed;
-    display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
-}
-.cr-btn {
-    height: 36px; padding: 0 22px; border-radius: 18px;
-    font-size: 14px; font-weight: 500; cursor: pointer;
-    font-family: 'Google Sans', sans-serif; transition: background 0.2s;
-}
-.cr-btn-cancel { border: 1px solid #dadce0; background: transparent; color: #1a73e8; }
-.cr-btn-cancel:hover { background: #e8f0fe; }
-.cr-btn-save { border: none; background: #1a73e8; color: #fff; }
-.cr-btn-save:hover { background: #1557b0; }
 </style>
+<script>
+// This runs immediately as the browser reads the head
+(function() {
+const savedSite = localStorage.getItem("selectedSite") || "site1";
+// Create a style rule to show the correct one instantly
+document.write('<style>#' + savedSite + '{ display: block; }</style>');
+})();
+
+document.addEventListener('keydown', function(e) {
+// "Backquote" is the name for the ` key
+if (e.code === 'Backquote') {
+window.location.href = 'https://www.eskymos.com/'; // URL
+}
+});
+
+</script>
 </head>
 <body>
 
-<!-- ── FLOATING TOGGLE BUTTON ── -->
-<button class="main-toggle-btn" onclick="toggleSites()" title="Toggle Mode">
-    <img src="https://static.thenounproject.com/png/441049-200.png" alt="Toggle">
-</button>
+<!-- FLOATING TOGGLE BUTTON -->
+<button class="main-toggle-btn" onclick="toggleSites()"><img src="https://static.thenounproject.com/png/441049-200.png" alt="Anonymous" title="Anonymous Mode" style="width: 40px; height: 40px;"></button>
 
-<!-- ── SHARED POPUP ── -->
 <div id="popupOverlay">
-    <div class="popup">
-        <div class="popup-header">
-            <h3 id="popupTitle">Title</h3>
-            <button id="popupClose" onclick="closePopup()">×</button>
-        </div>
-        <div id="popupBody"></div>
-    </div>
+<div class="popup">
+<div class="popup-header">
+<h3 id="popupTitle">Title</h3>
+<button id="popupClose" onclick="closePopup()">×</button>
+</div>
+<div id="popupBody">
+Content will be here
+</div>
+</div>
 </div>
 
-<!-- ════════════════════════════════════
-     SITE 1 — Links / Games
-     ════════════════════════════════════ -->
+<!-- WEBSITE 1 -->
 <div id="site1">
-    <div class="s1-header">
-        <div class="s1-logo">Links</div>
-        <button class="s1-suggest-btn" id="suggestions">
-            <img src="https://static.thenounproject.com/png/3370196-200.png" alt="Suggestions">
-            <span>Suggestions?</span>
-        </button>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Escanaba Area Public Schools</title>
+<link rel="icon" type="image/png" href="https://www.eskymofanclub.org/wp-content/uploads/Escanaba-512.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode" style="background-color: #0f172a";>
+<header style="padding: 10px 5%; background-color: #0f172a;">
+<div class="header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
 
-    <div class="s1-content">
-        <div class="s1-row">
-            <a href="https://tmorris01.github.io/gnlinks/esky.html" style="width:85%">
-                <button class="settings-button s1-full">Open Gn-Math</button>
-            </a>
-        </div>
-        <div class="s1-row">
-            <button class="settings-button s1-half minecraft-btn">Minecraft</button>
-            <a href="https://tmorris01.github.io/gnlinks/drive-mad-new" style="width:40%">
-                <button class="settings-button s1-full">Drive Mad</button>
-            </a>
-        </div>
-        <div class="s1-row">
-            <a href="https://tmorris01.github.io/gnlinks/rocketgoal" style="width:40%">
-                <button class="settings-button s1-full">RocketGoal.io</button>
-            </a>
-            <a href="https://tmorris01.github.io/gnlinks/monkeymart.html" style="width:40%">
-                <button class="settings-button s1-full">Monkey Mart</button>
-            </a>
-        </div>
-        <div class="s1-row">
-            <button class="settings-button s1-half retro-btn">Retro Bowl</button>
-            <a href="https://tmorris01.github.io/gnlinks/subway-surfers.html" style="width:40%">
-                <button class="settings-button s1-full">Subway Surfers</button>
-            </a>
-        </div>
-    </div>
+<!-- Logo: Uses clamp to stay perfectly sized on any screen -->
+<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white; line-height: 1; text-align:left">Links</div>
 
-    <a href="https://noodlelover1.github.io/coreus/" target="_blank"><button class="invisible-button"></button></a>
-    <a href="https://tmorris01.github.io/gnlinks/text22.html" target="_blank"><button class="invisible-button"></button></a>
+<!-- Suggestions Section -->
+<div class="control-buttons" style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
+<button id="suggestions" class="control-button" 
+style="background: none; border: none; cursor: pointer; padding: 0; margin-top: clamp(1rem, 5vw, 2.5rem);">
+<img src="https://static.thenounproject.com/png/3370196-200.png" 
+alt="suggestions?" 
+style="width: clamp(4rem, 10vw, 8rem); height: auto;"> 
+</button>
+<!-- Label: Now uses color: #ffa500 to match your buttons and stay visible -->
+<div class="button-label" style="font-size: clamp(0.8rem, 2.5vw, 1.5rem); margin-top: 5px; font-weight: bold; text-align: center;">
+Suggestions?
+</div>
 </div>
 
-<!-- ════════════════════════════════════
-     SITE 2 — Classroom
-     ════════════════════════════════════ -->
+</div>
+</header>
+<center>
+<br><br>
+<a href="https://tmorris01.github.io/gnlinks/esky.html"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
+<br><br>
+<a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%; margin-right: 5%;">Minecraft</button></a>
+<a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%;">Drive Mad</button></a>
+<br><br>
+<a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button class="settings-button" style="width: 40%; margin-right: 5%;">RocketGoal.io</button></a>
+<a href="https://tmorris01.github.io/gnlinks/monkeymart.html"><button class="settings-button" style="width: 40%;">Monkey Mart</button></a>
+<br><br>
+<a><button id="retro" class="settings-button retro-btn" style="width: 40%; margin-right: 5%;">Retro Bowl</button></a>
+<a href="https://tmorris01.github.io/gnlinks/subway-surfers.html"><button class="settings-button" style="width: 40%;">Subway Surfers</button></a>
+<br><br>
+<!-- Future buttons go here -->
+</center>
+<a href="https://noodlelover1.github.io/coreus/" target="_blank">
+<button class="invisible-button" style="cursor: default"></button>
+</a>
+<a href="https://tmorris01.github.io/gnlinks/text22.html" target="_blank">
+<button class="invisible-button" style="cursor: default"></button>
+</a>
+
+
+
+</body>
+</html>
+</div>
+
+<!-- WEBSITE 2 -->
 <div id="site2">
 
-    <!-- HEADER -->
-    <header class="cr-header">
-        <div class="cr-header-left">
-            <div class="menu-icon" id="menuBtn">
-                <span></span><span></span><span></span>
-            </div>
-            <a href="#" class="cr-logo">
-                <div class="cr-logo-icon"><img src="https://www.gstatic.com/classroom/logo_square_rounded.svg" alt="Classroom"></div>
-                <span>Classroom</span>
-            </a>
-        </div>
-        <div class="cr-header-right">
-            <button class="icon-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
-            <button class="icon-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
-            </button>
-            <div class="profile-pic"></div>
-        </div>
-    </header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Classroom</title>
+    <link rel="icon" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
 
-    <!-- LAYOUT -->
-    <div class="cr-layout">
-        <div class="cr-sidebar">
-            <a href="#" class="cr-sidebar-item active">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            </a>
-            <a href="#" class="cr-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
-            </a>
-            <a href="#" class="cr-sidebar-item gap-above gap-below">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
-            </a>
-            <a href="#" class="cr-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1 0-2 .9-2 2v18l4-4h14c1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-            </a>
-            <a href="#" class="cr-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-            </a>
-        </div>
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+        }
 
-        <div class="cr-container">
-            <div class="classes-grid" id="classesGrid"></div>
+        /* ── HEADER ── */
+        .header {
+            background-color: #f3f4f6;
+            padding: 8px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px; flex-shrink: 0;
+            position: relative; z-index: 200;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
+        .menu-icon {
+            width: 18px; height: 13px; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .menu-icon span { width: 100%; height: 2px; background-color: #5f6368; border-radius: 2px; }
+
+        .logo { display: flex; align-items: center; gap: 6px; font-size: 22px; color: #202124; text-decoration: none; }
+        .logo-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon img { width: 32px; height: 32px; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .icon-button {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #5f6368; transition: background-color 0.2s;
+        }
+        .icon-button:hover { background-color: #e8eaed; }
+        .profile-pic {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); cursor: pointer;
+        }
+
+        /* ── LAYOUT ── */
+        .layout { display: flex; flex: 1; overflow: hidden; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 72px; min-width: 72px; background-color: #f3f4f6;
+            flex-shrink: 0; display: flex; flex-direction: column;
+            align-items: center; padding-top: 8px; gap: 4px; z-index: 100;
+        }
+        .sidebar-item {
+            width: 56px; height: 40px; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #444746;
+            transition: background-color 0.2s; text-decoration: none;
+        }
+        .sidebar-item:hover { background-color: #e2e4e7; }
+        .sidebar-item.active { background-color: #c2e7ff; color: #001d35; }
+        .sidebar-item svg { width: 22px; height: 22px; }
+        .sidebar-item.gap-above { margin-top: 12px; }
+        .sidebar-item.gap-below { margin-bottom: 12px; }
+
+        /* ── MAIN ── */
+        .container {
+            flex: 1; background-color: #fff;
+            border-top-left-radius: 24px;
+            padding: 24px; overflow-y: auto;
+        }
+
+        /* ── CARDS GRID ── */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 300px));
+            gap: 24px; margin-top: 24px;
+        }
+        .class-card {
+            background: white; border-radius: 8px; overflow: visible;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            cursor: pointer; transition: box-shadow 0.3s, transform 0.2s;
+            text-decoration: none; color: inherit; display: block; position: relative;
+        }
+        .class-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.23); transform: translateY(-2px); }
+        .class-card-inner { border-radius: 8px; overflow: hidden; }
+
+        .class-header {
+            height: 110px; padding: 14px 16px; color: white;
+            position: relative; display: flex; align-items: flex-start;
+            overflow: hidden;
+        }
+        .class-header.theme-blue   { background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%); }
+        .class-header.theme-green  { background: linear-gradient(135deg, #0f9d58 0%, #34a853 100%); }
+        .class-header.theme-orange { background: linear-gradient(135deg, #f4511e 0%, #fb8c00 100%); }
+        .class-header.theme-red    { background: linear-gradient(135deg, #d93025 0%, #ea4335 100%); }
+        .class-header.theme-teal   { background: linear-gradient(135deg, #00897b 0%, #26a69a 100%); }
+        .class-header.theme-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .class-header.theme-pink   { background: linear-gradient(135deg, #c2185b 0%, #e91e63 100%); }
+        .class-header.theme-indigo { background: linear-gradient(135deg, #3949ab 0%, #5c6bc0 100%); }
+        .class-header.theme-image  { background-size: cover; background-position: center; }
+
+        .class-header-text { flex: 1; min-width: 0; }
+        .class-name { font-size: 20px; font-weight: 500; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .class-section { font-size: 13px; opacity: 0.9; }
+
+        .teacher-icon {
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 500;
+            position: absolute; right: 16px; top: calc(110px - 30px);
+            z-index: 3;
+        }
+        .class-body { padding: 44px 16px 12px 16px; min-height: 120px; }
+        .class-footer {
+            padding: 8px 12px; border-top: 1px solid #e0e0e0;
+            display: flex; justify-content: flex-end; align-items: center; gap: 4px;
+        }
+        .footer-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #5f6368; transition: background-color 0.2s;
+        }
+        .footer-btn:hover { background-color: #f1f3f4; }
+
+        /* ── EDIT OVERLAY + DRAWER ── */
+        .edit-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.32);
+            z-index: 300;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .edit-overlay.open { opacity: 1; pointer-events: all; }
+
+        .edit-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 400px;
+            background: #fff;
+            z-index: 400;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 28px rgba(0,0,0,0.18);
+        }
+        .edit-drawer.open { transform: translateX(0); }
+
+        .drawer-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #e8eaed;
+            flex-shrink: 0;
+        }
+        .drawer-title { font-size: 18px; font-weight: 500; color: #202124; }
+        .drawer-close {
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #5f6368; transition: background-color 0.2s;
+        }
+        .drawer-close:hover { background-color: #f1f3f4; }
+
+        .drawer-body { flex: 1; overflow-y: auto; padding: 12px 20px 20px; }
+
+        .edit-row {
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .edit-row-top {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px;
+            cursor: pointer; user-select: none;
+            transition: background-color 0.15s;
+        }
+        .edit-row-top:hover { background-color: #f8f9fa; }
+        .edit-row-swatch { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+        .edit-row-info { flex: 1; min-width: 0; }
+        .edit-row-classname { font-size: 14px; font-weight: 500; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .edit-row-teacher { font-size: 12px; color: #5f6368; margin-top: 2px; }
+        .edit-row-chevron {
+            width: 20px; height: 20px; color: #80868b; flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        .edit-row.open .edit-row-chevron { transform: rotate(180deg); }
+
+        .edit-row-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.28s ease;
+            border-top: 0px solid #e8eaed;
+        }
+        .edit-row.open .edit-row-body { max-height: 520px; border-top-width: 1px; }
+
+        .edit-row-fields { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+        .field-label {
+            font-size: 11px; font-weight: 600; color: #80868b;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+        }
+        .field-input {
+            height: 38px;
+            border: 1px solid #dadce0; border-radius: 8px;
+            padding: 0 12px; font-size: 14px;
+            font-family: 'Google Sans', sans-serif; color: #202124;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            display: block;
+        }
+        .field-input.full { width: 100%; }
+        .field-input.short { width: 72px; text-align: center; font-size: 18px; font-weight: 500; }
+        .field-input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+
+        .color-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+        .swatch {
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+            position: relative; transition: transform 0.15s;
+        }
+        .swatch:hover { transform: scale(1.15); }
+        .swatch.selected::after {
+            content: '';
+            position: absolute; inset: -4px;
+            border-radius: 50%; border: 2.5px solid #202124;
+        }
+        .swatch-blue   { background: linear-gradient(135deg, #1a73e8, #4285f4); }
+        .swatch-green  { background: linear-gradient(135deg, #0f9d58, #34a853); }
+        .swatch-orange { background: linear-gradient(135deg, #f4511e, #fb8c00); }
+        .swatch-red    { background: linear-gradient(135deg, #d93025, #ea4335); }
+        .swatch-teal   { background: linear-gradient(135deg, #00897b, #26a69a); }
+        .swatch-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .swatch-pink   { background: linear-gradient(135deg, #c2185b, #e91e63); }
+        .swatch-indigo { background: linear-gradient(135deg, #3949ab, #5c6bc0); }
+
+        .drawer-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e8eaed;
+            display: flex; justify-content: flex-end; gap: 10px;
+            flex-shrink: 0;
+        }
+        .btn {
+            height: 36px; padding: 0 22px; border-radius: 18px;
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            font-family: 'Google Sans', sans-serif; transition: background-color 0.2s;
+        }
+        .btn-cancel { border: 1px solid #dadce0; background: transparent; color: #1a73e8; }
+        .btn-cancel:hover { background-color: #e8f0fe; }
+        .btn-save { border: none; background: #1a73e8; color: #fff; }
+        .btn-save:hover { background: #1557b0; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-left">
+        <div class="menu-icon" id="menuBtn">
+            <span></span><span></span><span></span>
         </div>
+        <a href="#" class="logo">
+            <div class="logo-icon"><img src="https://www.gstatic.com/classroom/logo_square_rounded.svg" alt="Classroom"></div>
+            <span>Classroom</span>
+        </a>
+    </div>
+    <div class="header-right">
+        <button class="icon-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </button>
+        <button class="icon-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+        </button>
+        <div class="profile-pic"></div>
+    </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+    <div class="sidebar">
+        <a href="#" class="sidebar-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </a>
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
+        </a>
+        <a href="#" class="sidebar-item gap-above gap-below">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+        </a>
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1 0-2 .9-2 2v18l4-4h14c1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        </a>
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+        </a>
     </div>
 
-    <!-- EDIT OVERLAY + DRAWER -->
-    <div class="edit-overlay" id="editOverlay"></div>
-    <div class="edit-drawer" id="editDrawer">
-        <div class="drawer-header">
-            <span class="drawer-title">Edit Classes</span>
-            <button class="drawer-close" id="drawerClose">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-        </div>
-        <div class="drawer-body" id="drawerBody"></div>
-        <div class="drawer-footer">
-            <button class="cr-btn cr-btn-cancel" id="btnCancel">Cancel</button>
-            <button class="cr-btn cr-btn-save" id="btnSave">Save Changes</button>
-        </div>
+    <div class="container">
+        <div class="classes-grid" id="classesGrid"></div>
     </div>
+</div>
 
-</div><!-- end #site2 -->
+<!-- EDIT OVERLAY (dimmed background) -->
+<div class="edit-overlay" id="editOverlay"></div>
 
-<!-- ════════════════════════════════════
-     SCRIPTS
-     ════════════════════════════════════ -->
+<!-- EDIT DRAWER -->
+<div class="edit-drawer" id="editDrawer">
+    <div class="drawer-header">
+        <span class="drawer-title">Edit Classes</span>
+        <button class="drawer-close" id="drawerClose">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-footer">
+        <button class="btn btn-cancel" id="btnCancel">Cancel</button>
+        <button class="btn btn-save" id="btnSave">Save Changes</button>
+    </div>
+</div>
+
 <script>
-// ── SITE TOGGLE ───────────────────────────────────────────────────────────────
-function toggleSites() {
-    const s1 = document.getElementById('site1');
-    const s2 = document.getElementById('site2');
-    const showing1 = s1.style.display !== 'none' && s1.style.display !== '';
-    if (showing1) {
-        s1.style.display = 'none';
-        s2.style.display = 'flex';
-        localStorage.setItem('selectedSite', 'site2');
-    } else {
-        s1.style.display = 'block';
-        s2.style.display = 'none';
-        localStorage.setItem('selectedSite', 'site1');
-    }
-}
-
-// Keyboard shortcut: backtick → go to school site
-document.addEventListener('keydown', e => {
-    if (e.code === 'Backquote') window.location.href = 'https://www.eskymos.com/';
-});
-
-// ── POPUP ─────────────────────────────────────────────────────────────────────
-function openPopup(title, html) {
-    document.getElementById('popupTitle').textContent = title;
-    document.getElementById('popupBody').innerHTML = html;
-    document.getElementById('popupOverlay').classList.add('active');
-}
-function closePopup() {
-    document.getElementById('popupOverlay').classList.remove('active');
-}
-// Close on backdrop click
-document.getElementById('popupOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('popupOverlay')) closePopup();
-});
-
-// Suggestions button
-document.getElementById('suggestions').addEventListener('click', () => {
-    openPopup('Suggestions?', `
-        <h4 style="text-align:center;margin-bottom:12px;color:#f1f5f9">Any game you want added or any improvement?</h4>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
-            style="width:100%;height:290px;border:none;display:block;" loading="lazy"></iframe>
-    `);
-});
-
-// Retro Bowl buttons (site1 button + any classroom card with .retro-btn)
-document.addEventListener('click', e => {
-    const btn = e.target.closest('.retro-btn');
-    if (!btn) return;
-    e.preventDefault(); e.stopPropagation();
-    openPopup('Retro Bowl', `
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <a href="https://tmorris01.github.io/gnlinks/rb.html">
-                <button class="settings-button" style="width:160px">Retro Bowl</button>
-            </a>
-            <a href="https://tmorris01.github.io/gnlinks/college.html">
-                <button class="settings-button" style="width:160px">RB College</button>
-            </a>
-        </div>
-    `);
-});
-
-// Minecraft buttons (site1 button + any classroom card with .minecraft-btn)
-document.addEventListener('click', e => {
-    const btn = e.target.closest('.minecraft-btn');
-    if (!btn) return;
-    e.preventDefault(); e.stopPropagation();
-    openPopup('Minecraft — Select Version', `
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <a href="https://tmorris01.github.io/gnlinks/1.12.html">
-                <button class="settings-button" style="width:160px">Minecraft 1.12</button>
-            </a>
-            <a href="https://tmorris01.github.io/gnlinks/1.8.html">
-                <button class="settings-button" style="width:160px">Minecraft 1.8</button>
-            </a>
-        </div>
-    `);
-});
-
-// ── CLASSROOM ─────────────────────────────────────────────────────────────────
-const CR_THEMES = {
+// ── THEME CONFIG ──────────────────────────────────────────────────────────────
+const THEMES = {
     blue:   { icon_bg: '#e8f0fe', icon_fg: '#1a73e8', swatch_bg: '#1a73e8' },
     green:  { icon_bg: '#e6f4ea', icon_fg: '#0f9d58', swatch_bg: '#0f9d58' },
     orange: { icon_bg: '#fce8e0', icon_fg: '#f4511e', swatch_bg: '#f4511e' },
@@ -584,38 +476,41 @@ const CR_THEMES = {
 
 // ════════════════════════════════════════════════════════════════
 //  ✏️  EDIT YOUR CLASSES HERE
-//  name      → class title (default — also changeable in the drawer)
-//  url       → where clicking the card takes you ('' = do nothing)
-//  teacher   → shown on card (fixed — only editable here in code)
-//  letter    → default icon letter (also changeable in drawer)
-//  theme     → default color (also changeable in drawer)
-//              options: 'blue'|'green'|'orange'|'red'|'teal'|'purple'|'pink'|'indigo'
-//  cardClass → CSS class on the card, e.g. 'minecraft-btn' triggers the popup
+//  name    → the class title (default — also changeable in the drawer)
+//  url     → where clicking the card takes you (use '' to do nothing)
+//  teacher → teacher name shown on the card (fixed — only editable here in code)
+//  letter  → default icon letter  (can also be changed in the drawer)
+//  theme   → default color        (can also be changed in the drawer)
+//            options: 'blue' | 'green' | 'orange' | 'red' | 'teal' | 'purple' | 'pink' | 'indigo'
+//  cardClass → a CSS class added to the card so you can select it in code
+//              e.g. 'minecraft-btn' lets you do: document.querySelectorAll('.minecraft-btn')
 // ════════════════════════════════════════════════════════════════
-// ─── TO ADD A NEW CLASS: copy a line and paste it at the end of the list ───
+// ─── TO ADD A NEW CLASS: copy the line below and paste it at the end of the list ───
 //  { name: 'New Class', url: '', teacher: 'Mr. Name', letter: 'N', theme: 'blue', cardClass: '' },
-// ───────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────────────
 const DEFAULTS = [
-    { name: 'Math',      url: 'https://tmorris01.github.io/gnlinks/esky.html',             teacher: 'Gn-Math',        letter: 'G', theme: 'blue',   cardClass: '' },
-    { name: 'Chemistry', url: '',                                                           teacher: 'Minecraft',       letter: 'M', theme: 'green',  cardClass: 'minecraft-btn' },
-    { name: 'Biology',   url: 'https://tmorris01.github.io/gnlinks/drive-mad-new',         teacher: 'Drive Mad',       letter: 'D', theme: 'blue',   cardClass: '' },
-    { name: 'History',   url: 'https://tmorris01.github.io/gnlinks/rocketgoal',            teacher: 'RocketGoal.io',   letter: 'R', theme: 'orange', cardClass: '' },
-    { name: 'English',   url: 'https://tmorris01.github.io/gnlinks/monkeymart.html',       teacher: 'Monkey Mart',     letter: 'M', theme: 'red',    cardClass: '' },
-    { name: 'Geography', url: '',                                                           teacher: 'Retro Bowl',      letter: 'R', theme: 'teal',   cardClass: 'retro-btn' },
-    { name: 'Art',       url: 'https://tmorris01.github.io/gnlinks/subway-surfers.html',   teacher: 'Subway Surfers',  letter: 'S', theme: 'purple', cardClass: '' },
+    { name: 'Math',         url: 'https://tmorris01.github.io/gnlinks/esky.html',  teacher: 'Gn-Math',    letter: 'G', theme: 'blue',   cardClass: '' },
+    { name: 'Chemistry', url: '',  teacher: 'Minecraft',  letter: 'M', theme: 'green',  cardClass: 'minecraft-btn' },
+    { name: 'Biology', url: 'https://tmorris01.github.io/gnlinks/drive-mad-new', teacher: 'Drive Mad', letter: 'D', theme: 'blue', cardClass: '' },
+    { name: 'History',      url: 'https://tmorris01.github.io/gnlinks/rocketgoal',  teacher: 'Rocketgoal.io', letter: 'R', theme: 'orange', cardClass: '' },
+    { name: 'English', url: 'https://tmorris01.github.io/gnlinks/monkeymart.html',  teacher: 'Monkey Mart',   letter: 'M', theme: 'red',    cardClass: '' },
+    { name: 'Geography', url: '',  teacher: 'Retro Bowl', letter: 'R', theme: 'teal',   cardClass: 'retro-btn' },
+    { name: 'Art',       url: 'https://tmorris01.github.io/gnlinks/subway-surfers.html',  teacher: 'Subway Surfers', letter: 'S', theme: 'purple', cardClass: '' },
 ];
 // ════════════════════════════════════════════════════════════════
 
+// ── PERSISTENCE ───────────────────────────────────────────────────────────────
 function loadClasses() {
     try {
         const saved = JSON.parse(localStorage.getItem('classroomEdits') || 'null');
         if (saved && Array.isArray(saved)) {
+            // name and url always come from DEFAULTS (edit them in the code)
             return DEFAULTS.map((def, i) => ({
-                name:      saved[i]?.name    ?? def.name,
+                name:      saved[i].name    ?? def.name,
                 url:       def.url,
                 teacher:   def.teacher,
-                letter:    saved[i]?.letter  ?? def.letter,
-                theme:     saved[i]?.theme   ?? def.theme,
+                letter:    saved[i].letter  ?? def.letter,
+                theme:     saved[i].theme   ?? def.theme,
                 cardClass: def.cardClass,
             }));
         }
@@ -624,6 +519,7 @@ function loadClasses() {
 }
 
 function saveClasses(data) {
+    // Only persist the editable fields
     const toSave = data.map(c => ({ name: c.name, letter: c.letter, theme: c.theme }));
     localStorage.setItem('classroomEdits', JSON.stringify(toSave));
 }
@@ -631,15 +527,17 @@ function saveClasses(data) {
 let classes = loadClasses();
 let draft = [];
 
+// ── HELPERS ───────────────────────────────────────────────────────────────────
 function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── RENDER CARDS ──────────────────────────────────────────────────────────────
 function renderCards() {
     const grid = document.getElementById('classesGrid');
     grid.innerHTML = '';
-    classes.forEach(c => {
-        const t = CR_THEMES[c.theme];
+    classes.forEach((c) => {
+        const t = THEMES[c.theme];
         const card = document.createElement('a');
         card.href = '#';
         card.className = 'class-card' + (c.cardClass ? ' ' + c.cardClass : '');
@@ -653,18 +551,18 @@ function renderCards() {
                 </div>
                 <div class="class-body"></div>
                 <div class="class-footer">
-                    <button class="footer-btn" title="Photo" onclick="event.preventDefault();event.stopPropagation()">
+                    <button class="footer-btn" title="Photo" onclick="event.preventDefault(); event.stopPropagation();">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 1 1 15.2 12 3.2 3.2 0 0 1 12 15.2zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9z"/></svg>
                     </button>
-                    <button class="footer-btn" title="Folder" onclick="event.preventDefault();event.stopPropagation()">
+                    <button class="footer-btn" title="Folder" onclick="event.preventDefault(); event.stopPropagation();">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
                     </button>
-                    <button class="footer-btn" title="More" onclick="event.preventDefault();event.stopPropagation()">
+                    <button class="footer-btn" title="More" onclick="event.preventDefault(); event.stopPropagation();">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                     </button>
                 </div>
             </div>
-            <div class="teacher-icon" style="background-color:${t.icon_bg};color:${t.icon_fg}">
+            <div class="teacher-icon" style="background-color:${t.icon_bg}; color:${t.icon_fg};">
                 <span>${esc(c.letter)}</span>
             </div>`;
         card.addEventListener('click', e => {
@@ -675,27 +573,32 @@ function renderCards() {
     });
 }
 
+// ── BUILD DRAWER CONTENTS ─────────────────────────────────────────────────────
 function buildDrawer() {
     const body = document.getElementById('drawerBody');
     body.innerHTML = '';
+
     draft.forEach((c, i) => {
-        const t = CR_THEMES[c.theme];
+        const t = THEMES[c.theme];
         const row = document.createElement('div');
         row.className = 'edit-row';
         row.dataset.index = i;
 
-        const swatchesHtml = Object.entries(CR_THEMES).map(([key]) =>
-            `<div class="swatch swatch-${key}${c.theme === key ? ' selected' : ''}" data-theme="${key}" data-idx="${i}" title="${key}"></div>`
-        ).join('');
+        const swatchesHtml = Object.entries(THEMES).map(([key]) => `
+            <div class="swatch swatch-${key}${c.theme === key ? ' selected' : ''}"
+                 data-theme="${key}" data-idx="${i}" title="${key}"></div>
+        `).join('');
 
         row.innerHTML = `
             <div class="edit-row-top">
-                <div class="edit-row-swatch" style="background:linear-gradient(135deg,${t.swatch_bg}dd,${t.swatch_bg}99)"></div>
+                <div class="edit-row-swatch" style="background:linear-gradient(135deg,${t.swatch_bg}dd,${t.swatch_bg}99);"></div>
                 <div class="edit-row-info">
                     <div class="edit-row-classname">${esc(c.name)}</div>
                     <div class="edit-row-teacher">${esc(c.teacher)}</div>
                 </div>
-                <svg class="edit-row-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                <svg class="edit-row-chevron" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+                </svg>
             </div>
             <div class="edit-row-body">
                 <div class="edit-row-fields">
@@ -714,14 +617,17 @@ function buildDrawer() {
                 </div>
             </div>`;
 
+        // toggle expand/collapse
         row.querySelector('.edit-row-top').addEventListener('click', () => {
             const wasOpen = row.classList.contains('open');
             document.querySelectorAll('.edit-row.open').forEach(r => r.classList.remove('open'));
             if (!wasOpen) row.classList.add('open');
         });
+
         body.appendChild(row);
     });
 
+    // live update draft on input
     body.querySelectorAll('.field-input').forEach(input => {
         input.addEventListener('input', () => {
             const idx = +input.dataset.idx;
@@ -734,13 +640,14 @@ function buildDrawer() {
         });
     });
 
+    // swatch clicks
     body.querySelectorAll('.swatch').forEach(sw => {
         sw.addEventListener('click', e => {
             e.stopPropagation();
             const idx = +sw.dataset.idx;
             const theme = sw.dataset.theme;
             draft[idx].theme = theme;
-            const t = CR_THEMES[theme];
+            const t = THEMES[theme];
             const row = body.querySelector(`.edit-row[data-index="${idx}"]`);
             row.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
             sw.classList.add('selected');
@@ -749,23 +656,27 @@ function buildDrawer() {
     });
 }
 
+// ── DRAWER OPEN / CLOSE / SAVE ────────────────────────────────────────────────
 function openDrawer() {
     draft = classes.map(c => ({ ...c }));
     buildDrawer();
     document.getElementById('editOverlay').classList.add('open');
     document.getElementById('editDrawer').classList.add('open');
 }
+
 function closeDrawer() {
     document.getElementById('editOverlay').classList.remove('open');
     document.getElementById('editDrawer').classList.remove('open');
 }
+
 function saveDrawer() {
     classes = draft.map(c => ({ ...c }));
-    saveClasses(classes);
+    saveClasses(classes);   // persist to localStorage
     renderCards();
     closeDrawer();
 }
 
+// ── WIRE UP ───────────────────────────────────────────────────────────────────
 document.getElementById('menuBtn').addEventListener('click', openDrawer);
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('editOverlay').addEventListener('click', closeDrawer);
@@ -774,21 +685,121 @@ document.getElementById('btnSave').addEventListener('click', saveDrawer);
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 renderCards();
-
-// Ensure correct site is shown on load (the <script> in <head> handles the flash,
-// but this makes sure display values are set properly for the toggle logic)
-(function() {
-    const saved = localStorage.getItem('selectedSite') || 'site2';
-    const s1 = document.getElementById('site1');
-    const s2 = document.getElementById('site2');
-    if (saved === 'site1') {
-        s1.style.display = 'block';
-        s2.style.display = 'none';
-    } else {
-        s1.style.display = 'none';
-        s2.style.display = 'flex';
-    }
-})();
 </script>
 </body>
 </html>
+      
+</div>
+
+<script>
+// LOAD: Check what was saved when the page opens
+window.addEventListener('DOMContentLoaded', () => {
+const lastSite = localStorage.getItem("selectedSite");
+if (lastSite === "site2") {
+document.getElementById("site1").style.display = "none";
+document.getElementById("site2").style.display = "block";
+}
+});
+
+// TOGGLE: Switch sites and SAVE the choice
+function toggleSites() {
+const s1 = document.getElementById("site1");
+const s2 = document.getElementById("site2");
+
+if (s1.style.display === "none") {
+//Switch to Site 1
+s1.style.display = "block";
+s2.style.display = "none";
+localStorage.setItem("selectedSite", "site1"); // Save preference
+
+
+} else {
+//Switch to Site 2
+s1.style.display = "none";
+s2.style.display = "block";
+localStorage.setItem("selectedSite", "site2"); // Save preference
+}
+}
+</script>
+
+<script>
+const settings = document.getElementById('suggestions');
+settings.addEventListener('click', () => {
+document.getElementById('popupTitle').textContent = "Suggestions?";
+const popupBody = document.getElementById('popupBody');
+popupBody.innerHTML =` 
+           <h4 style="text-align: center">Any Game you want to see added or <br> any Improvement you might want?</h4>
+               <iframe 
+               src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
+               style="width:100%; height:290px; border:none; display:block;"
+               loading="lazy">
+               </iframe>
+           `;
+popupBody.contentEditable = false;
+document.getElementById('popupOverlay').style.display = "flex";
+});
+
+// This targets every button with the "retro-btn" class
+const retro = document.querySelectorAll('.retro-btn');
+
+retro.forEach(btn => {
+btn.addEventListener('click', (e) => {
+// Essential to stop school-site 404 redirects
+e.preventDefault();
+e.stopPropagation();
+
+document.getElementById('popupTitle').textContent = "Retro Bowl";
+const popupBody = document.getElementById('popupBody');
+
+popupBody.innerHTML = ` 
+           <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/rb.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/college.html">
+                   <button class="settings-button" style="width: 40%;">RB College</button>
+               </a>
+           </h4>
+       `;
+
+document.getElementById('popupOverlay').style.display = "flex";
+});
+});
+
+// This targets every button with the "minecraft-btn" class
+const allMineBtns = document.querySelectorAll('.minecraft-btn');
+
+allMineBtns.forEach(btn => {
+btn.addEventListener('click', (e) => {
+// Essential to stop school-site 404 redirects
+e.preventDefault();
+e.stopPropagation();
+
+document.getElementById('popupTitle').textContent = "Minecraft (Select Version)";
+const popupBody = document.getElementById('popupBody');
+
+popupBody.innerHTML = ` 
+           <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/1.12.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/1.8.html">
+                   <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+               </a>
+           </h4>
+       `;
+
+document.getElementById('popupOverlay').style.display = "flex";
+});
+});
+
+function closePopup() {
+document.getElementById('popupOverlay').style.display = "none";
+}
+
+
+</script>
+
+</body>
+</html>
+
