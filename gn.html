@@ -1360,7 +1360,7 @@ function cloakIcon(url) {
     const link = document.querySelector("link[rel~='icon']");
     link.rel = "icon";
     if ((url+"").trim().length === 0) {
-        link.href = "https://www.eskymofanclub.org/wp-content/uploads/Escanaba-512.png";
+        link.href = "https://www.gstatic.com/classroom/logo_square_rounded.svg";
     } else {
         link.href = url;
     }
@@ -1368,7 +1368,7 @@ function cloakIcon(url) {
 }
 function cloakName(string) {
     if ((string+"").trim().length === 0) {
-        document.title = "Esky";
+        document.title = "Home - Classroom";
         return;
     }
     document.title = string;
@@ -1418,11 +1418,25 @@ function showMinecraft() {
     document.getElementById('popupTitle').textContent = "Minecraft";
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
-    <button class="settings-button" onclick="window.location.href='https://tmorris01.github.io/gnlinks/1.12.html'">Go to Minecraft</button>`;
-    popupBody.contentEditable = false;
+popupBody.innerHTML = ` 
+           <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/1.12.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/1.8.html">
+                   <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+               </a>
+           </h4>
+       `;    popupBody.contentEditable = false;
     document.getElementById('popupOverlay').style.display = "flex";
 }
 
+document.getElementById('popupOverlay').style.display = "flex";
+});
+});
+
+
+     
 function loadPrivacy() {
     document.getElementById('popupTitle').textContent = "Privacy Policy";
     const popupBody = document.getElementById('popupBody');
