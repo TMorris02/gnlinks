@@ -1418,15 +1418,8 @@ function showMinecraft() {
     document.getElementById('popupTitle').textContent = "Minecraft";
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
-           <h4 style="text-align: center">
-               <a href="https://tmorris01.github.io/gnlinks/1.12.html">
-                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
-               </a>
-               <a href="https://tmorris01.github.io/gnlinks/1.8.html">
-                   <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
-               </a>
-           </h4>
-       `;    popupBody.contentEditable = false;
+    <button class="settings-button" onclick="window.location.href='https://tmorris01.github.io/gnlinks/1.12.html'">Go to Minecraft</button>`;
+    popupBody.contentEditable = false;
     document.getElementById('popupOverlay').style.display = "flex";
 }
 
