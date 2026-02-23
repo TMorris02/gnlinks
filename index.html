@@ -11,19 +11,18 @@
 .main-toggle-btn {
 position: fixed;
 bottom: 20px;
-left: 10px;
+left: 20px;
 z-index: 9999; /* Ensures it stays on top */
 padding: 0px;
 background-color: #FFA500;
 color: white;
 border: none;
-border-radius: 15%;
+border-radius: 50%;
 font-weight: bold;
 cursor: pointer;
 box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-width: 50px;
-height: 60px;
-zoom: reset;
+width: 70px;
+height: 70px;
 }
 
 
@@ -108,7 +107,7 @@ Suggestions?
 </header>
 <center>
 <br><br>
-<a href="https://tmorris01.github.io/gnlinks/"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
+<a href="https://tmorris01.github.io/gnlinks/esky.html"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
 <br><br>
 <a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%; margin-right: 5%;">Minecraft</button></a>
 <a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%;">Drive Mad</button></a>
@@ -340,7 +339,7 @@ Suggestions?
             transition: max-height 0.28s ease;
             border-top: 0px solid #e8eaed;
         }
-        .edit-row.open .edit-row-body { max-height: 520px; border-top-width: 1px; }
+        .edit-row.open .edit-row-body { max-height: 820px; border-top-width: 1px; }
 
         .edit-row-fields { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -399,6 +398,37 @@ Suggestions?
         /* ── RESET BUTTON ── */
         .btn-reset { border: 1px solid #f28b82; background: transparent; color: #c5221f; margin-right: auto; }
         .btn-reset:hover { background-color: #fce8e6; }
+        /* ── IMAGE UPLOAD FIELDS ── */
+        .img-upload-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 4px;
+        }
+        .img-upload-label {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            height: 36px; padding: 0 14px; border-radius: 18px;
+            border: 1px solid #dadce0; background: transparent;
+            font-size: 13px; font-weight: 500; color: #5f6368;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .img-upload-label:hover { background: #f1f3f4; border-color: #bdc1c6; }
+        .img-upload-label input[type=file] { display: none; }
+        .img-preview {
+            width: 36px; height: 36px; border-radius: 8px;
+            object-fit: cover; display: none; border: 1px solid #e0e0e0;
+        }
+        .img-preview.visible { display: block; }
+        .img-clear {
+            width: 28px; height: 28px; border-radius: 50%; border: none;
+            background: #f1f3f4; cursor: pointer; display: none;
+            align-items: center; justify-content: center; color: #5f6368;
+            font-size: 16px; transition: background 0.15s; flex-shrink: 0;
+        }
+        .img-clear.visible { display: flex; }
+        .img-clear:hover { background: #e8eaed; }
+        .or-divider {
+            font-size: 11px; color: #9aa0a6; font-weight: 500;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -498,7 +528,7 @@ const THEMES = {
 //  { name: 'New Class', url: '', teacher: 'Mr. Name', letter: 'N', theme: 'blue', cardClass: '' },
 // ────────────────────────────────────────────────────────────────────────────────────
 const DEFAULTS = [
-    { name: 'Math',         url: 'https://tmorris01.github.io/gnlinks/gn.html',  teacher: 'Gn-Math',    letter: 'G', theme: 'blue',   cardClass: '' },
+    { name: 'Math',         url: 'https://tmorris01.github.io/gnlinks/esky.html',  teacher: 'Gn-Math',    letter: 'G', theme: 'blue',   cardClass: '' },
     { name: 'Chemistry', url: '',  teacher: 'Minecraft',  letter: 'M', theme: 'green',  cardClass: 'minecraft-btn' },
     { name: 'Biology', url: 'https://tmorris01.github.io/gnlinks/drive-mad-new', teacher: 'Drive Mad', letter: 'D', theme: 'blue', cardClass: '' },
     { name: 'History',      url: 'https://tmorris01.github.io/gnlinks/rocketgoal',  teacher: 'Rocketgoal.io', letter: 'R', theme: 'orange', cardClass: '' },
@@ -520,16 +550,18 @@ function loadClasses() {
                 teacher:   def.teacher,
                 letter:    saved[i].letter  ?? def.letter,
                 theme:     saved[i].theme   ?? def.theme,
+                iconImg:   saved[i].iconImg  ?? '',
+                bgImg:     saved[i].bgImg    ?? '',
                 cardClass: def.cardClass,
             }));
         }
     } catch(e) {}
-    return DEFAULTS.map(d => ({ ...d }));
+    return DEFAULTS.map(d => ({ ...d, iconImg: '', bgImg: '' }));
 }
 
 function saveClasses(data) {
     // Only persist the editable fields
-    const toSave = data.map(c => ({ name: c.name, letter: c.letter, theme: c.theme }));
+    const toSave = data.map(c => ({ name: c.name, letter: c.letter, theme: c.theme, iconImg: c.iconImg||'', bgImg: c.bgImg||'' }));
     localStorage.setItem('classroomEdits', JSON.stringify(toSave));
 }
 
@@ -552,7 +584,7 @@ function renderCards() {
         card.className = 'class-card' + (c.cardClass ? ' ' + c.cardClass : '');
         card.innerHTML = `
             <div class="class-card-inner">
-                <div class="class-header theme-${esc(c.theme)}">
+                <div class="class-header theme-${esc(c.theme)}" style="${c.bgImg ? 'background-image:url(' + c.bgImg + ');background-size:cover;background-position:center;' : ''}">
                     <div class="class-header-text">
                         <div class="class-name">${esc(c.name)}</div>
                         <div class="class-section">${esc(c.teacher)}</div>
@@ -571,9 +603,9 @@ function renderCards() {
                     </button>
                 </div>
             </div>
-            <div class="teacher-icon" style="background-color:${t.icon_bg}; color:${t.icon_fg};">
-                <span>${esc(c.letter)}</span>
-            </div>`;
+            <div class="teacher-icon" style="${c.iconImg ? 'background:none;padding:0;overflow:hidden;' : 'background-color:' + t.icon_bg + ';color:' + t.icon_fg + ';'}">
+                ${c.iconImg ? '<img src="' + c.iconImg + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '<span>' + esc(c.letter) + '</span>'}
+            </div>\`;
         card.addEventListener('click', e => {
             e.preventDefault();
             if (c.url) window.location.href = c.url;
@@ -616,12 +648,30 @@ function buildDrawer() {
                         <input class="field-input full" type="text" data-field="name" data-idx="${i}" value="${esc(c.name)}" placeholder="Class name">
                     </div>
                     <div>
-                        <div class="field-label">Icon Letter</div>
-                        <input class="field-input short" type="text" data-field="letter" data-idx="${i}" value="${esc(c.letter)}" maxlength="2">
+                        <div class="field-label">Icon</div>
+                        <div class="img-upload-row">
+                            <input class="field-input short" type="text" data-field="letter" data-idx="${i}" value="${esc(c.letter)}" maxlength="2" placeholder="A">
+                            <span class="or-divider">or</span>
+                            <label class="img-upload-label">
+                                📷 Image
+                                <input type="file" accept="image/*" data-imgfield="iconImg" data-idx="${i}">
+                            </label>
+                            <img class="img-preview${c.iconImg ? ' visible' : ''}" data-preview="iconImg-${i}" src="${c.iconImg || ''}" alt="">
+                            <button class="img-clear${c.iconImg ? ' visible' : ''}" data-clearfield="iconImg" data-idx="${i}" title="Remove image">×</button>
+                        </div>
                     </div>
                     <div>
-                        <div class="field-label">Header Color</div>
-                        <div class="color-swatches">${swatchesHtml}</div>
+                        <div class="field-label">Header</div>
+                        <div class="img-upload-row" style="flex-wrap:wrap;gap:8px;">
+                            <div class="color-swatches" style="margin-top:0">${swatchesHtml}</div>
+                            <span class="or-divider" style="align-self:center">or</span>
+                            <label class="img-upload-label">
+                                🖼 Image
+                                <input type="file" accept="image/*" data-imgfield="bgImg" data-idx="${i}">
+                            </label>
+                            <img class="img-preview${c.bgImg ? ' visible' : ''}" data-preview="bgImg-${i}" src="${c.bgImg || ''}" style="border-radius:6px" alt="">
+                            <button class="img-clear${c.bgImg ? ' visible' : ''}" data-clearfield="bgImg" data-idx="${i}" title="Remove image">×</button>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -634,6 +684,76 @@ function buildDrawer() {
         });
 
         body.appendChild(row);
+    });
+
+    // image upload handlers
+    body.querySelectorAll('input[type=file][data-imgfield]').forEach(input => {
+        input.addEventListener('change', () => {
+            if (!input.files[0]) return;
+            const idx = +input.dataset.idx;
+            const field = input.dataset.imgfield;
+            const reader = new FileReader();
+            reader.onload = e => {
+                draft[idx][field] = e.target.result;
+                // if icon image set, clear the letter input visually
+                if (field === 'iconImg') {
+                    const letterInput = body.querySelector(`.field-input.short[data-idx="${idx}"]`);
+                    if (letterInput) { letterInput.value = ''; draft[idx].letter = ''; }
+                }
+                // if bg image set, clear theme selection visually
+                if (field === 'bgImg') {
+                    body.querySelectorAll(`.swatch[data-idx="${idx}"]`).forEach(s => s.classList.remove('selected'));
+                }
+                // show preview + clear button
+                const preview = body.querySelector(`img[data-preview="${field}-${idx}"]`);
+                const clearBtn = body.querySelector(`button[data-clearfield="${field}"][data-idx="${idx}"]`);
+                if (preview) { preview.src = e.target.result; preview.classList.add('visible'); }
+                if (clearBtn) clearBtn.classList.add('visible');
+            };
+            reader.readAsDataURL(input.files[0]);
+        });
+    });
+
+    // clear image buttons
+    body.querySelectorAll('button[data-clearfield]').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const idx = +btn.dataset.idx;
+            const field = btn.dataset.clearfield;
+            draft[idx][field] = '';
+            const preview = body.querySelector(`img[data-preview="${field}-${idx}"]`);
+            if (preview) { preview.src = ''; preview.classList.remove('visible'); }
+            btn.classList.remove('visible');
+        });
+    });
+
+    // typing a letter clears icon image
+    body.querySelectorAll('.field-input.short').forEach(input => {
+        input.addEventListener('input', () => {
+            const idx = +input.dataset.idx;
+            if (input.value && draft[idx].iconImg) {
+                draft[idx].iconImg = '';
+                const preview = body.querySelector(`img[data-preview="iconImg-${idx}"]`);
+                const clearBtn = body.querySelector(`button[data-clearfield="iconImg"][data-idx="${idx}"]`);
+                if (preview) { preview.src = ''; preview.classList.remove('visible'); }
+                if (clearBtn) clearBtn.classList.remove('visible');
+            }
+        });
+    });
+
+    // picking a color swatch clears bg image
+    body.querySelectorAll('.swatch').forEach(sw => {
+        const origClick = sw.onclick;
+        sw.addEventListener('click', () => {
+            const idx = +sw.dataset.idx;
+            if (draft[idx] && draft[idx].bgImg) {
+                draft[idx].bgImg = '';
+                const preview = body.querySelector(`img[data-preview="bgImg-${idx}"]`);
+                const clearBtn = body.querySelector(`button[data-clearfield="bgImg"][data-idx="${idx}"]`);
+                if (preview) { preview.src = ''; preview.classList.remove('visible'); }
+                if (clearBtn) clearBtn.classList.remove('visible');
+            }
+        });
     });
 
     // live update draft on input
@@ -691,7 +811,7 @@ function saveDrawer() {
 function resetClasses() {
     if (!confirm('Reset all classes back to their original names, letters, and colors?')) return;
     localStorage.removeItem('classroomEdits');
-    classes = DEFAULTS.map(d => ({ ...d }));
+    classes = DEFAULTS.map(d => ({ ...d, iconImg: '', bgImg: '' }));
     renderCards();
     closeDrawer();
 }
@@ -719,7 +839,6 @@ const lastSite = localStorage.getItem("selectedSite");
 if (lastSite === "site2") {
 document.getElementById("site1").style.display = "none";
 document.getElementById("site2").style.display = "block";
-document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
 }
 });
 
@@ -729,15 +848,17 @@ const s1 = document.getElementById("site1");
 const s2 = document.getElementById("site2");
 
 if (s1.style.display === "none") {
+//Switch to Site 1
 s1.style.display = "block";
 s2.style.display = "none";
-localStorage.setItem("selectedSite", "site1");
-document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
-} else { //switch to site 2
+localStorage.setItem("selectedSite", "site1"); // Save preference
+
+
+} else {
+//Switch to Site 2
 s1.style.display = "none";
 s2.style.display = "block";
-localStorage.setItem("selectedSite", "site2");
-document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
+localStorage.setItem("selectedSite", "site2"); // Save preference
 }
 }
 </script>
