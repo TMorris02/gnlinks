@@ -719,6 +719,7 @@ const lastSite = localStorage.getItem("selectedSite");
 if (lastSite === "site2") {
 document.getElementById("site1").style.display = "none";
 document.getElementById("site2").style.display = "block";
+document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
 }
 });
 
@@ -728,17 +729,15 @@ const s1 = document.getElementById("site1");
 const s2 = document.getElementById("site2");
 
 if (s1.style.display === "none") {
-//Switch to Site 1
 s1.style.display = "block";
 s2.style.display = "none";
-localStorage.setItem("selectedSite", "site1"); // Save preference
-
-
-} else {
-//Switch to Site 2
+localStorage.setItem("selectedSite", "site1");
+document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
+} else { //switch to site 2
 s1.style.display = "none";
 s2.style.display = "block";
-localStorage.setItem("selectedSite", "site2"); // Save preference
+localStorage.setItem("selectedSite", "site2");
+document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
 }
 }
 </script>
