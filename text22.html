@@ -394,6 +394,10 @@ Suggestions?
         .btn-cancel:hover { background-color: #e8f0fe; }
         .btn-save { border: none; background: #1a73e8; color: #fff; }
         .btn-save:hover { background: #1557b0; }
+
+        /* ── RESET BUTTON ── */
+        .btn-reset { border: 1px solid #f28b82; background: transparent; color: #c5221f; margin-right: auto; }
+        .btn-reset:hover { background-color: #fce8e6; }
     </style>
 </head>
 <body>
@@ -458,6 +462,8 @@ Suggestions?
     </div>
     <div class="drawer-body" id="drawerBody"></div>
     <div class="drawer-footer">
+        <!-- ↓ NEW: Reset button sits on the left, Cancel + Save stay on the right -->
+        <button class="btn btn-reset" id="btnReset">↺ Reset All</button>
         <button class="btn btn-cancel" id="btnCancel">Cancel</button>
         <button class="btn btn-save" id="btnSave">Save Changes</button>
     </div>
@@ -678,12 +684,22 @@ function saveDrawer() {
     closeDrawer();
 }
 
+// ── RESET ─────────────────────────────────────────────────────────────────────
+function resetClasses() {
+    if (!confirm('Reset all classes back to their original names, letters, and colors?')) return;
+    localStorage.removeItem('classroomEdits');
+    classes = DEFAULTS.map(d => ({ ...d }));
+    renderCards();
+    closeDrawer();
+}
+
 // ── WIRE UP ───────────────────────────────────────────────────────────────────
 document.getElementById('menuBtn').addEventListener('click', openDrawer);
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('editOverlay').addEventListener('click', closeDrawer);
 document.getElementById('btnCancel').addEventListener('click', closeDrawer);
 document.getElementById('btnSave').addEventListener('click', saveDrawer);
+document.getElementById('btnReset').addEventListener('click', resetClasses); // ← NEW
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 renderCards();
@@ -804,4 +820,3 @@ document.getElementById('popupOverlay').style.display = "none";
 
 </body>
 </html>
-
