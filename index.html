@@ -863,7 +863,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const lastSite = localStorage.getItem("selectedSite");
     if (lastSite === "site2") {
         document.getElementById("site1").style.display = "none";
-        document.getElementById("site2").style.display = "block";
+        document.getElementById("site2").style.display = "flex";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
@@ -878,7 +878,7 @@ function toggleSites() {
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
     } else {
         s1.style.display = "none";
-        s2.style.display = "block";
+        s2.style.display = "flex";
         localStorage.setItem("selectedSite", "site2");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
