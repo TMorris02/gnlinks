@@ -322,7 +322,6 @@
     <div style="display:flex;align-items:center;gap:8px">
         <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
         <button class="username-btn" id="changeUsernameBtn">
-            <div class="avatar-small" id="headerAvatar"></div>
             <span id="headerUsername">—</span>
         </button>
     </div>
@@ -411,13 +410,16 @@ const modal      = document.getElementById('usernameModal');
 const uInput     = document.getElementById('usernameInput');
 const confirmBtn = document.getElementById('usernameConfirm');
 
-const savedName = localStorage.getItem(USERNAME_KEY);
-if (savedName) {
-    activateUser(savedName);
-} else {
-    modal.classList.add('open');
-    uInput.focus();
-}
+// Wait until page fully loaded (CDN script ready) then boot
+window.addEventListener('load', function() {
+    const savedName = localStorage.getItem(USERNAME_KEY);
+    if (savedName) {
+        activateUser(savedName);
+    } else {
+        modal.classList.add('open');
+        uInput.focus();
+    }
+});
 
 function activateUser(name) {
     name = name.trim().replace(/\s+/g,' ');
@@ -426,17 +428,28 @@ function activateUser(name) {
     localStorage.setItem(USERNAME_KEY, name);
     modal.classList.remove('open');
 
-    const av = document.getElementById('headerAvatar');
-    av.textContent      = initials(name);
-    av.style.background = colorFor(name);
     document.getElementById('headerUsername').textContent = name;
 
     document.getElementById('msgInput').disabled = false;
     document.getElementById('sendBtn').disabled  = false;
     document.getElementById('msgInput').focus();
 
-    // Now that we have a username, join presence
-    if (supabase) joinPresence();
+    // Init supabase on first activation, rejoin presence on username change
+    if (!supabase) {
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            showBanner('');
+            loadHistory().then(() => {
+                startPolling();
+                joinPresence();
+            });
+        } catch(e) {
+            showBanner('⚠ Could not connect — check Supabase credentials');
+            console.error(e);
+        }
+    } else {
+        joinPresence();
+    }
 }
 
 confirmBtn.addEventListener('click', () => activateUser(uInput.value));
@@ -449,18 +462,7 @@ document.getElementById('changeUsernameBtn').addEventListener('click', () => {
     setTimeout(() => { uInput.focus(); uInput.select(); }, 30);
 });
 
-// ── SUPABASE INIT ─────────────────────────────────────────
-try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    showBanner('');
-    loadHistory().then(() => {
-        startPolling();
-        if (username) joinPresence();
-    });
-} catch(e) {
-    showBanner('⚠ Could not connect — check Supabase credentials');
-    console.error(e);
-}
+// Supabase init happens inside activateUser() above
 
 // ── PRESENCE ──────────────────────────────────────────────
 function joinPresence() {
