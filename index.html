@@ -72,7 +72,7 @@ window.location.href = 'https://classroom.google.com/';
 <body class="dark-mode" style="background-color: #0f172a">
 <header style="padding: 10px 5%; background-color: #0f172a;">
 <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white; line-height: 1; text-align:left">Links</div>
+<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white !important; -webkit-text-fill-color: white !important; background: none !important; line-height: 1; text-align:left">Links</div>
 <div class="control-buttons" style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
 <button id="suggestions" class="control-button" style="background: none; border: none; cursor: pointer; padding: 0; margin-top: clamp(1rem, 5vw, 2.5rem);">
 <img src="https://static.thenounproject.com/png/3370196-200.png" alt="suggestions?" style="width: clamp(4rem, 10vw, 8rem); height: auto;">
@@ -113,7 +113,10 @@ window.location.href = 'https://classroom.google.com/';
 
     /* ── HEADER (fixed, never scrolls) ── */
     .header {
-        background-color: #f3f4f6;
+        background-color: #f3f4f6 !important;
+        background: #f3f4f6 !important;
+        background-image: none !important;
+        box-shadow: none !important;
         padding: 8px 24px;
         display: flex; align-items: center; justify-content: space-between;
         height: 64px; flex-shrink: 0;
@@ -292,7 +295,7 @@ window.location.href = 'https://classroom.google.com/';
     }
     .cloak-row-top:hover { background-color: #f8f9fa; }
     .cloak-row-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; border-top: 0px solid #e8eaed; }
-    .cloak-row.open .cloak-row-body { max-height: 300px; border-top-width: 1px; }
+    .cloak-row.open .cloak-row-body { max-height: 420px; border-top-width: 1px; }
     .cloak-row.open .edit-row-chevron { transform: rotate(180deg); }
     .cloak-icon-badge { width: 36px; height: 36px; border-radius: 8px; background: #e8f0fe; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 
@@ -605,13 +608,14 @@ function buildDrawer() {
                 </div>
                 <div>
                     <div class="field-label">Tab Icon</div>
-                    <div class="img-row">
+                    <div class="drop-zone" id="cloakIconDrop">
                         <label class="upload-btn">
                             📎 Upload image
                             <input type="file" accept="image/*" id="cloakIconFile">
                         </label>
                         <img id="cloakIconPreview" class="img-preview circle${cl.favicon ? ' visible' : ''}" src="${cl.favicon || ''}" alt="">
                         <button class="img-clear${cl.favicon ? ' visible' : ''}" id="cloakIconClear" title="Remove">×</button>
+                        <span class="drop-zone-hint">or drag image here</span>
                     </div>
                 </div>
             </div>
@@ -653,6 +657,32 @@ function buildDrawer() {
         document.getElementById('cloakIconPreview').classList.remove('visible');
         document.getElementById('cloakIconClear').classList.remove('visible');
         document.getElementById('faviconLink').href = 'https://www.gstatic.com/classroom/logo_square_rounded.svg';
+    });
+
+    // cloak icon drag-and-drop
+    const cloakDropZone = cloakRow.querySelector('#cloakIconDrop');
+    cloakDropZone.addEventListener('dragover', e => {
+        e.preventDefault(); e.stopPropagation();
+        cloakDropZone.classList.add('drag-over');
+    });
+    cloakDropZone.addEventListener('dragleave', e => {
+        e.stopPropagation();
+        cloakDropZone.classList.remove('drag-over');
+    });
+    cloakDropZone.addEventListener('drop', e => {
+        e.preventDefault(); e.stopPropagation();
+        cloakDropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            cloakDraft.favicon = ev.target.result;
+            document.getElementById('cloakIconPreview').src = ev.target.result;
+            document.getElementById('cloakIconPreview').classList.add('visible');
+            document.getElementById('cloakIconClear').classList.add('visible');
+            document.getElementById('faviconLink').href = ev.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 
     // ── CLASSES LABEL ──────────────────────────────────────────────────────
@@ -944,7 +974,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const lastSite = localStorage.getItem("selectedSite");
     if (lastSite === "site2") {
         document.getElementById("site1").style.display = "none";
-        document.getElementById("site2").style.display = "block";
+        document.getElementById("site2").style.display = "flex";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
@@ -959,7 +989,7 @@ function toggleSites() {
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
     } else {
         s1.style.display = "none";
-        s2.style.display = "block";
+        s2.style.display = "flex";
         localStorage.setItem("selectedSite", "site2");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
