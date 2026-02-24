@@ -24,6 +24,26 @@ width: 50px;
 height: 60px;
 zoom: reset;
 }
+
+#alert {
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%); /* Centers it horizontally */
+background-color: #ffa500;
+color: black;
+padding: 15px 25px;
+border-radius: 10px;
+font-weight: bold;
+z-index: 10001; /* Higher than your button */
+display: none;
+box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+text-align: center;
+min-width: 250px;
+transition: opacity 0.5s ease; /* This handles the smooth fade */
+cursor: pointer;
+}
+    
 #site1, #site2 { display: none; }
 #site1 {
 background-color: #0f172a;
@@ -56,7 +76,8 @@ window.location.href = 'https://classroom.google.com/';
 <body>
 
 <button class="main-toggle-btn" onclick="toggleSites()"><img src="https://static.thenounproject.com/png/441049-200.png" alt="Anonymous" title="Anonymous Mode" style="width: 40px; height: 40px;"></button>
-
+<div id="alert">Try the Left Menu<br>Some of them Work!</div>
+    
 <div id="popupOverlay">
 <div class="popup">
 <div class="popup-header">
@@ -986,13 +1007,31 @@ function toggleSites() {
     if (s1.style.display === "none") {
         s1.style.display = "block";
         s2.style.display = "none";
+        const alertBox = document.getElementById("alert");
         localStorage.setItem("selectedSite", "site1");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
+        
+        // Hide immediately without fading if they switch back
+alertBox.style.display = "none";
+alertBox.style.opacity = "0";
+        
     } else {
         s1.style.display = "none";
         s2.style.display = "flex";
         localStorage.setItem("selectedSite", "site2");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
+        
+alertBox.style.display = "block";
+setTimeout(() => { alertBox.style.opacity = "1"; }, 10); // Tiny delay to ensure transition triggers
+
+// Hide it after 5 seconds
+setTimeout(() => {
+alertBox.style.opacity = "0"; 
+// 3. Fully hide after the 0.5s transition finishes
+setTimeout(() => { 
+if(alertBox.style.opacity === "0") alertBox.style.display = "none"; 
+}, 500);
+}, 5000);
     }
 }
 </script>
