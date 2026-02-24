@@ -32,14 +32,6 @@
 .ctx-menu-item:hover { background: var(--surface-hover); color: var(--primary); }
 
 
-/* ── ADMIN ── */
-.admin-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
-    color: white; font-size: 9px; font-weight: 800;
-    padding: 1px 5px; border-radius: 6px; letter-spacing: 0.5px;
-    text-transform: uppercase; vertical-align: middle; margin-left: 4px;
-}
 .ctx-menu-item.danger { color: #ef4444; }
 .ctx-menu-item.danger:hover { background: #fef2f2; color: #dc2626; }
 .ctx-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
@@ -244,19 +236,17 @@ body {
 .msg.same-sender .msg-meta { display: none; }
 .msg.same-sender .msg-avatar { opacity: 0; pointer-events: none; }
 
-/* delete button */
+/* delete button — sits INSIDE bubble wrapper, no gap issue */
+.msg-bubble-wrap { position: relative; display: inline-block; max-width: 100%; }
 .msg-delete {
-    display: none; position: absolute; top: 50%; transform: translateY(-50%);
-    background: #ef4444; border: none; color: white;
-    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
-    font-size: 11px; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 5;
-    /* Extend hit area so hovering between bubble and button doesn't dismiss it */
-    padding: 0; margin: 0;
+    display: none; position: absolute; top: -8px; right: -8px;
+    background: #ef4444; border: 2px solid var(--bg); color: white;
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    font-size: 10px; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 10;
+    line-height: 1;
 }
-/* Use padding pseudo-extension via outline trick — keep button visible on msg-row hover */
-.msg.mine .msg-delete { right: -32px; }
-.msg-row:hover .msg-delete { display: flex; }
+.msg-bubble-wrap:hover .msg-delete { display: flex; }
 .msg-delete:hover { background: #dc2626; }
 
 /* deleted message */
@@ -410,8 +400,14 @@ body {
 
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span>💬 Direct Messages</span>
+        <div class="sidebar-header" style="flex-direction:column;align-items:stretch;gap:6px;padding-bottom:10px;">
+            <button id="globalChatBtn" style="
+                background:var(--gradient-primary);color:white;border:none;
+                border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;
+                font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+                display:flex;align-items:center;gap:8px;transition:opacity 0.2s;
+            ">🌐 Global Chat</button>
+            <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding-top:4px;">💬 Direct Messages</span>
         </div>
         <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
         <div class="sidebar-list" id="sidebarList">
@@ -642,7 +638,6 @@ async function submitUsername() {
         localStorage.setItem(USERNAME_KEY, name);
         modal.classList.remove('open');
         document.getElementById('headerUsername').textContent = name;
-        if (typeof updateAdminBadge === 'function') updateAdminBadge();
         document.getElementById('msgInput').disabled = false;
         document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
         document.getElementById('sendBtn').disabled = false;
@@ -680,7 +675,7 @@ async function boot() {
             // Restore username from DB (source of truth)
             username = rows[0].username;
             localStorage.setItem(USERNAME_KEY, username);
-            document.getElementById('headerUsername').textContent = username; if (typeof updateAdminBadge === 'function') setTimeout(updateAdminBadge, 0);
+            document.getElementById('headerUsername').textContent = username;
             document.getElementById('msgInput').disabled = false;
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
             document.getElementById('sendBtn').disabled = false;
@@ -693,7 +688,7 @@ async function boot() {
         const saved = localStorage.getItem(USERNAME_KEY);
         if (saved) {
             username = saved;
-            document.getElementById('headerUsername').textContent = username; if (typeof updateAdminBadge === 'function') setTimeout(updateAdminBadge, 0);
+            document.getElementById('headerUsername').textContent = username;
             document.getElementById('msgInput').disabled = false;
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
             document.getElementById('sendBtn').disabled = false;
@@ -948,6 +943,9 @@ function closeDm() {
 }
 
 document.getElementById('dmBackBtn').addEventListener('click', closeDm);
+document.getElementById('globalChatBtn').addEventListener('click', () => {
+    if (dmMode) closeDm();
+});
 
 // ════════════════════════════════════════════════
 // RENDER MESSAGE
@@ -990,8 +988,10 @@ function renderMessage(msg, isDm) {
         </div>
         <div class="msg-row">
             ${!isMe ? `<div class="msg-avatar" style="background:${color}">${initials(senderName)}</div>` : ''}
-            <div class="msg-bubble">${esc(msg.text)}</div>
-            ${isMe ? `<button class="msg-delete" title="Delete message" onclick="deleteMessage(this, ${msg.id}, ${isDm})">✕</button>` : ''}
+            <div class="msg-bubble-wrap">
+                <div class="msg-bubble">${esc(msg.text)}</div>
+                ${(isMe || isAdmin()) ? `<button class="msg-delete" title="Delete message" onclick="deleteMsg(event, ${msg.id}, ${isDm})">✕</button>` : ''}
+            </div>
         </div>`;
 
     container.appendChild(el);
@@ -1003,8 +1003,10 @@ function renderMessage(msg, isDm) {
 // ════════════════════════════════════════════════
 // DELETE MESSAGE
 // ════════════════════════════════════════════════
-async function deleteMessage(btn, id, isDm) {
-    const msgEl = btn.closest('.msg');
+async function deleteMsg(e, id, isDm) {
+    e.stopPropagation();
+    const msgEl = e.target.closest('.msg');
+    if (!msgEl) return;
     try {
         if (isDm) {
             await sbDelete(`/rest/v1/dms?id=eq.${id}`);
@@ -1012,8 +1014,8 @@ async function deleteMessage(btn, id, isDm) {
             await sbDelete(`/rest/v1/messages?id=eq.${id}`);
         }
         msgEl.remove();
-    } catch(e) {
-        console.error('delete error:', e);
+    } catch(err) {
+        console.error('delete error:', err);
         showBanner('⚠ Could not delete message');
         setTimeout(() => showBanner(''), 3000);
     }
@@ -1114,6 +1116,90 @@ function startCooldown() {
     };
     cooldownRaf = requestAnimationFrame(tick);
 }
+// ════════════════════════════════════════════════
+// ADMIN
+// ════════════════════════════════════════════════
+const ADMIN_USERNAME = 'lamb'; // case-insensitive
+function isAdmin() { return username.toLowerCase() === ADMIN_USERNAME; }
+
+async function adminDeleteAllFrom(targetUser) {
+    if (!confirm(`Delete ALL messages from "${targetUser.username}"?`)) return;
+    try {
+        await sbDelete(`/rest/v1/messages?username=ilike.${encodeURIComponent(targetUser.username)}`);
+        showBanner(`✅ Deleted all messages from ${targetUser.username}`);
+        setTimeout(() => showBanner(''), 3000);
+        // Reload chat
+        document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
+        lastRenderedId = 0; lastRenderedUser = null;
+        await loadHistory();
+    } catch(e) { console.error(e); showBanner('⚠ Admin action failed'); }
+}
+
+async function adminBanUser(targetUser) {
+    if (!confirm(`Ban "${targetUser.username}"? They'll have to pick a new username.`)) return;
+    try {
+        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        showBanner(`✅ Banned ${targetUser.username}`);
+        setTimeout(() => showBanner(''), 3000);
+        loadAllUsers();
+    } catch(e) { console.error(e); showBanner('⚠ Admin action failed'); }
+}
+
+// ════════════════════════════════════════════════
+// USERNAME CLICK → CONTEXT MENU
+// ════════════════════════════════════════════════
+const ctxMenu = document.getElementById('ctxMenu');
+let ctxTarget = null;
+
+function showCtxMenu(e, targetUsername) {
+    if (targetUsername === username) return;
+    const user = allUsers.find(u => u.username === targetUsername);
+    if (!user) return;
+    ctxTarget = user;
+
+    // Build menu
+    document.getElementById('ctxMenuName').textContent = targetUsername;
+    // Remove old admin items
+    ctxMenu.querySelectorAll('.ctx-admin-item,.ctx-divider').forEach(x => x.remove());
+
+    if (isAdmin()) {
+        const div = document.createElement('div');
+        div.className = 'ctx-divider';
+        div.style.cssText = 'height:1px;background:var(--border);margin:4px 0;';
+        ctxMenu.appendChild(div);
+
+        const delAllBtn = document.createElement('div');
+        delAllBtn.className = 'ctx-menu-item ctx-admin-item';
+        delAllBtn.style.color = '#ef4444';
+        delAllBtn.textContent = '🗑 Delete all their messages';
+        delAllBtn.onclick = () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); };
+        ctxMenu.appendChild(delAllBtn);
+
+        const banBtn = document.createElement('div');
+        banBtn.className = 'ctx-menu-item ctx-admin-item';
+        banBtn.style.color = '#ef4444';
+        banBtn.textContent = '🔇 Ban username';
+        banBtn.onclick = () => { ctxMenu.classList.remove('open'); adminBanUser(ctxTarget); };
+        ctxMenu.appendChild(banBtn);
+    }
+
+    ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 120) + 'px';
+    ctxMenu.classList.add('open');
+    e.stopPropagation();
+}
+
+document.getElementById('ctxDmBtn').addEventListener('click', () => {
+    if (ctxTarget) { openDm(ctxTarget); ctxTarget = null; }
+    ctxMenu.classList.remove('open');
+});
+
+document.addEventListener('click', () => ctxMenu.classList.remove('open'));
+
+document.getElementById('messagesInner').addEventListener('click', e => {
+    const span = e.target.closest('.msg-username');
+    if (span) showCtxMenu(e, span.textContent);
+});
 </script>
 
 <!-- USERNAME CONTEXT MENU -->
