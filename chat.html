@@ -30,8 +30,6 @@
     color: var(--text); cursor: pointer; transition: background 0.15s;
 }
 .ctx-menu-item:hover { background: var(--surface-hover); color: var(--primary); }
-
-
 .ctx-menu-item.danger { color: #ef4444; }
 .ctx-menu-item.danger:hover { background: #fef2f2; color: #dc2626; }
 .ctx-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
@@ -184,7 +182,9 @@ body {
     width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+    overflow: hidden;
 }
+.sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .sidebar-unread {
     margin-left: auto; background: var(--primary); color: white;
     font-size: 10px; font-weight: 700; border-radius: 10px;
@@ -212,7 +212,8 @@ body {
     border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 .dm-header.show { display: flex; }
-.dm-header-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
+.dm-header-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; overflow: hidden; }
+.dm-header-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .dm-header-name { font-size: 14px; font-weight: 700; color: var(--text); }
 .dm-back-btn {
     margin-left: auto; background: none; border: 1px solid var(--border);
@@ -256,8 +257,13 @@ body {
     width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+    cursor: pointer; overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
 }
-.msg-username { font-size: 12px; font-weight: 700; }
+.msg-avatar:hover { transform: scale(1.12); box-shadow: 0 0 0 2px var(--primary); }
+.msg-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
+.msg-username { font-size: 12px; font-weight: 700; cursor: pointer; }
+.msg-username:hover { text-decoration: underline; }
 .msg-time { font-size: 11px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
 .msg-bubble {
     padding: 9px 13px; font-size: 14px; line-height: 1.55;
@@ -274,7 +280,7 @@ body {
 .msg.same-sender .msg-meta { display: none; }
 .msg.same-sender .msg-avatar { opacity: 0; pointer-events: none; }
 
-/* delete button — sits INSIDE bubble wrapper, no gap issue */
+/* delete button */
 .msg-bubble-wrap { position: relative; display: inline-block; max-width: 100%; }
 .msg-delete {
     display: none; position: absolute; top: -8px; right: -8px;
@@ -338,7 +344,7 @@ body {
 .modal-overlay.open { display: flex; }
 .modal {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 380px;
+    border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 420px;
     box-shadow: var(--shadow-xl); animation: pop-in 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 @keyframes pop-in { from{transform:scale(0.92) translateY(16px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
@@ -363,6 +369,31 @@ body {
 .modal-error { font-size: 12px; color: #ef4444; margin-top: -6px; margin-bottom: 10px; display: none; line-height: 1.4; }
 .modal-error.show { display: block; }
 .modal-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+
+/* ── AVATAR PICKER ── */
+.avatar-section { margin-bottom: 18px; }
+.avatar-section-label {
+    font-size: 12px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+}
+.avatar-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+}
+.avatar-option {
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; border: 3px solid transparent;
+    transition: all 0.15s; background: var(--bg-secondary);
+    user-select: none;
+}
+.avatar-option:hover { transform: scale(1.15); border-color: var(--primary); }
+.avatar-option.selected { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); transform: scale(1.1); }
+.avatar-preview {
+    width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; background: var(--bg-secondary); margin: 0 auto 16px;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
 
 /* ── SCROLL BTN ── */
 .scroll-btn {
@@ -391,6 +422,7 @@ body {
     .messages-inner { padding: 0 10px; }
     .input-area { padding: 10px; }
     .msg { max-width: 85%; }
+    .avatar-grid { grid-template-columns: repeat(5, 1fr); }
 }
 </style>
 </head>
@@ -400,11 +432,21 @@ body {
 <div class="modal-overlay" id="usernameModal">
     <div class="modal">
         <div class="modal-title">Welcome 👋</div>
-        <div class="modal-sub" id="usernameModalSub">Choose a username. It's tied to this device so no one else can take it.</div>
+        <div class="modal-sub" id="usernameModalSub">Choose a username and pick a profile picture!</div>
+
+        <!-- Avatar preview -->
+        <div class="avatar-preview" id="avatarPreview">😎</div>
+
+        <!-- Avatar picker grid -->
+        <div class="avatar-section">
+            <div class="avatar-section-label">Pick your vibe</div>
+            <div class="avatar-grid" id="avatarGrid"></div>
+        </div>
+
         <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off">
         <div class="modal-error" id="usernameError"></div>
         <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
-        <div class="modal-note" id="usernameNote">Your username is locked to this browser. Clearing browser data would release it.</div>
+        <div class="modal-note" id="usernameNote">Your username and avatar are locked to this browser. Clearing browser data would release them.</div>
     </div>
 </div>
 
@@ -425,7 +467,7 @@ body {
     </div>
     <div class="header-right">
         <button class="theme-btn" id="themeBtn">🌙</button>
-        <button class="username-btn" id="changeUsernameBtn" title="Change username">
+        <button class="username-btn" id="changeUsernameBtn" title="Change username/avatar">
             ✏️ <span id="headerUsername">Set username</span>
         </button>
     </div>
@@ -506,6 +548,12 @@ body {
     </div>
 </div>
 
+<!-- USERNAME CONTEXT MENU — moved BEFORE scripts so it exists in DOM -->
+<div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-menu-header" id="ctxMenuName"></div>
+    <div class="ctx-menu-item" id="ctxDmBtn">💬 Send DM</div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════
 // CREDENTIALS
@@ -518,24 +566,35 @@ const POLL_MS      = 2000;
 const DEVICE_KEY   = 'gnChatDeviceId';
 const USERNAME_KEY = 'gnChatUsername';
 const THEME_KEY    = 'gnChatTheme';
+const AVATAR_KEY   = 'gnChatAvatar';
+
+// ── AVATAR OPTIONS ─────────────────────────────
+const AVATAR_OPTIONS = [
+    '😎','🐶','🐱','🐸','🦊','🐺',
+    '🦁','🐻','🐼','🐨','🐯','🦄',
+    '👾','🤖','👻','💀','🎃','🔥',
+    '🌊','⚡','🌙','⭐','🍀','🎯'
+];
 
 // ── STATE ─────────────────────────────────────
 let deviceId         = '';
 let username         = '';
+let myAvatar         = '😎';
+let selectedAvatar   = '😎';
 let lastSendTime     = 0;
 let cooldownRaf      = null;
 let autoScroll       = true;
 let lastRenderedUser = null;
-let lastRenderedId   = 0;   // for public chat
-let lastDmId         = 0;   // for DM polling
+let lastRenderedId   = 0;
+let lastDmId         = 0;
 let presenceChannel  = null;
 let sb               = null;
 let sidebarOpen      = true;
-let dmMode           = false;      // true = showing DMs
-let dmPartner        = null;       // { device_id, username }
+let dmMode           = false;
+let dmPartner        = null;
 let dmPartnerDevId   = null;
-let unreadDms        = {};         // device_id → count
-let allUsers         = [];         // cached from users table
+let unreadDms        = {};
+let allUsers         = [];  // includes avatar field
 
 // ── HELPERS ───────────────────────────────────
 const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6',
@@ -559,6 +618,28 @@ function showBanner(msg) {
 }
 function genId() {
     return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+}
+
+// Build avatar html — emoji or colored initials fallback
+function avatarHtml(avatarVal, name, size, extraStyle = '') {
+    const bg = colorFor(name);
+    if (avatarVal && avatarVal !== 'default' && AVATAR_OPTIONS.includes(avatarVal)) {
+        const fs = Math.round(size * 0.55);
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${fs}px;${extraStyle}">${avatarVal}</div>`;
+    }
+    const fs = Math.round(size * 0.4);
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:700;color:white;${extraStyle}">${initials(name)}</div>`;
+}
+
+// Get avatar for a username (from allUsers cache, fallback to stored)
+function getAvatarFor(nameOrDevId, isDevId = false) {
+    if (isDevId) {
+        const u = allUsers.find(x => x.device_id === nameOrDevId);
+        return u ? (u.avatar || 'default') : 'default';
+    }
+    if (nameOrDevId === username) return myAvatar;
+    const u = allUsers.find(x => x.username === nameOrDevId);
+    return u ? (u.avatar || 'default') : 'default';
 }
 
 // ── DEVICE ID ─────────────────────────────────
@@ -627,6 +708,24 @@ async function sbDelete(path) {
 }
 
 // ════════════════════════════════════════════════
+// AVATAR PICKER SETUP
+// ════════════════════════════════════════════════
+function buildAvatarGrid() {
+    const grid = document.getElementById('avatarGrid');
+    grid.innerHTML = AVATAR_OPTIONS.map((em, i) =>
+        `<div class="avatar-option${em === selectedAvatar ? ' selected' : ''}" data-emoji="${em}" title="${em}">${em}</div>`
+    ).join('');
+    grid.querySelectorAll('.avatar-option').forEach(el => {
+        el.addEventListener('click', () => {
+            selectedAvatar = el.dataset.emoji;
+            grid.querySelectorAll('.avatar-option').forEach(x => x.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('avatarPreview').textContent = selectedAvatar;
+        });
+    });
+}
+
+// ════════════════════════════════════════════════
 // USERNAME / IDENTITY SYSTEM
 // ════════════════════════════════════════════════
 const modal  = document.getElementById('usernameModal');
@@ -635,12 +734,15 @@ const uError = document.getElementById('usernameError');
 const uBtn   = document.getElementById('usernameConfirm');
 
 function openUsernameModal(isChange = false) {
+    selectedAvatar = myAvatar || '😎';
     uInput.value = username || '';
     uError.classList.remove('show');
     document.getElementById('usernameModalSub').textContent = isChange
-        ? 'Enter a new username. It must not be taken by another device.'
-        : 'Choose a username. It\'s tied to this device so no one else can take it.';
+        ? 'Update your username or profile picture.'
+        : 'Choose a username and pick a profile picture!';
     document.getElementById('usernameNote').style.display = isChange ? 'none' : '';
+    document.getElementById('avatarPreview').textContent = selectedAvatar;
+    buildAvatarGrid();
     modal.classList.add('open');
     uBtn.disabled = false;
     setTimeout(() => { uInput.focus(); if (username) uInput.select(); }, 30);
@@ -649,25 +751,26 @@ function openUsernameModal(isChange = false) {
 async function submitUsername() {
     const name = uInput.value.trim().replace(/\s+/g,' ');
     if (!name) { uError.textContent = 'Please enter a username.'; uError.classList.add('show'); return; }
-    if (name === username) { modal.classList.remove('open'); return; }
+    if (name === username && selectedAvatar === myAvatar) { modal.classList.remove('open'); return; }
 
     uBtn.disabled = true;
-    uBtn.textContent = 'Checking...';
+    uBtn.textContent = 'Saving...';
 
     try {
-        // Check if username is taken by a DIFFERENT device
-        // Case-insensitive check: fetch all users with same name ignoring case
-        const existing = await sbGet(
-            `/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`
-        );
-        if (existing && existing.length && existing[0].device_id !== deviceId) {
-            uError.textContent = `That username is already taken (as "${existing[0].username}").`;
-            uError.classList.add('show');
-            uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
-            return;
+        if (name !== username) {
+            // Check if username is taken by a DIFFERENT device
+            const existing = await sbGet(
+                `/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`
+            );
+            if (existing && existing.length && existing[0].device_id !== deviceId) {
+                uError.textContent = `That username is already taken (as "${existing[0].username}").`;
+                uError.classList.add('show');
+                uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
+                return;
+            }
         }
 
-        // Upsert: insert or update our device's username
+        // Upsert with avatar
         await fetch(SUPABASE_URL + '/rest/v1/users', {
             method: 'POST',
             headers: {
@@ -675,11 +778,13 @@ async function submitUsername() {
                 'Content-Type': 'application/json',
                 'Prefer': 'resolution=merge-duplicates,return=minimal'
             },
-            body: JSON.stringify({ device_id: deviceId, username: name })
+            body: JSON.stringify({ device_id: deviceId, username: name, avatar: selectedAvatar })
         });
 
         username = name;
+        myAvatar = selectedAvatar;
         localStorage.setItem(USERNAME_KEY, name);
+        localStorage.setItem(AVATAR_KEY, myAvatar);
         modal.classList.remove('open');
         document.getElementById('headerUsername').textContent = name;
         document.getElementById('msgInput').disabled = false;
@@ -691,7 +796,7 @@ async function submitUsername() {
         if (sb) joinPresence();
         loadAllUsers();
     } catch(e) {
-        uError.textContent = 'Error checking username. Try again.';
+        uError.textContent = 'Error saving. Try again.';
         uError.classList.add('show');
         uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
         console.error(e);
@@ -703,7 +808,6 @@ uInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefa
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
 
 // ── BOOT ──────────────────────────────────────
-// Try to restore identity from saved device registration
 async function boot() {
     try {
         sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -714,22 +818,25 @@ async function boot() {
 
     // Check if this device has a registered username
     try {
-        const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=username`);
+        const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=username,avatar`);
         if (rows && rows.length) {
-            // Restore username from DB (source of truth)
             username = rows[0].username;
+            myAvatar = rows[0].avatar || '😎';
             localStorage.setItem(USERNAME_KEY, username);
+            localStorage.setItem(AVATAR_KEY, myAvatar);
             document.getElementById('headerUsername').textContent = username;
             document.getElementById('msgInput').disabled = false;
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
             document.getElementById('sendBtn').disabled = false;
         } else {
             // New device — show modal
+            myAvatar = localStorage.getItem(AVATAR_KEY) || '😎';
             openUsernameModal(false);
         }
     } catch(e) {
         // DB check failed — fall back to localStorage
         const saved = localStorage.getItem(USERNAME_KEY);
+        myAvatar = localStorage.getItem(AVATAR_KEY) || '😎';
         if (saved) {
             username = saved;
             document.getElementById('headerUsername').textContent = username;
@@ -767,18 +874,15 @@ async function loadHistory() {
 }
 
 function startPolling() {
-    // Poll public chat
     setInterval(async () => {
-        if (dmMode) return; // skip public poll while in DM view
+        if (dmMode) return;
         try {
-            // Always poll — even if lastRenderedId is 0 (first message edge case)
             const url = lastRenderedId > 0
                 ? `/rest/v1/messages?id=gt.${lastRenderedId}&order=id.asc&select=*`
                 : `/rest/v1/messages?order=id.asc&limit=1&select=*`;
             const msgs = await sbGet(url);
             if (msgs && msgs.length) {
                 msgs.forEach(m => {
-                    // Don't re-render messages we already rendered (sent by us)
                     if (m.id > lastRenderedId) {
                         renderMessage(m, false);
                         lastRenderedId = m.id;
@@ -788,16 +892,8 @@ function startPolling() {
         } catch(e) { /* silent */ }
     }, POLL_MS);
 
-    // Poll DMs
     setInterval(async () => {
         if (!username) return;
-        try {
-            const msgs = await sbGet(
-                `/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartnerDevId || 'none'}),and(sender_device_id.eq.${dmPartnerDevId || 'none'},recipient_device_id.eq.${deviceId}))&id=gt.${lastDmId}&order=id.asc&select=*`
-            );
-            // Actually just poll all DMs involving me for unread tracking
-        } catch(e) { /* silent */ }
-
         if (dmMode && dmPartner) {
             pollDmThread();
         } else {
@@ -819,15 +915,13 @@ async function pollDmThread() {
                     lastDmId = m.id;
                 }
             });
-            // Mark received ones as read
             const received = msgs.filter(m => m.sender_device_id === dmPartner.device_id);
             if (received.length) markDmRead(dmPartner.device_id, received[received.length-1].id);
         }
     } catch(e) { /* silent */ }
 }
 
-// Track the highest DM id we've actually READ per sender
-const seenDmIds = {}; // sender_device_id -> highest id seen
+const seenDmIds = {};
 
 async function pollDmUnreads() {
     try {
@@ -835,7 +929,6 @@ async function pollDmUnreads() {
             `/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.asc&select=*`
         );
         if (!msgs) return;
-        // Count only messages newer than what we've seen
         const counts = {};
         msgs.forEach(m => {
             const seen = seenDmIds[m.sender_device_id] || 0;
@@ -843,7 +936,6 @@ async function pollDmUnreads() {
                 counts[m.sender_device_id] = (counts[m.sender_device_id] || 0) + 1;
             }
         });
-        // Update sidebar badges
         document.querySelectorAll('.sidebar-user[data-devid]').forEach(el => {
             const devId = el.dataset.devid;
             const badge = el.querySelector('.sidebar-unread');
@@ -866,7 +958,6 @@ async function pollDmUnreads() {
 
 function markDmRead(senderDevId, highestId) {
     seenDmIds[senderDevId] = Math.max(seenDmIds[senderDevId] || 0, highestId);
-    // Clear badge immediately
     document.querySelectorAll(`.sidebar-user[data-devid="${senderDevId}"]`).forEach(el => {
         el.querySelector('.sidebar-unread')?.remove();
         el.classList.remove('has-unread');
@@ -929,12 +1020,18 @@ function renderSidebar(filter) {
         return;
     }
 
-    list.innerHTML = filtered.map(u => `
+    list.innerHTML = filtered.map(u => {
+        const av = u.avatar || 'default';
+        const avHtml = (av !== 'default' && AVATAR_OPTIONS.includes(av))
+            ? `<div class="sidebar-avatar" style="background:${colorFor(u.username)};font-size:15px;">${av}</div>`
+            : `<div class="sidebar-avatar" style="background:${colorFor(u.username)};font-size:11px;font-weight:700;color:white;">${initials(u.username)}</div>`;
+        return `
         <div class="sidebar-user ${dmPartner && dmPartner.device_id === u.device_id ? 'active' : ''}"
              data-devid="${esc(u.device_id)}" data-username="${esc(u.username)}">
-            <div class="sidebar-avatar" style="background:${colorFor(u.username)}">${initials(u.username)}</div>
+            ${avHtml}
             <span>${esc(u.username)}</span>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 
     list.querySelectorAll('.sidebar-user').forEach(el => {
         el.addEventListener('click', () => {
@@ -956,26 +1053,32 @@ async function openDm(partner) {
     dmMode = true;
     lastDmId = 0;
 
-    // Clear messages
     const inner = document.getElementById('messagesInner');
     inner.innerHTML = '';
     lastRenderedUser = null;
 
-    // Show DM header
     const hdr = document.getElementById('dmHeader');
     hdr.classList.add('show');
     document.getElementById('dmHeaderName').textContent = partner.username;
+
+    // Set DM header avatar
     const av = document.getElementById('dmHeaderAvatar');
-    av.textContent = initials(partner.username);
-    av.style.background = colorFor(partner.username);
+    const partnerAvatar = getAvatarFor(partner.device_id, true) || partner.avatar || 'default';
+    if (partnerAvatar && partnerAvatar !== 'default' && AVATAR_OPTIONS.includes(partnerAvatar)) {
+        av.textContent = partnerAvatar;
+        av.style.background = colorFor(partner.username);
+        av.style.fontSize = '16px';
+    } else {
+        av.textContent = initials(partner.username);
+        av.style.background = colorFor(partner.username);
+        av.style.fontSize = '11px';
+        av.style.fontWeight = '700';
+        av.style.color = 'white';
+    }
 
-    // Update input placeholder
     document.getElementById('msgInput').placeholder = `Message ${partner.username}...`;
-
-    // Highlight in sidebar
     renderSidebar(document.getElementById('sidebarSearch').value);
 
-    // Load DM history
     try {
         const msgs = await sbGet(
             `/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${partner.device_id}),and(sender_device_id.eq.${partner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`
@@ -983,7 +1086,6 @@ async function openDm(partner) {
         if (msgs && msgs.length) {
             msgs.forEach(m => renderMessage(m, true));
             lastDmId = msgs[msgs.length - 1].id;
-            // Mark all received DMs from this partner as read
             const received = msgs.filter(m => m.sender_device_id === partner.device_id);
             if (received.length) markDmRead(partner.device_id, received[received.length-1].id);
         } else {
@@ -1000,7 +1102,6 @@ function closeDm() {
     document.getElementById('dmHeader').classList.remove('show');
     document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
 
-    // Reload public chat
     const inner = document.getElementById('messagesInner');
     inner.innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
     lastRenderedId = 0;
@@ -1016,7 +1117,7 @@ document.getElementById('globalChatBtn').addEventListener('click', () => {
 // ════════════════════════════════════════════════
 // REPLY STATE
 // ════════════════════════════════════════════════
-let replyTo = null; // { id, username, text }
+let replyTo = null;
 
 function setReply(msgId, senderName, text) {
     replyTo = { id: msgId, username: senderName, text };
@@ -1049,34 +1150,46 @@ function renderMessage(msg, isDm) {
         return;
     }
 
-    // For DMs, sender is identified by sender_device_id
-    // For public, sender is identified by device_id (or username fallback)
     const senderDevId = isDm ? msg.sender_device_id : msg.device_id;
     const senderName  = isDm ? msg.sender_username  : msg.username;
     const isMe        = isDm ? msg.sender_device_id === deviceId : msg.device_id === deviceId || msg.username === username;
     const sameSender  = lastRenderedUser === (senderDevId || senderName);
     const color       = colorFor(senderName);
 
+    // Get avatar for this sender
+    let senderAvatar = 'default';
+    if (isMe) {
+        senderAvatar = myAvatar;
+    } else {
+        senderAvatar = getAvatarFor(senderName);
+    }
+    const hasEmoji = senderAvatar && senderAvatar !== 'default' && AVATAR_OPTIONS.includes(senderAvatar);
+
     const el = document.createElement('div');
     el.className = ['msg', isMe ? 'mine' : 'theirs', sameSender ? 'same-sender' : ''].filter(Boolean).join(' ');
-    if (isDm) {
-        el.dataset.dmId = msg.id;
-    } else {
-        el.dataset.msgId = msg.id;
-    }
+    if (isDm) el.dataset.dmId = msg.id;
+    else el.dataset.msgId = msg.id;
 
     const replySnippet = (!isDm && msg.reply_to_username && msg.reply_to_text)
         ? `<div class="reply-preview"><strong>${esc(msg.reply_to_username)}</strong> ${esc(msg.reply_to_text.slice(0,80))}</div>`
         : '';
 
+    // Avatar HTML: emoji on color bg or initials
+    const avInner = hasEmoji
+        ? senderAvatar
+        : initials(senderName);
+    const avFontSize = hasEmoji ? '14px' : '11px';
+    const avExtraStyle = hasEmoji ? '' : 'color:white;font-weight:700;';
+    const avHtml = `<div class="msg-avatar" style="background:${color};font-size:${avFontSize};${avExtraStyle}" data-username="${esc(senderName)}" data-devid="${esc(senderDevId || '')}">${avInner}</div>`;
+
     el.innerHTML = `
         <div class="msg-meta">
-            ${!isMe ? `<span class="msg-username" style="color:${color}">${esc(senderName)}</span>` : ''}
+            ${!isMe ? `<span class="msg-username" style="color:${color}" data-username="${esc(senderName)}">${esc(senderName)}</span>` : ''}
             <span class="msg-time">${fmtTime(msg.created_at || Date.now())}</span>
             ${isDm ? `<span class="dm-indicator">DM</span>` : ''}
         </div>
         <div class="msg-row">
-            ${!isMe ? `<div class="msg-avatar" style="background:${color}">${initials(senderName)}</div>` : ''}
+            ${!isMe ? avHtml : ''}
             <div class="msg-bubble-wrap">
                 ${replySnippet}
                 <div class="msg-bubble">${esc(msg.text)}</div>
@@ -1147,7 +1260,6 @@ async function sendMessage() {
 
     try {
         if (dmMode && dmPartner) {
-            // Send DM
             const inserted = await sbPost('/rest/v1/dms', {
                 sender_device_id: deviceId,
                 recipient_device_id: dmPartner.device_id,
@@ -1159,7 +1271,6 @@ async function sendMessage() {
                 lastDmId = inserted[0].id;
             }
         } else {
-            // Send public message
             const payload = { username, text, type: 'chat', device_id: deviceId };
             if (replyTo) {
                 payload.reply_to = replyTo.id;
@@ -1215,11 +1326,12 @@ function startCooldown() {
     };
     cooldownRaf = requestAnimationFrame(tick);
 }
+
 // ════════════════════════════════════════════════
 // ADMIN
 // ════════════════════════════════════════════════
 const ADMIN_USERNAME = 'lamb'; // case-insensitive
-function isAdmin() { return username.toLowerCase() === ADMIN_USERNAME; }
+function isAdmin() { return username && username.toLowerCase() === ADMIN_USERNAME; }
 
 async function adminDeleteAllFrom(targetUser) {
     if (!confirm(`Delete ALL messages from "${targetUser.username}"?`)) return;
@@ -1227,7 +1339,6 @@ async function adminDeleteAllFrom(targetUser) {
         await sbDelete(`/rest/v1/messages?username=ilike.${encodeURIComponent(targetUser.username)}`);
         showBanner(`✅ Deleted all messages from ${targetUser.username}`);
         setTimeout(() => showBanner(''), 3000);
-        // Reload chat
         document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
         lastRenderedId = 0; lastRenderedUser = null;
         await loadHistory();
@@ -1235,57 +1346,75 @@ async function adminDeleteAllFrom(targetUser) {
 }
 
 async function adminBanUser(targetUser) {
-    if (!confirm(`Ban "${targetUser.username}"? They'll have to pick a new username.`)) return;
+    if (!confirm(`Ban "${targetUser.username}"? This will delete their account and ALL their messages.`)) return;
     try {
+        // Delete all their public messages first
+        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        // Delete all their DMs (sent and received)
+        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        // Remove from users table — their device will be forced to pick a new name
         await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        showBanner(`✅ Banned ${targetUser.username}`);
-        setTimeout(() => showBanner(''), 3000);
+        showBanner(`✅ Banned ${targetUser.username} — all their data removed`);
+        setTimeout(() => showBanner(''), 4000);
+        // Reload chat to reflect deleted messages
+        document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
+        lastRenderedId = 0; lastRenderedUser = null;
+        await loadHistory();
         loadAllUsers();
-    } catch(e) { console.error(e); showBanner('⚠ Admin action failed'); }
+    } catch(e) { console.error(e); showBanner('⚠ Admin ban failed'); }
 }
 
 // ════════════════════════════════════════════════
-// USERNAME CLICK → CONTEXT MENU
+// USERNAME CLICK / AVATAR CLICK → CONTEXT MENU
 // ════════════════════════════════════════════════
 const ctxMenu = document.getElementById('ctxMenu');
 let ctxTarget = null;
 
-function showCtxMenu(e, targetUsername) {
-    if (targetUsername === username) return;
-    const user = allUsers.find(u => u.username === targetUsername);
-    if (!user) return;
+function showCtxMenu(e, targetUsername, targetDevId) {
+    if (targetUsername === username) return; // don't show menu for self
+
+    // Try to find user object
+    let user = allUsers.find(u => u.username === targetUsername);
+    if (!user && targetDevId) user = allUsers.find(u => u.device_id === targetDevId);
+    if (!user) {
+        // Minimal fallback — still allow DM via username
+        user = { username: targetUsername, device_id: targetDevId || '' };
+    }
     ctxTarget = user;
 
-    // Build menu
+    // Build menu header
     document.getElementById('ctxMenuName').textContent = targetUsername;
+
     // Remove old admin items
-    ctxMenu.querySelectorAll('.ctx-admin-item,.ctx-divider').forEach(x => x.remove());
+    ctxMenu.querySelectorAll('.ctx-admin-item, .ctx-divider').forEach(x => x.remove());
 
     if (isAdmin()) {
         const div = document.createElement('div');
-        div.className = 'ctx-divider';
+        div.className = 'ctx-divider ctx-admin-item';
         div.style.cssText = 'height:1px;background:var(--border);margin:4px 0;';
         ctxMenu.appendChild(div);
 
         const delAllBtn = document.createElement('div');
         delAllBtn.className = 'ctx-menu-item ctx-admin-item';
         delAllBtn.style.color = '#ef4444';
-        delAllBtn.textContent = '🗑 Delete all their messages';
+        delAllBtn.innerHTML = '🗑 Delete all their messages';
         delAllBtn.onclick = () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); };
         ctxMenu.appendChild(delAllBtn);
 
         const banBtn = document.createElement('div');
         banBtn.className = 'ctx-menu-item ctx-admin-item';
         banBtn.style.color = '#ef4444';
-        banBtn.textContent = '🔇 Ban username';
+        banBtn.innerHTML = '🔇 Ban user (removes all data)';
         banBtn.onclick = () => { ctxMenu.classList.remove('open'); adminBanUser(ctxTarget); };
         ctxMenu.appendChild(banBtn);
     }
 
     ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
-    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 120) + 'px';
+    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 160) + 'px';
     ctxJustOpened = true;
     ctxMenu.classList.add('open');
+    e.stopPropagation();
 }
 
 document.getElementById('ctxDmBtn').addEventListener('click', () => {
@@ -1293,20 +1422,19 @@ document.getElementById('ctxDmBtn').addEventListener('click', () => {
     ctxMenu.classList.remove('open');
 });
 
-// Close menu on next click outside — use mousedown with a flag to avoid same-event close
 let ctxJustOpened = false;
 document.addEventListener('mousedown', (e) => {
     if (ctxJustOpened) { ctxJustOpened = false; return; }
     if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('open');
 });
 
-// Unified click handler for messages area
+// ── Unified click handler for messages area ──
 document.getElementById('messagesInner').addEventListener('click', e => {
-    // Handle reply button clicks
+    // Reply button
     const replyBtn = e.target.closest('.msg-reply-btn');
     if (replyBtn) {
         e.stopPropagation();
-        const id   = parseInt(replyBtn.dataset.id);
+        const id     = parseInt(replyBtn.dataset.id);
         const sender = replyBtn.dataset.sender;
         const text   = replyBtn.dataset.text
             .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
@@ -1314,30 +1442,31 @@ document.getElementById('messagesInner').addEventListener('click', e => {
         return;
     }
 
-    // Handle delete button — already has onclick, just don't propagate
+    // Delete button — already has onclick
     if (e.target.closest('.msg-delete')) return;
 
-    // Click on username label → context menu
-    const span = e.target.closest('.msg-username');
-    if (span) { showCtxMenu(e, span.textContent); return; }
+    // Click avatar OR username → context menu
+    const avatar = e.target.closest('.msg-avatar');
+    const usernameSpan = e.target.closest('.msg-username');
 
-    // Click on another user's bubble → context menu
-    const bubble = e.target.closest('.msg-bubble-wrap');
-    if (bubble) {
-        const msgEl = bubble.closest('.msg');
+    if (avatar && !avatar.style.opacity) {
+        // Make sure it's another user's avatar (not hidden/ghosted same-sender)
+        const msgEl = avatar.closest('.msg');
         if (msgEl && msgEl.classList.contains('theirs')) {
-            const nameEl = msgEl.querySelector('.msg-username');
-            if (nameEl) showCtxMenu(e, nameEl.textContent);
+            const targetName = avatar.dataset.username;
+            const targetDev  = avatar.dataset.devid;
+            if (targetName) showCtxMenu(e, targetName, targetDev);
+            return;
         }
+    }
+
+    if (usernameSpan) {
+        const targetName = usernameSpan.dataset.username || usernameSpan.textContent;
+        showCtxMenu(e, targetName, null);
+        return;
     }
 });
 </script>
-
-<!-- USERNAME CONTEXT MENU -->
-<div class="ctx-menu" id="ctxMenu">
-    <div class="ctx-menu-header" id="ctxMenuName"></div>
-    <div class="ctx-menu-item" id="ctxDmBtn">💬 Send DM</div>
-</div>
 
 </body>
 </html>
