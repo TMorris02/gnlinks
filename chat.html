@@ -43,13 +43,51 @@
         border: 1px solid rgba(255,255,255,0.2);
         padding: 4px 10px; border-radius: 20px;
         font-size: 12px; font-weight: 600; color: white;
+        cursor: default; position: relative;
+        transition: background 0.2s;
     }
+    .online-badge:hover { background: rgba(255,255,255,0.22); }
+
+    /* tooltip showing who's online */
+    .online-tooltip {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        background: rgba(15,23,42,0.97);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        padding: 8px 12px;
+        min-width: 140px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #f1f5f9;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        display: none;
+        z-index: 100;
+        white-space: nowrap;
+    }
+    .online-badge:hover .online-tooltip { display: block; }
+    .online-tooltip-title {
+        font-size: 10px; font-weight: 700; color: #64748b;
+        text-transform: uppercase; letter-spacing: 0.6px;
+        margin-bottom: 6px;
+    }
+    .online-tooltip-user {
+        display: flex; align-items: center; gap: 7px;
+        padding: 3px 0;
+    }
+    .online-tooltip-dot {
+        width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0;
+    }
+
     .online-dot {
         width: 7px; height: 7px; border-radius: 50%;
         background: #4ade80; box-shadow: 0 0 6px #4ade80;
-        animation: pulse-dot 2s infinite;
+        animation: pulse-dot 2s infinite; flex-shrink: 0;
     }
     @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .online-count { font-variant-numeric: tabular-nums; }
 
     .username-btn {
         display: flex; align-items: center; gap: 8px;
@@ -142,11 +180,9 @@
         border-radius: 16px 4px 16px 16px; color: white;
     }
 
-    /* group consecutive same-sender */
     .msg.same-sender .msg-meta { display: none; }
     .msg.same-sender .msg-avatar { opacity: 0; pointer-events: none; }
 
-    /* system */
     .msg-system {
         align-self: center;
         font-size: 11px; color: var(--text-light);
@@ -252,12 +288,13 @@
         .messages-inner { padding: 0 10px; }
         .input-area { padding: 10px; }
         .msg { max-width: 85%; }
+        .chat-logo { font-size: 1.1rem; }
     }
 </style>
 </head>
 <body class="dark-mode">
 
-<!-- USERNAME MODAL (only shown for first-time users) -->
+<!-- USERNAME MODAL -->
 <div class="modal-overlay" id="usernameModal">
     <div class="modal">
         <div class="modal-title">Welcome 👋</div>
@@ -271,9 +308,15 @@
 <header class="chat-header">
     <div class="chat-header-left">
         <div class="chat-logo">💬 GN Chat</div>
-        <div class="online-badge">
+        <!-- online badge with hover tooltip -->
+        <div class="online-badge" id="onlineBadge">
             <div class="online-dot"></div>
-            <span>Live</span>
+            <span class="online-count" id="onlineCount">1</span>
+            <span>online</span>
+            <div class="online-tooltip" id="onlineTooltip">
+                <div class="online-tooltip-title">Currently Online</div>
+                <div id="onlineList"></div>
+            </div>
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
@@ -319,32 +362,33 @@
     </div>
 </div>
 
+<!-- Supabase JS client (needed for Realtime / Presence) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
-// ════════════════════════════════════════════════════════════
-//  🔧 PASTE YOUR SUPABASE CREDENTIALS HERE
-//  supabase.com → your project → Project Settings → API
-// ════════════════════════════════════════════════════════════
+// ── CREDENTIALS ───────────────────────────────────────────
 const SUPABASE_URL  = 'https://oootjrtweyqrlegipyok.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vb3RqcnR3ZXlxcmxlZ2lweW9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzcxNDQsImV4cCI6MjA4NzUxMzE0NH0.YCGWff6GH6nEN7nNQI8TQKvA4pTZrSff_oXc-sBdNr8';
-// ════════════════════════════════════════════════════════════
 
+// ── CONFIG ────────────────────────────────────────────────
 const COOLDOWN_MS  = 5000;
 const USERNAME_KEY = 'gnChatUsername';
 const THEME_KEY    = 'gnChatTheme';
-const POLL_MS      = 2000; // fallback polling interval
+const POLL_MS      = 2000;
 
-let username     = '';
-let lastSendTime = 0;
-let cooldownRaf  = null;
-let autoScroll   = true;
+// ── STATE ─────────────────────────────────────────────────
+let username        = '';
+let lastSendTime    = 0;
+let cooldownRaf     = null;
+let autoScroll      = true;
 let lastRenderedUser = null;
 let lastRenderedId   = 0;
-let realtimeChannel  = null;
+let presenceChannel  = null;
+let supabase         = null;
 
 // ── AVATAR COLORS ─────────────────────────────────────────
 const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6',
                 '#ec4899','#ef4444','#06b6d4','#84cc16','#f97316','#6366f1'];
-
 function colorFor(name) {
     let h = 0;
     for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
@@ -369,10 +413,8 @@ const confirmBtn = document.getElementById('usernameConfirm');
 
 const savedName = localStorage.getItem(USERNAME_KEY);
 if (savedName) {
-    // Has username — jump straight in, no modal
     activateUser(savedName);
 } else {
-    // First time — show modal
     modal.classList.add('open');
     uInput.focus();
 }
@@ -392,65 +434,128 @@ function activateUser(name) {
     document.getElementById('msgInput').disabled = false;
     document.getElementById('sendBtn').disabled  = false;
     document.getElementById('msgInput').focus();
+
+    // Now that we have a username, join presence
+    if (supabase) joinPresence();
 }
 
 confirmBtn.addEventListener('click', () => activateUser(uInput.value));
 uInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); activateUser(uInput.value); }
 });
-
 document.getElementById('changeUsernameBtn').addEventListener('click', () => {
     uInput.value = username;
     modal.classList.add('open');
     setTimeout(() => { uInput.focus(); uInput.select(); }, 30);
 });
 
-// ── SUPABASE API HELPERS ──────────────────────────────────
-async function sbFetch(path, opts = {}) {
-    const res = await fetch(SUPABASE_URL + path, {
-        ...opts,
-        headers: {
-            'apikey': SUPABASE_ANON,
-            'Authorization': 'Bearer ' + SUPABASE_ANON,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
-            ...(opts.headers || {})
-        }
+// ── SUPABASE INIT ─────────────────────────────────────────
+try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    showBanner('');
+    loadHistory().then(() => {
+        startPolling();
+        if (username) joinPresence();
     });
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-    }
-    try { return await res.json(); } catch { return null; }
+} catch(e) {
+    showBanner('⚠ Could not connect — check Supabase credentials');
+    console.error(e);
 }
 
-// ── LOAD INITIAL MESSAGES ─────────────────────────────────
+// ── PRESENCE ──────────────────────────────────────────────
+function joinPresence() {
+    if (presenceChannel) {
+        presenceChannel.unsubscribe();
+    }
+
+    presenceChannel = supabase.channel('gn-chat-room', {
+        config: { presence: { key: username } }
+    });
+
+    presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+            const state = presenceChannel.presenceState();
+            updateOnlineUI(state);
+        })
+        .on('presence', { event: 'join' }, ({ key }) => {
+            // handled by sync
+        })
+        .on('presence', { event: 'leave' }, ({ key }) => {
+            // handled by sync
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await presenceChannel.track({ username, online_at: Date.now() });
+            }
+        });
+}
+
+function updateOnlineUI(state) {
+    // state is an object keyed by presence key, each value is array of presences
+    const users = [];
+    Object.values(state).forEach(presences => {
+        presences.forEach(p => {
+            if (p.username && !users.includes(p.username)) {
+                users.push(p.username);
+            }
+        });
+    });
+
+    const count = users.length;
+    document.getElementById('onlineCount').textContent = count;
+
+    // Update tooltip list
+    const list = document.getElementById('onlineList');
+    list.innerHTML = users.map(u => `
+        <div class="online-tooltip-user">
+            <div class="online-tooltip-dot"></div>
+            <span style="color:${colorFor(u)};font-weight:600">${esc(u)}</span>
+            ${u === username ? '<span style="color:#64748b;font-size:10px">(you)</span>' : ''}
+        </div>
+    `).join('');
+}
+
+// Leave presence cleanly when tab closes
+window.addEventListener('beforeunload', () => {
+    if (presenceChannel) presenceChannel.untrack();
+});
+
+// ── REST API HELPERS ──────────────────────────────────────
+async function sbFetch(path, opts = {}) {
+    const headers = {
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON,
+        'Content-Type': 'application/json',
+        ...(opts.headers || {})
+    };
+    const res = await fetch(SUPABASE_URL + path, { ...opts, headers });
+    if (!res.ok) { const err = await res.text(); throw new Error(err); }
+    const text = await res.text();
+    try { return text ? JSON.parse(text) : null; } catch { return null; }
+}
+
+// ── LOAD HISTORY ──────────────────────────────────────────
 async function loadHistory() {
     try {
-        const msgs = await sbFetch('/rest/v1/messages?order=id.asc&limit=200', {
-            headers: { 'Prefer': 'return=representation' }
-        });
+        const msgs = await sbFetch('/rest/v1/messages?order=id.asc&limit=200&select=*');
         if (msgs && msgs.length) {
             msgs.forEach(m => renderMessage(m));
             lastRenderedId = msgs[msgs.length - 1].id;
         }
         showBanner('');
     } catch(e) {
-        showBanner('⚠ Could not connect — check your Supabase credentials in chat.html');
+        showBanner('⚠ Could not load messages — check Supabase credentials');
         console.error(e);
     }
 }
 
-// ── REALTIME via Supabase Realtime REST (polling fallback) ─
-// Supabase realtime requires a WebSocket client lib; we use
-// efficient polling instead which works fine for a chat room.
+// ── POLLING FOR NEW MESSAGES ──────────────────────────────
 function startPolling() {
     setInterval(async () => {
         if (!lastRenderedId) return;
         try {
             const msgs = await sbFetch(
-                `/rest/v1/messages?id=gt.${lastRenderedId}&order=id.asc`,
-                { headers: { 'Prefer': 'return=representation' } }
+                `/rest/v1/messages?id=gt.${lastRenderedId}&order=id.asc&select=*`
             );
             if (msgs && msgs.length) {
                 msgs.forEach(m => renderMessage(m));
@@ -482,7 +587,7 @@ function renderMessage(msg) {
         container.appendChild(el);
         lastRenderedUser = null;
     } else {
-        const isMe      = msg.username === username;
+        const isMe       = msg.username === username;
         const sameSender = lastRenderedUser === msg.username;
         const color      = colorFor(msg.username);
         const time       = fmtTime(msg.created_at || Date.now());
@@ -497,9 +602,7 @@ function renderMessage(msg) {
                 <span class="msg-time">${time}</span>
             </div>
             <div class="msg-row">
-                ${!isMe
-                    ? `<div class="msg-avatar" style="background:${color}">${initials(msg.username)}</div>`
-                    : ''}
+                ${!isMe ? `<div class="msg-avatar" style="background:${color}">${initials(msg.username)}</div>` : ''}
                 <div class="msg-bubble">${esc(msg.text)}</div>
             </div>`;
 
@@ -537,13 +640,17 @@ async function sendMessage() {
     startCooldown();
 
     try {
-        await sbFetch('/rest/v1/messages', {
+        const inserted = await sbFetch('/rest/v1/messages', {
             method: 'POST',
+            headers: { 'Prefer': 'return=representation' },
             body: JSON.stringify({ username, text, type: 'chat' })
         });
-        // The polling loop will pick it up and render it (including for sender)
+        if (inserted && inserted.length) {
+            renderMessage(inserted[0]);
+            lastRenderedId = inserted[0].id;
+        }
     } catch(e) {
-        showBanner('⚠ Failed to send message');
+        showBanner('⚠ Failed to send — try again');
         console.error(e);
     }
 }
@@ -592,9 +699,6 @@ function showBanner(msg) {
     b.textContent = msg;
     b.classList.toggle('show', !!msg);
 }
-
-// ── BOOT ─────────────────────────────────────────────────
-loadHistory().then(startPolling);
 </script>
 </body>
 </html>
