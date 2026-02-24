@@ -1004,10 +1004,10 @@ window.addEventListener('DOMContentLoaded', () => {
 function toggleSites() {
     const s1 = document.getElementById("site1");
     const s2 = document.getElementById("site2");
+    const alertBox = document.getElementById("alert");
     if (s1.style.display === "none") {
         s1.style.display = "block";
         s2.style.display = "none";
-        const alertBox = document.getElementById("alert");
         localStorage.setItem("selectedSite", "site1");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
         
