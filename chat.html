@@ -8,6 +8,42 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
+
+/* ── USERNAME CONTEXT MENU ── */
+.ctx-menu {
+    position: fixed; z-index: 9998;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-xl);
+    padding: 6px 0; min-width: 160px;
+    animation: pop-in 0.15s cubic-bezier(0.4,0,0.2,1);
+    display: none;
+}
+.ctx-menu.open { display: block; }
+.ctx-menu-header {
+    padding: 8px 14px 6px; font-size: 11px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border); margin-bottom: 4px;
+}
+.ctx-menu-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 13px; font-weight: 600;
+    color: var(--text); cursor: pointer; transition: background 0.15s;
+}
+.ctx-menu-item:hover { background: var(--surface-hover); color: var(--primary); }
+
+
+/* ── ADMIN ── */
+.admin-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white; font-size: 9px; font-weight: 800;
+    padding: 1px 5px; border-radius: 6px; letter-spacing: 0.5px;
+    text-transform: uppercase; vertical-align: middle; margin-left: 4px;
+}
+.ctx-menu-item.danger { color: #ef4444; }
+.ctx-menu-item.danger:hover { background: #fef2f2; color: #dc2626; }
+.ctx-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
 /* ── RESET ── */
 .main-toggle-btn { display: none !important; }
 header { background: var(--gradient-primary) !important; position: relative !important; box-shadow: var(--shadow-lg) !important; }
@@ -212,13 +248,16 @@ body {
 .msg-delete {
     display: none; position: absolute; top: 50%; transform: translateY(-50%);
     background: #ef4444; border: none; color: white;
-    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
     font-size: 11px; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-sm); transition: all 0.15s; z-index: 5;
+    box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 5;
+    /* Extend hit area so hovering between bubble and button doesn't dismiss it */
+    padding: 0; margin: 0;
 }
-.msg.mine .msg-delete { right: calc(100% + 6px); }
-.msg:hover .msg-delete { display: flex; }
-.msg-delete:hover { background: #dc2626; transform: translateY(-50%) scale(1.1); }
+/* Use padding pseudo-extension via outline trick — keep button visible on msg-row hover */
+.msg.mine .msg-delete { right: -32px; }
+.msg-row:hover .msg-delete { display: flex; }
+.msg-delete:hover { background: #dc2626; }
 
 /* deleted message */
 .msg-bubble.deleted { font-style: italic; opacity: 0.5; font-size: 12px; }
@@ -577,11 +616,12 @@ async function submitUsername() {
 
     try {
         // Check if username is taken by a DIFFERENT device
+        // Case-insensitive check: fetch all users with same name ignoring case
         const existing = await sbGet(
-            `/rest/v1/users?username=eq.${encodeURIComponent(name)}&select=device_id`
+            `/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`
         );
         if (existing && existing.length && existing[0].device_id !== deviceId) {
-            uError.textContent = 'That username is already taken by another user.';
+            uError.textContent = `That username is already taken (as "${existing[0].username}").`;
             uError.classList.add('show');
             uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
             return;
@@ -602,6 +642,7 @@ async function submitUsername() {
         localStorage.setItem(USERNAME_KEY, name);
         modal.classList.remove('open');
         document.getElementById('headerUsername').textContent = name;
+        if (typeof updateAdminBadge === 'function') updateAdminBadge();
         document.getElementById('msgInput').disabled = false;
         document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
         document.getElementById('sendBtn').disabled = false;
@@ -639,7 +680,7 @@ async function boot() {
             // Restore username from DB (source of truth)
             username = rows[0].username;
             localStorage.setItem(USERNAME_KEY, username);
-            document.getElementById('headerUsername').textContent = username;
+            document.getElementById('headerUsername').textContent = username; if (typeof updateAdminBadge === 'function') setTimeout(updateAdminBadge, 0);
             document.getElementById('msgInput').disabled = false;
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
             document.getElementById('sendBtn').disabled = false;
@@ -652,7 +693,7 @@ async function boot() {
         const saved = localStorage.getItem(USERNAME_KEY);
         if (saved) {
             username = saved;
-            document.getElementById('headerUsername').textContent = username;
+            document.getElementById('headerUsername').textContent = username; if (typeof updateAdminBadge === 'function') setTimeout(updateAdminBadge, 0);
             document.getElementById('msgInput').disabled = false;
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
             document.getElementById('sendBtn').disabled = false;
@@ -1074,5 +1115,12 @@ function startCooldown() {
     cooldownRaf = requestAnimationFrame(tick);
 }
 </script>
+
+<!-- USERNAME CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-menu-header" id="ctxMenuName"></div>
+    <div class="ctx-menu-item" id="ctxDmBtn">💬 Send DM</div>
+</div>
+
 </body>
 </html>
