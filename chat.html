@@ -162,7 +162,7 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .admin-user-row:hover { background: var(--surface-hover); }
 .admin-user-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
 .admin-user-info { flex: 1; min-width: 0; }
-.admin-user-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: normal; word-break: break-word; }
+.admin-user-name { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-user-meta { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
 .admin-user-actions { display: flex; gap: 4px; flex-shrink: 0; }
 .admin-user-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -228,8 +228,6 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .sidebar-list::-webkit-scrollbar { width: 3px; }
 .sidebar-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; transition: background 0.15s; font-size: 13px; font-weight: 600; color: var(--text); }
-.sidebar-star { margin-left:auto; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text-light); background:var(--bg-secondary); }
-.sidebar-star.on { color:#f59e0b; border-color:#f59e0b; background:#fffbeb; }
 .sidebar-user:hover { background: var(--surface-hover); }
 .sidebar-user.active { background: var(--primary-light); color: var(--primary); }
 .sidebar-user.has-unread { font-weight: 800; }
@@ -528,8 +526,6 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
             <div class="admin-section-title">📢 Broadcast Announcement</div>
             <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
             <button class="announce-send-btn" id="announceSendBtn">📢 Send to Everyone</button>
-            <select class="inline-input" id="announceTargetUser"><option value="">Send to one active user...</option></select>
-            <button class="announce-send-btn" id="announceSendOneBtn" style="margin-top:6px;background:linear-gradient(135deg,#0ea5e9,#0284c7)">👤 Send to Selected Active User</button>
         </div>
 
         <!-- User List -->
@@ -638,7 +634,6 @@ const DEVICE_KEY   = 'gnChatDeviceId';
 const USERNAME_KEY = 'gnChatUsername';
 const THEME_KEY    = 'gnChatTheme';
 const AVATAR_KEY   = 'gnChatAvatar';
-const STARRED_DMS_KEY = 'gnChatStarredDms';
 
 // ── STATE ─────────────────────────────────────
 let deviceId         = '';
@@ -692,14 +687,6 @@ function showBanner(msg, color) {
     if (msg) setTimeout(() => showBanner(''), 4000);
 }
 function genId() { return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); }
-
-function saveStarredDms() { localStorage.setItem(STARRED_DMS_KEY, JSON.stringify(starredDms)); }
-function toggleStarDm(devId) { starredDms[devId] = !starredDms[devId]; if (!starredDms[devId]) delete starredDms[devId]; saveStarredDms(); renderSidebar(document.getElementById('sidebarSearch').value); }
-function isUserActive(devId) {
-    if (!presenceChannel || !presenceChannel.presenceState) return false;
-    const st = presenceChannel.presenceState();
-    return Object.keys(st).some(k => st[k].some(m => m.device_id === devId));
-}
 
 // ── AVATAR RENDERING ──────────────────────────
 function makeAvatarEl(avatarUrl, name, size) {
@@ -1083,15 +1070,6 @@ async function broadcastAdminCmd(payload) {
     await adminChannel.send({ type: 'broadcast', event: 'command', payload });
 }
 
-function showKickedScreen(reason) {
-    username = ''; myAvatar = '';
-    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
-    disableInput();
-    document.getElementById('headerUsername').textContent = 'Set username';
-    showBanner('👢 You were kicked: ' + reason, 'red');
-    openUsernameModal(false);
-}
-
 function showBannedScreen(reason) {
     // Clear their identity
     username = ''; myAvatar = '';
@@ -1233,7 +1211,6 @@ function joinPresence() {
         document.getElementById('onlineList').innerHTML = users.length
             ? users.map(u => `<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:${colorFor(u)};font-weight:600">${esc(u)}</span>${u === username ? '<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>' : ''}</div>`).join('')
             : '<em style="color:#64748b">No one online</em>';
-        refreshAnnouncementTargets(allUsers);
     }).subscribe(async status => {
         if (status === 'SUBSCRIBED') await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
     });
@@ -1255,12 +1232,8 @@ function renderSidebar(filter) {
     const list = document.getElementById('sidebarList');
     let filtered = filter ? allUsers.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())) : [...allUsers];
 
-    // Sort: starred first, then unread recency, then name
+    // Sort: users with unread messages go to top, sorted by most recent message time
     filtered.sort((a, b) => {
-        const aStar = !!starredDms[a.device_id];
-        const bStar = !!starredDms[b.device_id];
-        if (aStar && !bStar) return -1;
-        if (!aStar && bStar) return 1;
         const aUnread = (dmUnreadMap[a.device_id] || {});
         const bUnread = (dmUnreadMap[b.device_id] || {});
         const aHas = (aUnread.count || 0) > 0;
@@ -1291,13 +1264,6 @@ function renderSidebar(filter) {
         const nameSpan = document.createElement('span');
         nameSpan.textContent = u.username;
         row.appendChild(avWrap); row.appendChild(nameSpan);
-
-        const starBtn = document.createElement('button');
-        starBtn.className = 'sidebar-star' + (starredDms[u.device_id] ? ' on' : '');
-        starBtn.textContent = '★';
-        starBtn.title = starredDms[u.device_id] ? 'Unstar DM' : 'Star DM';
-        starBtn.addEventListener('click', ev => { ev.stopPropagation(); toggleStarDm(u.device_id); });
-        row.appendChild(starBtn);
 
         if (unread > 0) {
             const badge = document.createElement('div');
@@ -1414,7 +1380,7 @@ function renderMessage(msg, isDm) {
 
     const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
     if (!isMe) {
-        const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = color; uSpan.dataset.username = senderName; uSpan.dataset.devid = senderDevId || ''; uSpan.textContent = senderName;
+        const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = color; uSpan.dataset.username = senderName; uSpan.textContent = senderName;
         metaDiv.appendChild(uSpan);
     }
     const tSpan = document.createElement('span'); tSpan.className = 'msg-time'; tSpan.textContent = fmtTime(msg.created_at || Date.now()); metaDiv.appendChild(tSpan);
@@ -1550,37 +1516,13 @@ document.getElementById('announceSendBtn').addEventListener('click', async () =>
     const text = document.getElementById('announceText').value.trim();
     if (!text) return;
     try {
+        // Save as a system message in DB so it persists
         await sbPost('/rest/v1/messages', { username: '📢 Admin', text: '📢 ' + text, type: 'system', device_id: deviceId });
         await broadcastAdminCmd({ action: 'announcement', text });
         document.getElementById('announceText').value = '';
         showBanner('✅ Announcement sent', 'green');
     } catch(e) { showBanner('⚠ Failed to send announcement', 'red'); }
 });
-document.getElementById('announceSendOneBtn').addEventListener('click', async () => {
-    const text = document.getElementById('announceText').value.trim();
-    const target = document.getElementById('announceTargetUser').value;
-    if (!text || !target) return;
-    if (!isUserActive(target)) { showBanner('⚠ User is no longer active', 'red'); return; }
-    try {
-        await broadcastAdminCmd({ action: 'announcement_target', text, device_id: target });
-        showBanner('✅ Announcement sent to active user', 'green');
-    } catch(e) { showBanner('⚠ Failed to send targeted announcement', 'red'); }
-});
-
-function refreshAnnouncementTargets(users) {
-    const sel = document.getElementById('announceTargetUser');
-    if (!sel) return;
-    const current = sel.value;
-    const activeUsers = (users || allUsers || []).filter(u => isUserActive(u.device_id));
-    sel.innerHTML = '<option value="">Send to one active user...</option>';
-    activeUsers.forEach(u => {
-        const op = document.createElement('option');
-        op.value = u.device_id;
-        op.textContent = u.username;
-        sel.appendChild(op);
-    });
-    if (current && activeUsers.some(u => u.device_id === current)) sel.value = current;
-}
 
 async function loadAdminUserList() {
     const listEl = document.getElementById('adminUserList');
@@ -1798,10 +1740,6 @@ function openBanModal(targetUser) {
     banTarget = targetUser;
     document.getElementById('banTargetName').textContent = targetUser.username;
     document.getElementById('banReasonInput').value = '';
-    document.getElementById('banDays').value = 0;
-    document.getElementById('banHours').value = 0;
-    document.getElementById('banMinutes').value = 0;
-    document.getElementById('banSeconds').value = 0;
     document.getElementById('banModal').classList.add('open');
     setTimeout(() => document.getElementById('banReasonInput').focus(), 30);
 }
@@ -1810,15 +1748,7 @@ document.getElementById('banConfirmBtn').addEventListener('click', () => adminBa
 
 async function adminBanUser(targetUser) {
     if (!targetUser) return;
-    targetUser = await resolveTargetUser(targetUser);
-    if (!targetUser || !targetUser.device_id) { showBanner('⚠ Device id not found', 'red'); return; }
     const reason = document.getElementById('banReasonInput').value.trim() || 'No reason provided.';
-    const d = parseInt(document.getElementById('banDays').value || '0', 10);
-    const h = parseInt(document.getElementById('banHours').value || '0', 10);
-    const m = parseInt(document.getElementById('banMinutes').value || '0', 10);
-    const sec = parseInt(document.getElementById('banSeconds').value || '0', 10);
-    const total = Math.max(0, d*86400 + h*3600 + m*60 + sec);
-    const bannedUntil = total > 0 ? new Date(Date.now() + total * 1000).toISOString() : null;
     document.getElementById('banModal').classList.remove('open');
     try {
         await sbPost('/rest/v1/banned_devices', { device_id: targetUser.device_id, reason, banned_by: username, last_username: targetUser.username }, { Prefer: 'resolution=merge-duplicates,return=representation' });
@@ -1851,8 +1781,6 @@ document.getElementById('muteConfirmBtn').addEventListener('click', () => adminM
 
 async function adminMuteUser(targetUser) {
     if (!targetUser) return;
-    targetUser = await resolveTargetUser(targetUser);
-    if (!targetUser || !targetUser.device_id) { showBanner('⚠ Device id not found', 'red'); return; }
     document.getElementById('muteModal').classList.remove('open');
     const d = parseInt(document.getElementById('muteDays').value || '0', 10);
     const h = parseInt(document.getElementById('muteHours').value || '0', 10);
@@ -1963,7 +1891,7 @@ document.getElementById('messagesInner').addEventListener('click', e => {
         if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; }
     }
     const usernameSpan = e.target.closest('.msg-username');
-    if (usernameSpan) { showCtxMenu(e, usernameSpan.dataset.username || usernameSpan.textContent, usernameSpan.dataset.devid || null); return; }
+    if (usernameSpan) { showCtxMenu(e, usernameSpan.dataset.username || usernameSpan.textContent, null); return; }
 });
 </script>
 </body>
