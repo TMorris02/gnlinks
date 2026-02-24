@@ -72,7 +72,7 @@ window.location.href = 'https://classroom.google.com/';
 <body class="dark-mode" style="background-color: #0f172a">
 <header style="padding: 10px 5%; background-color: #0f172a;">
 <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white !important; -webkit-text-fill-color: white !important; background: none; line-height: 1; text-align:left">Links</div>
+<div class="logo" style="font-size: clamp(3rem, 12vw, 6rem); color: white; line-height: 1; text-align:left">Links</div>
 <div class="control-buttons" style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
 <button id="suggestions" class="control-button" style="background: none; border: none; cursor: pointer; padding: 0; margin-top: clamp(1rem, 5vw, 2.5rem);">
 <img src="https://static.thenounproject.com/png/3370196-200.png" alt="suggestions?" style="width: clamp(4rem, 10vw, 8rem); height: auto;">
@@ -113,14 +113,11 @@ window.location.href = 'https://classroom.google.com/';
 
     /* ── HEADER (fixed, never scrolls) ── */
     .header {
-        background-color: #f3f4f6 !important;
-        background: #f3f4f6 !important;
-        background-image: none !important;
+        background-color: #f3f4f6;
         padding: 8px 24px;
         display: flex; align-items: center; justify-content: space-between;
         height: 64px; flex-shrink: 0;
         position: relative; z-index: 200;
-        box-shadow: none !important;
     }
     .header-left { display: flex; align-items: center; gap: 16px; }
     .menu-icon {
@@ -133,7 +130,7 @@ window.location.href = 'https://classroom.google.com/';
     .logo {
         display: flex; align-items: center; gap: 6px;
         font-size: 22px; font-weight: 400 !important;
-        color: #202124; text-decoration: none;
+        color: #202124 !important; text-decoration: none;
         background: none !important;
         -webkit-text-fill-color: #202124 !important;
         -webkit-background-clip: unset !important;
@@ -183,7 +180,6 @@ window.location.href = 'https://classroom.google.com/';
         flex: 1; background-color: #fff;
         border-top-left-radius: 24px;
         padding: 24px; overflow-y: auto; /* ONLY this scrolls */
-        overflow-y: auto !important;
     }
 
     /* ── CARDS ── */
@@ -345,6 +341,22 @@ window.location.href = 'https://classroom.google.com/';
     .img-clear.visible { display: flex; }
     .img-clear:hover { background: #e8eaed; }
 
+    /* ── DRAG AND DROP ZONES ── */
+    .drop-zone {
+        border: 1.5px dashed #dadce0; border-radius: 10px;
+        padding: 10px 14px; margin-top: 6px;
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        transition: border-color 0.2s, background 0.2s; cursor: default;
+        min-height: 52px;
+    }
+    .drop-zone.drag-over {
+        border-color: #1a73e8; background: #e8f0fe;
+    }
+    .drop-zone-hint {
+        font-size: 11px; color: #9aa0a6; flex-shrink: 0;
+        pointer-events: none; white-space: nowrap;
+    }
+
     /* ── FOOTER ── */
     .drawer-footer {
         padding: 12px 20px; border-top: 1px solid #e8eaed;
@@ -363,7 +375,7 @@ window.location.href = 'https://classroom.google.com/';
 <header class="header">
     <div class="header-left">
         <div class="menu-icon" id="menuBtn"><span></span><span></span><span></span></div>
-        <a href="#" class="logo" style="color: #202124 !important">
+        <a href="#" class="logo">
             <div class="logo-icon"><img src="https://www.gstatic.com/classroom/logo_square_rounded.svg" alt="Classroom"></div>
             <span>Classroom</span>
         </a>
@@ -442,16 +454,34 @@ const DEFAULTS = [
 // ── PERSISTENCE ───────────────────────────────────────────────────────────────
 function loadClasses() {
     try {
+        // Load by teacher key — safe when adding/reordering classes
         const saved = JSON.parse(localStorage.getItem('classroomEdits') || 'null');
+        if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+            // New keyed format
+            return DEFAULTS.map(def => {
+                const s = saved[def.teacher] || {};
+                return {
+                    name:      s.name     != null ? s.name     : def.name,
+                    url:       def.url,
+                    teacher:   def.teacher,
+                    letter:    s.letter   != null ? s.letter   : def.letter,
+                    theme:     s.theme    != null ? s.theme    : def.theme,
+                    iconImg:   s.iconImg  || '',
+                    bgImg:     s.bgImg    || '',
+                    cardClass: def.cardClass,
+                };
+            });
+        }
+        // Legacy array format — migrate it on next save
         if (saved && Array.isArray(saved)) {
             return DEFAULTS.map((def, i) => ({
-                name:     (saved[i] && saved[i].name    != null) ? saved[i].name    : def.name,
-                url:      def.url,
-                teacher:  def.teacher,
-                letter:   (saved[i] && saved[i].letter  != null) ? saved[i].letter  : def.letter,
-                theme:    (saved[i] && saved[i].theme   != null) ? saved[i].theme   : def.theme,
-                iconImg:  (saved[i] && saved[i].iconImg)         ? saved[i].iconImg  : '',
-                bgImg:    (saved[i] && saved[i].bgImg)           ? saved[i].bgImg    : '',
+                name:      (saved[i] && saved[i].name    != null) ? saved[i].name    : def.name,
+                url:       def.url,
+                teacher:   def.teacher,
+                letter:    (saved[i] && saved[i].letter  != null) ? saved[i].letter  : def.letter,
+                theme:     (saved[i] && saved[i].theme   != null) ? saved[i].theme   : def.theme,
+                iconImg:   (saved[i] && saved[i].iconImg)         ? saved[i].iconImg  : '',
+                bgImg:     (saved[i] && saved[i].bgImg)           ? saved[i].bgImg    : '',
                 cardClass: def.cardClass,
             }));
         }
@@ -460,10 +490,14 @@ function loadClasses() {
 }
 
 function saveClasses(data) {
-    const toSave = data.map(c => ({
-        name: c.name, letter: c.letter, theme: c.theme,
-        iconImg: c.iconImg || '', bgImg: c.bgImg || ''
-    }));
+    // Save as object keyed by teacher — adding/reordering classes never loses user data
+    const toSave = {};
+    data.forEach(c => {
+        toSave[c.teacher] = {
+            name: c.name, letter: c.letter, theme: c.theme,
+            iconImg: c.iconImg || '', bgImg: c.bgImg || ''
+        };
+    });
     localStorage.setItem('classroomEdits', JSON.stringify(toSave));
 }
 
@@ -662,7 +696,7 @@ function buildDrawer() {
 
                     <div>
                         <div class="field-label">Icon — Letter or Image</div>
-                        <div class="img-row">
+                        <div class="drop-zone" data-dropfield="iconImg" data-idx="${i}">
                             <input class="field-input short" type="text" data-field="letter" data-idx="${i}" value="${esc(c.letter)}" maxlength="2" placeholder="A" style="margin:0">
                             <span class="or-text">or</span>
                             <label class="upload-btn">
@@ -671,12 +705,13 @@ function buildDrawer() {
                             </label>
                             <img class="img-preview circle${c.iconImg ? ' visible' : ''}" data-preview="iconImg-${i}" src="${c.iconImg || ''}" alt="">
                             <button class="img-clear${c.iconImg ? ' visible' : ''}" data-clear="iconImg" data-idx="${i}" title="Remove">×</button>
+                            <span class="drop-zone-hint">or drag image here</span>
                         </div>
                     </div>
 
                     <div>
                         <div class="field-label">Header — Color or Image</div>
-                        <div class="img-row">
+                        <div class="drop-zone" data-dropfield="bgImg" data-idx="${i}">
                             <div class="color-swatches">${swatchesHtml}</div>
                             <span class="or-text">or</span>
                             <label class="upload-btn">
@@ -685,6 +720,7 @@ function buildDrawer() {
                             </label>
                             <img class="img-preview${c.bgImg ? ' visible' : ''}" data-preview="bgImg-${i}" src="${c.bgImg || ''}" alt="" style="border-radius:5px">
                             <button class="img-clear${c.bgImg ? ' visible' : ''}" data-clear="bgImg" data-idx="${i}" title="Remove">×</button>
+                            <span class="drop-zone-hint">or drag image here</span>
                         </div>
                     </div>
 
@@ -808,6 +844,52 @@ function buildDrawer() {
             }
         });
     });
+
+    // ── DRAG AND DROP ──────────────────────────────────────────────────────
+    function handleDroppedFile(file, idx, field) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const dataUrl = ev.target.result;
+            draft[idx][field] = dataUrl;
+            if (field === 'iconImg') {
+                draft[idx].letter = '';
+                const letterInput = body.querySelector(`.field-input.short[data-idx="${idx}"]`);
+                if (letterInput) letterInput.value = '';
+            }
+            if (field === 'bgImg') {
+                body.querySelectorAll(`.swatch[data-idx="${idx}"]`).forEach(s => s.classList.remove('selected'));
+                const row = body.querySelector(`.edit-row[data-index="${idx}"]`);
+                if (row) row.querySelector('.edit-row-swatch').style.cssText =
+                    `background-image:url('${dataUrl}');background-size:cover;background-position:center;`;
+            }
+            const prev = body.querySelector(`[data-preview="${field}-${idx}"]`);
+            const clr = body.querySelector(`[data-clear="${field}"][data-idx="${idx}"]`);
+            if (prev) { prev.src = dataUrl; prev.classList.add('visible'); }
+            if (clr) clr.classList.add('visible');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    body.querySelectorAll('.drop-zone[data-dropfield]').forEach(zone => {
+        const field = zone.dataset.dropfield;
+        const idx = +zone.dataset.idx;
+
+        zone.addEventListener('dragover', e => {
+            e.preventDefault(); e.stopPropagation();
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', e => {
+            e.stopPropagation();
+            zone.classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); e.stopPropagation();
+            zone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            handleDroppedFile(file, idx, field);
+        });
+    });
 }
 
 // ── DRAWER OPEN / CLOSE / SAVE / RESET ───────────────────────────────────────
@@ -862,7 +944,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const lastSite = localStorage.getItem("selectedSite");
     if (lastSite === "site2") {
         document.getElementById("site1").style.display = "none";
-        document.getElementById("site2").style.display = "flex";
+        document.getElementById("site2").style.display = "block";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
@@ -877,7 +959,7 @@ function toggleSites() {
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
     } else {
         s1.style.display = "none";
-        s2.style.display = "flex";
+        s2.style.display = "block";
         localStorage.setItem("selectedSite", "site2");
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
