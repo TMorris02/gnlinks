@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Room</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Syne', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    .chat-header {
+        background: var(--gradient-primary);
+        padding: 0 1.5rem;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        z-index: 10;
+    }
+
+    .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chat-logo {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -0.02em;
+    }
+
+    .online-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .online-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 6px #4ade80;
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    /* ── USERNAME BUTTON ── */
+    .username-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 6px 14px;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+    }
+    .username-btn:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-1px);
+    }
+    .username-btn .avatar-small {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    /* ── MESSAGES AREA ── */
+    .messages-wrap {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 0;
+        scroll-behavior: smooth;
+    }
+
+    .messages-wrap::-webkit-scrollbar { width: 4px; }
+    .messages-wrap::-webkit-scrollbar-track { background: transparent; }
+    .messages-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .messages-inner {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* ── MESSAGE BUBBLES ── */
+    .msg {
+        display: flex;
+        flex-direction: column;
+        animation: msg-in 0.25s cubic-bezier(0.4,0,0.2,1);
+        margin-bottom: 2px;
+    }
+
+    @keyframes msg-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-header {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 3px;
+        padding-left: 4px;
+    }
+
+    .msg-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .msg-username {
+        font-size: 13px;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .msg-time {
+        font-size: 11px;
+        color: var(--text-light);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 400;
+    }
+
+    .msg-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .msg-bubble {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 4px 16px 16px 16px;
+        padding: 10px 14px;
+        font-size: 14.5px;
+        line-height: 1.55;
+        max-width: 580px;
+        word-break: break-word;
+        box-shadow: var(--shadow-xs);
+    }
+
+    /* Show header only when sender changes */
+    .msg.same-sender .msg-header { display: none; }
+    .msg.same-sender .msg-avatar { opacity: 0; }
+    .msg.same-sender .msg-bubble {
+        border-radius: 4px 16px 16px 16px;
+        margin-top: 1px;
+    }
+
+    /* System messages */
+    .msg-system {
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-light);
+        font-family: 'JetBrains Mono', monospace;
+        padding: 6px 0;
+        margin: 4px 0;
+    }
+
+    /* ── INPUT AREA ── */
+    .input-area {
+        flex-shrink: 0;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 14px 20px;
+    }
+
+    .input-inner {
+        max-width: 780px;
+        margin: 0 auto;
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .input-box {
+        flex: 1;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 11px 14px;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        color: var(--text);
+        outline: none;
+        resize: none;
+        min-height: 44px;
+        max-height: 120px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        line-height: 1.5;
+    }
+    .input-box:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .input-box::placeholder { color: var(--text-light); }
+    .input-box:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .send-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius);
+        border: none;
+        background: var(--gradient-primary);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+    .send-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+    .send-btn:active:not(:disabled) { transform: translateY(0); }
+    .send-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* cooldown bar */
+    .cooldown-bar-wrap {
+        height: 3px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 8px;
+        max-width: 780px;
+        margin-left: auto;
+        margin-right: auto;
+        display: none;
+    }
+    .cooldown-bar-wrap.active { display: block; }
+    .cooldown-bar {
+        height: 100%;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+        transition: width 0.1s linear;
+    }
+
+    /* ── USERNAME MODAL ── */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: var(--shadow-xl);
+        animation: pop-in 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    @keyframes pop-in {
+        from { transform: scale(0.92) translateY(16px); opacity: 0; }
+        to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--text);
+    }
+    .modal-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+
+    .modal-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-secondary);
+        color: var(--text);
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        margin-bottom: 16px;
+    }
+    .modal-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .modal-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: var(--radius);
+        background: var(--gradient-primary);
+        color: white;
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+    .modal-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .modal-btn:active { transform: translateY(0); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+    .empty-state .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.4;
+    }
+    .empty-state p {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* ── DARK MODE TOGGLE ── */
+    .theme-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.1);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.2s;
+        backdrop-filter: blur(10px);
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* scrolled-to-bottom indicator */
+    .scroll-btn {
+        position: fixed;
+        bottom: 90px;
+        right: 24px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-lg);
+        z-index: 50;
+        font-size: 18px;
+        transition: all 0.2s;
+    }
+    .scroll-btn.show { display: flex; }
+    .scroll-btn:hover { transform: translateY(-2px); }
+
+    @media (max-width: 600px) {
+        .chat-logo { font-size: 1.1rem; }
+        .online-badge span { display: none; }
+        .messages-inner { padding: 0 12px; }
+        .input-area { padding: 10px 12px; }
+    }
+</style>
+</head>
+<body class="dark-mode">
+
+<!-- USERNAME MODAL -->
+<div class="modal-overlay open" id="usernameModal">
+    <div class="modal">
+        <div class="modal-title">Welcome 👋</div>
+        <div class="modal-sub">Pick a username. It'll be saved so you don't have to re-enter it next time.</div>
+        <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off">
+        <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="chat-header">
+    <div class="chat-header-left">
+        <div class="chat-logo">💬 GN Chat</div>
+        <div class="online-badge">
+            <div class="online-dot"></div>
+            <span id="onlineCount">Live</span>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+        <button class="username-btn" id="changeUsernameBtn">
+            <div class="avatar-small" id="headerAvatar"></div>
+            <span id="headerUsername">Guest</span>
+        </button>
+    </div>
+</header>
+
+<!-- MESSAGES -->
+<div class="messages-wrap" id="messagesWrap">
+    <div class="messages-inner" id="messagesInner">
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🗨️</div>
+            <p>No messages yet.<br>Be the first to say something!</p>
+        </div>
+    </div>
+</div>
+
+<!-- SCROLL TO BOTTOM -->
+<button class="scroll-btn" id="scrollBtn">↓</button>
+
+<!-- INPUT -->
+<div class="input-area">
+    <div class="input-inner">
+        <textarea class="input-box" id="msgInput" placeholder="Type a message..." rows="1" maxlength="500" disabled></textarea>
+        <button class="send-btn" id="sendBtn" disabled title="Send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </div>
+    <div class="cooldown-bar-wrap" id="cooldownWrap">
+        <div class="cooldown-bar" id="cooldownBar"></div>
+    </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const COOLDOWN_MS   = 5000;   // 5 seconds between messages
+const POLL_MS       = 1500;   // poll for new messages every 1.5s
+const MAX_MESSAGES  = 200;    // keep last 200 messages in storage
+
+// ── STORAGE KEY ──────────────────────────────────────────────────────────────
+const MSGS_KEY      = 'gnChatMessages';
+const USERNAME_KEY  = 'gnChatUsername';
+const THEME_KEY     = 'gnChatTheme';
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let username        = '';
+let lastSendTime    = 0;
+let cooldownTimer   = null;
+let pollTimer       = null;
+let lastMsgId       = 0;
+let isDarkMode      = localStorage.getItem(THEME_KEY) !== 'light';
+let autoScroll      = true;
+
+// ── AVATAR COLORS ─────────────────────────────────────────────────────────────
+const AVATAR_COLORS = [
+    '#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899',
+    '#ef4444','#06b6d4','#84cc16','#f97316','#6366f1'
+];
+
+function colorForName(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function initials(name) {
+    return name.trim().slice(0, 2).toUpperCase();
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function applyTheme() {
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    document.getElementById('themeBtn').textContent = isDarkMode ? '🌙' : '☀️';
+    localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light');
+}
+applyTheme();
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    applyTheme();
+});
+
+// ── USERNAME MODAL ─────────────────────────────────────────────────────────────
+const modal         = document.getElementById('usernameModal');
+const usernameInput = document.getElementById('usernameInput');
+const confirmBtn    = document.getElementById('usernameConfirm');
+
+// Pre-fill saved username
+const saved = localStorage.getItem(USERNAME_KEY);
+if (saved) usernameInput.value = saved;
+
+function setUsername(name) {
+    name = name.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    username = name;
+    localStorage.setItem(USERNAME_KEY, name);
+    modal.classList.remove('open');
+    document.getElementById('headerUsername').textContent = name;
+    const av = document.getElementById('headerAvatar');
+    av.textContent = initials(name);
+    av.style.background = colorForName(name);
+    // enable input
+    document.getElementById('msgInput').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('msgInput').focus();
+    // post join message
+    postSystemMessage(`${name} joined the chat`);
+}
+
+confirmBtn.addEventListener('click', () => setUsername(usernameInput.value));
+usernameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); setUsername(usernameInput.value); }
+});
+
+document.getElementById('changeUsernameBtn').addEventListener('click', () => {
+    usernameInput.value = username;
+    modal.classList.add('open');
+    usernameInput.focus();
+    usernameInput.select();
+});
+
+// ── MESSAGE STORAGE ────────────────────────────────────────────────────────────
+function loadMessages() {
+    try {
+        return JSON.parse(localStorage.getItem(MSGS_KEY) || '[]');
+    } catch(e) { return []; }
+}
+
+function saveMessages(msgs) {
+    // Keep only last MAX_MESSAGES
+    if (msgs.length > MAX_MESSAGES) msgs = msgs.slice(-MAX_MESSAGES);
+    localStorage.setItem(MSGS_KEY, JSON.stringify(msgs));
+}
+
+function nextId(msgs) {
+    return msgs.length ? msgs[msgs.length - 1].id + 1 : 1;
+}
+
+function postMessage(text) {
+    const msgs = loadMessages();
+    const msg = {
+        id:       nextId(msgs),
+        user:     username,
+        text:     text.trim(),
+        ts:       Date.now(),
+        type:     'chat'
+    };
+    msgs.push(msg);
+    saveMessages(msgs);
+    return msg;
+}
+
+function postSystemMessage(text) {
+    const msgs = loadMessages();
+    const msg = {
+        id:   nextId(msgs),
+        text: text,
+        ts:   Date.now(),
+        type: 'system'
+    };
+    msgs.push(msg);
+    saveMessages(msgs);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function formatTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderNewMessages(msgs) {
+    const container = document.getElementById('messagesInner');
+    const emptyState = document.getElementById('emptyState');
+    const wrap = document.getElementById('messagesWrap');
+
+    const toRender = msgs.filter(m => m.id > lastMsgId);
+    if (!toRender.length) return;
+
+    if (emptyState) emptyState.remove();
+
+    toRender.forEach((msg, idx) => {
+        if (msg.type === 'system') {
+            const el = document.createElement('div');
+            el.className = 'msg-system';
+            el.textContent = '— ' + msg.text + ' —';
+            container.appendChild(el);
+        } else {
+            // Check if same sender as previous rendered msg
+            const allMsgs = [...container.querySelectorAll('.msg[data-user]')];
+            const lastRendered = allMsgs[allMsgs.length - 1];
+            const sameSender = lastRendered && lastRendered.dataset.user === msg.user;
+
+            const color = colorForName(msg.user);
+            const el = document.createElement('div');
+            el.className = 'msg' + (sameSender ? ' same-sender' : '');
+            el.dataset.user = msg.user;
+            el.dataset.id = msg.id;
+
+            el.innerHTML = `
+                <div class="msg-header">
+                    <span class="msg-username" style="color:${color}">${escapeHtml(msg.user)}</span>
+                    <span class="msg-time">${formatTime(msg.ts)}</span>
+                </div>
+                <div class="msg-row">
+                    <div class="msg-avatar" style="background:${color};${sameSender ? 'opacity:0;' : ''}">${initials(msg.user)}</div>
+                    <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+                </div>`;
+            container.appendChild(el);
+        }
+        lastMsgId = Math.max(lastMsgId, msg.id);
+    });
+
+    // auto scroll
+    if (autoScroll) {
+        wrap.scrollTop = wrap.scrollHeight;
+    }
+}
+
+// ── POLL ──────────────────────────────────────────────────────────────────────
+function poll() {
+    const msgs = loadMessages();
+    renderNewMessages(msgs);
+}
+
+// ── SCROLL BUTTON ─────────────────────────────────────────────────────────────
+const wrap = document.getElementById('messagesWrap');
+const scrollBtn = document.getElementById('scrollBtn');
+
+wrap.addEventListener('scroll', () => {
+    const distFromBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight;
+    autoScroll = distFromBottom < 60;
+    scrollBtn.classList.toggle('show', distFromBottom > 120);
+});
+
+scrollBtn.addEventListener('click', () => {
+    wrap.scrollTop = wrap.scrollHeight;
+    autoScroll = true;
+    scrollBtn.classList.remove('show');
+});
+
+// ── SEND ──────────────────────────────────────────────────────────────────────
+function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text || !username) return;
+
+    const now = Date.now();
+    const elapsed = now - lastSendTime;
+    if (elapsed < COOLDOWN_MS) return;
+
+    postMessage(text);
+    input.value = '';
+    input.style.height = 'auto';
+    lastSendTime = Date.now();
+    poll(); // immediate render
+    startCooldown();
+}
+
+function startCooldown() {
+    const sendBtn = document.getElementById('sendBtn');
+    const input = document.getElementById('msgInput');
+    const wrap = document.getElementById('cooldownWrap');
+    const bar = document.getElementById('cooldownBar');
+
+    sendBtn.disabled = true;
+    input.disabled = true;
+    wrap.classList.add('active');
+
+    const start = Date.now();
+    const tick = () => {
+        const elapsed = Date.now() - start;
+        const pct = Math.min((elapsed / COOLDOWN_MS) * 100, 100);
+        bar.style.width = pct + '%';
+        if (elapsed < COOLDOWN_MS) {
+            cooldownTimer = requestAnimationFrame(tick);
+        } else {
+            sendBtn.disabled = false;
+            input.disabled = false;
+            wrap.classList.remove('active');
+            bar.style.width = '0%';
+            input.focus();
+        }
+    };
+    cooldownTimer = requestAnimationFrame(tick);
+}
+
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('msgInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// auto-resize textarea
+document.getElementById('msgInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// ── INIT POLL ─────────────────────────────────────────────────────────────────
+// Initial render of existing messages
+(function() {
+    const msgs = loadMessages();
+    if (msgs.length) {
+        // set lastMsgId to one before end so we render all existing
+        lastMsgId = msgs[0].id - 1;
+        renderNewMessages(msgs);
+    }
+})();
+
+pollTimer = setInterval(poll, POLL_MS);
+</script>
+</body>
+</html>
