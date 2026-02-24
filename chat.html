@@ -8,15 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-
-/* ── USERNAME CONTEXT MENU ── */
+/* ── CONTEXT MENU ── */
 .ctx-menu {
     position: fixed; z-index: 9998;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow-xl);
-    padding: 6px 0; min-width: 160px;
-    animation: pop-in 0.15s cubic-bezier(0.4,0,0.2,1);
-    display: none;
+    padding: 6px 0; min-width: 170px;
+    animation: pop-in 0.15s cubic-bezier(0.4,0,0.2,1); display: none;
 }
 .ctx-menu.open { display: block; }
 .ctx-menu-header {
@@ -44,24 +42,16 @@
 .reply-preview strong { color: var(--text); font-weight: 700; }
 .msg.mine .reply-preview { border-left-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
 .msg.mine .reply-preview strong { color: white; }
-
-/* reply bar above input */
 .reply-bar {
     display: none; align-items: center; gap: 10px;
     padding: 6px 16px; background: var(--primary-lighter);
     border-top: 1px solid var(--primary-light); font-size: 12px; color: var(--text-muted);
-    max-width: 100%;
 }
 .reply-bar.show { display: flex; }
 .reply-bar-text { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .reply-bar-text strong { color: var(--primary); font-weight: 700; }
-.reply-cancel {
-    background: none; border: none; color: var(--text-muted); cursor: pointer;
-    font-size: 16px; line-height: 1; padding: 2px 4px; flex-shrink: 0;
-}
+.reply-cancel { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; flex-shrink: 0; }
 .reply-cancel:hover { color: var(--text); }
-
-/* reply button on hover */
 .msg-reply {
     display: none; background: var(--surface); border: 1px solid var(--border);
     color: var(--text-muted); width: 26px; height: 26px; border-radius: 50%;
@@ -71,45 +61,29 @@
 .msg-bubble-wrap:hover .msg-reply { display: flex; }
 .msg-reply:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 
-/* ── RESET ── */
+/* ── BASE ── */
 .main-toggle-btn { display: none !important; }
 header { background: var(--gradient-primary) !important; position: relative !important; box-shadow: var(--shadow-lg) !important; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg); color: var(--text);
-    height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-}
+body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ── HEADER ── */
 .chat-header {
-    background: var(--gradient-primary) !important;
-    padding: 0 1.5rem; height: 60px;
-    display: flex !important; align-items: center;
-    justify-content: space-between; flex-shrink: 0;
-    box-shadow: var(--shadow-lg); z-index: 10; width: 100%;
+    background: var(--gradient-primary) !important; padding: 0 1.5rem; height: 60px;
+    display: flex !important; align-items: center; justify-content: space-between;
+    flex-shrink: 0; box-shadow: var(--shadow-lg); z-index: 10; width: 100%;
 }
 .chat-header-left { display: flex; align-items: center; gap: 12px; }
-.chat-logo {
-    font-size: 1.3rem; font-weight: 800;
-    color: white !important; -webkit-text-fill-color: white !important;
-    background: none !important; letter-spacing: -0.02em; text-decoration: none;
-}
+.chat-logo { font-size: 1.3rem; font-weight: 800; color: white !important; -webkit-text-fill-color: white !important; background: none !important; letter-spacing: -0.02em; text-decoration: none; }
 .online-badge {
     display: flex; align-items: center; gap: 6px;
     background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px;
     font-size: 12px; font-weight: 600; color: white;
     cursor: default; position: relative; transition: background 0.2s; user-select: none;
 }
 .online-badge:hover { background: rgba(255,255,255,0.25); }
-.online-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #4ade80; box-shadow: 0 0 6px #4ade80;
-    animation: pulse-dot 2s infinite; flex-shrink: 0;
-}
+.online-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; animation: pulse-dot 2s infinite; flex-shrink: 0; }
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .online-tooltip {
     position: absolute; top: calc(100% + 8px); left: 0;
@@ -123,337 +97,259 @@ body {
 .online-tooltip-row { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
 .online-tooltip-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.theme-btn {
-    width: 36px; height: 36px; border-radius: var(--radius);
-    border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);
-    color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 16px; transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0;
-}
+.theme-btn { width: 36px; height: 36px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0; }
 .theme-btn:hover { background: rgba(255,255,255,0.2); }
-.username-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-    color: white; padding: 6px 14px; border-radius: var(--radius); cursor: pointer;
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
-    transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0;
-}
+.username-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: var(--radius); cursor: pointer; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0; }
 .username-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
 
-/* ── BODY LAYOUT ── */
+/* ── ADMIN PANEL BUTTON ── */
+.admin-btn {
+    display: none; /* shown via JS for admins only */
+    align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.25); border: 1px solid rgba(239,68,68,0.5);
+    color: white; padding: 6px 12px; border-radius: var(--radius); cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0;
+}
+.admin-btn:hover { background: rgba(239,68,68,0.4); transform: translateY(-1px); }
+.admin-btn.visible { display: flex; }
+
+/* ── ADMIN PANEL OVERLAY ── */
+.admin-panel-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px); z-index: 9990; display: none;
+    align-items: flex-start; justify-content: flex-end; padding: 70px 16px 16px;
+}
+.admin-panel-overlay.open { display: flex; }
+.admin-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); width: 360px; max-height: calc(100vh - 100px);
+    overflow-y: auto; box-shadow: var(--shadow-xl);
+    animation: slide-in-right 0.2s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column;
+}
+@keyframes slide-in-right { from{transform:translateX(30px);opacity:0} to{transform:translateX(0);opacity:1} }
+.admin-panel-header {
+    padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.admin-panel-title { font-size: 15px; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; }
+.admin-panel-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.admin-panel-close:hover { background: rgba(255,255,255,0.35); }
+.admin-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.admin-section:last-child { border-bottom: none; }
+.admin-section-title { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+.admin-action-btn {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text);
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: all 0.15s; margin-bottom: 6px; text-align: left;
+}
+.admin-action-btn:hover { background: var(--surface-hover); border-color: var(--primary); color: var(--primary); }
+.admin-action-btn.danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+.admin-action-btn:last-child { margin-bottom: 0; }
+
+/* Admin user list in panel */
+.admin-user-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+.admin-user-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--bg-secondary); transition: background 0.15s;
+}
+.admin-user-row:hover { background: var(--surface-hover); }
+.admin-user-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+.admin-user-info { flex: 1; min-width: 0; }
+.admin-user-name { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-meta { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.admin-user-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.admin-user-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.admin-user-btn:hover { background: var(--surface-hover); color: var(--text); }
+.admin-user-btn.danger:hover { background: #fef2f2; color: #ef4444; border-color: #ef4444; }
+.admin-user-btn.warn:hover { background: #fffbeb; color: #d97706; border-color: #d97706; }
+.admin-user-row.muted .admin-user-name { color: var(--text-muted); text-decoration: line-through; }
+.muted-badge { font-size: 9px; background: #fbbf24; color: #78350f; padding: 1px 5px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
+
+/* Announce textarea */
+.announce-textarea {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif;
+    font-size: 13px; resize: none; outline: none; min-height: 60px; transition: border-color 0.2s;
+    margin-bottom: 6px;
+}
+.announce-textarea:focus { border-color: var(--primary); }
+.announce-send-btn {
+    width: 100%; padding: 8px; border: none; border-radius: var(--radius-sm);
+    background: var(--gradient-primary); color: white; font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+}
+.announce-send-btn:hover { opacity: 0.85; }
+
+/* ── LAYOUT ── */
 .body-wrap { display: flex; flex: 1; overflow: hidden; }
 
 /* ── SIDEBAR ── */
-.sidebar {
-    width: 260px; flex-shrink: 0;
-    background: var(--bg-secondary); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; overflow: hidden;
-    transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
-}
+.sidebar { width: 260px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s cubic-bezier(0.4,0,0.2,1); }
 .sidebar.collapsed { width: 0; border-right: none; }
-.sidebar-header {
-    padding: 12px 14px; border-bottom: 1px solid var(--border);
-    font-size: 11px; font-weight: 700; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.6px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: space-between;
-}
-.sidebar-search {
-    margin: 10px 10px 6px; padding: 8px 10px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); color: var(--text);
-    font-family: 'Syne', sans-serif; font-size: 13px; outline: none;
-    transition: border-color 0.2s; flex-shrink: 0; width: calc(100% - 20px);
-}
+.sidebar-header { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+.sidebar-search { margin: 10px 10px 6px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; flex-shrink: 0; width: calc(100% - 20px); }
 .sidebar-search:focus { border-color: var(--primary); }
 .sidebar-search::placeholder { color: var(--text-light); }
 .sidebar-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .sidebar-list::-webkit-scrollbar { width: 3px; }
 .sidebar-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.sidebar-user {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 14px; cursor: pointer;
-    transition: background 0.15s; border-radius: 0;
-    font-size: 13px; font-weight: 600; color: var(--text);
-}
+.sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; transition: background 0.15s; font-size: 13px; font-weight: 600; color: var(--text); }
 .sidebar-user:hover { background: var(--surface-hover); }
 .sidebar-user.active { background: var(--primary-light); color: var(--primary); }
 .sidebar-user.has-unread { font-weight: 800; }
-.sidebar-avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden;
-}
-.sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.sidebar-unread {
-    margin-left: auto; background: var(--primary); color: white;
-    font-size: 10px; font-weight: 700; border-radius: 10px;
-    padding: 1px 6px; min-width: 18px; text-align: center;
-}
+.sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+.sidebar-unread { margin-left: auto; background: var(--primary); color: white; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; min-width: 18px; text-align: center; }
 .sidebar-empty { padding: 20px 14px; font-size: 12px; color: var(--text-muted); text-align: center; }
-
-/* sidebar toggle */
-.sidebar-toggle {
-    position: relative; z-index: 5;
-    width: 28px; flex-shrink: 0;
-    background: var(--bg-secondary); border-right: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: background 0.2s; font-size: 14px; color: var(--text-muted);
-}
+.sidebar-toggle { position: relative; z-index: 5; width: 28px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; font-size: 14px; color: var(--text-muted); }
 .sidebar-toggle:hover { background: var(--surface-hover); color: var(--text); }
 
-/* ── MAIN CHAT AREA ── */
+/* ── MAIN CHAT ── */
 .main-chat { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-
-/* DM header */
-.dm-header {
-    display: none; align-items: center; gap: 10px;
-    padding: 10px 16px; background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
+.dm-header { display: none; align-items: center; gap: 10px; padding: 10px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .dm-header.show { display: flex; }
-.dm-header-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white; overflow: hidden;
-}
-.dm-header-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.dm-header-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; flex-shrink: 0; }
+.dm-header-avatar:hover { transform: scale(1.1); box-shadow: 0 0 0 2px var(--primary); }
 .dm-header-name { font-size: 14px; font-weight: 700; color: var(--text); }
-.dm-back-btn {
-    margin-left: auto; background: none; border: 1px solid var(--border);
-    color: var(--text-muted); padding: 4px 10px; border-radius: var(--radius-sm);
-    font-size: 12px; cursor: pointer; font-family: 'Syne', sans-serif; transition: all 0.2s;
-}
+.dm-back-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'Syne', sans-serif; transition: all 0.2s; }
 .dm-back-btn:hover { background: var(--surface-hover); color: var(--text); }
 
+/* ── MUTED BANNER ── */
+.muted-banner { display: none; padding: 8px 16px; background: #fffbeb; border-top: 1px solid #fde68a; font-size: 12px; color: #92400e; font-weight: 600; text-align: center; flex-shrink: 0; }
+.muted-banner.show { display: block; }
+
 /* ── CONNECTION BANNER ── */
-.conn-banner {
-    text-align: center; font-size: 12px; padding: 6px;
-    font-family: 'JetBrains Mono', monospace;
-    background: #fef3c7; color: #92400e; display: none; flex-shrink: 0;
-}
+.conn-banner { text-align: center; font-size: 12px; padding: 6px; font-family: 'JetBrains Mono', monospace; background: #fef3c7; color: #92400e; display: none; flex-shrink: 0; }
 .conn-banner.show { display: block; }
 
 /* ── MESSAGES ── */
 .messages-wrap { flex: 1; overflow-y: auto; padding: 16px 0; }
 .messages-wrap::-webkit-scrollbar { width: 4px; }
 .messages-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-.messages-inner {
-    max-width: 820px; margin: 0 auto; padding: 0 16px;
-    display: flex; flex-direction: column; gap: 2px;
-}
+.messages-inner { max-width: 820px; margin: 0 auto; padding: 0 16px; display: flex; flex-direction: column; gap: 2px; }
 
 /* ── BUBBLES ── */
-.msg {
-    display: flex; flex-direction: column;
-    animation: msg-in 0.2s cubic-bezier(0.4,0,0.2,1);
-    max-width: 72%; position: relative;
-}
+.msg { display: flex; flex-direction: column; animation: msg-in 0.2s cubic-bezier(0.4,0,0.2,1); max-width: 72%; position: relative; }
 @keyframes msg-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.msg.mine   { align-self: flex-end;   align-items: flex-end; }
+.msg.mine   { align-self: flex-end; align-items: flex-end; }
 .msg.theirs { align-self: flex-start; align-items: flex-start; }
 .msg-meta { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; padding: 0 4px; }
 .msg.mine .msg-meta { flex-direction: row-reverse; }
 .msg-row { display: flex; align-items: flex-end; gap: 8px; position: relative; }
 .msg.mine .msg-row { flex-direction: row-reverse; }
-.msg-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
-    cursor: pointer; overflow: hidden;
-    transition: transform 0.15s, box-shadow 0.15s;
-}
+.msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; cursor: pointer; overflow: hidden; transition: transform 0.15s, box-shadow 0.15s; }
 .msg-avatar:hover { transform: scale(1.12); box-shadow: 0 0 0 2px var(--primary); }
-.msg-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
 .msg-username { font-size: 12px; font-weight: 700; cursor: pointer; }
 .msg-username:hover { text-decoration: underline; }
 .msg-time { font-size: 11px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
-.msg-bubble {
-    padding: 9px 13px; font-size: 14px; line-height: 1.55;
-    word-break: break-word; box-shadow: var(--shadow-xs);
-}
-.msg.theirs .msg-bubble {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 4px 16px 16px 16px; color: var(--text);
-}
-.msg.mine .msg-bubble {
-    background: var(--gradient-primary);
-    border-radius: 16px 4px 16px 16px; color: white;
-}
+.msg-bubble { padding: 9px 13px; font-size: 14px; line-height: 1.55; word-break: break-word; box-shadow: var(--shadow-xs); }
+.msg.theirs .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 16px 16px 16px; color: var(--text); }
+.msg.mine .msg-bubble { background: var(--gradient-primary); border-radius: 16px 4px 16px 16px; color: white; }
 .msg.same-sender .msg-meta { display: none; }
 .msg.same-sender .msg-avatar { opacity: 0; pointer-events: none; }
-
 .msg-bubble-wrap { position: relative; display: inline-block; max-width: 100%; }
-.msg-delete {
-    display: none; position: absolute; top: -8px; right: -8px;
-    background: #ef4444; border: 2px solid var(--bg); color: white;
-    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
-    font-size: 10px; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 10; line-height: 1;
-}
+.msg-delete { display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; border: 2px solid var(--bg); color: white; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 10px; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 10; line-height: 1; }
 .msg-bubble-wrap:hover .msg-delete { display: flex; }
 .msg-delete:hover { background: #dc2626; }
-.msg-bubble.deleted { font-style: italic; opacity: 0.5; font-size: 12px; }
-
-.msg-system {
-    align-self: center; font-size: 11px; color: var(--text-light);
-    font-family: 'JetBrains Mono', monospace;
-    padding: 4px 12px; margin: 6px 0;
-    background: var(--border-light); border-radius: 20px;
-}
+.msg-system { align-self: center; font-size: 11px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; padding: 4px 12px; margin: 6px 0; background: var(--border-light); border-radius: 20px; }
+.msg-system.announcement { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 20px; box-shadow: var(--shadow-sm); }
+.dm-indicator { font-size: 10px; background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
 
 /* ── INPUT ── */
-.input-area {
-    flex-shrink: 0; background: var(--bg-secondary);
-    border-top: 1px solid var(--border); padding: 12px 16px;
-}
+.input-area { flex-shrink: 0; background: var(--bg-secondary); border-top: 1px solid var(--border); padding: 12px 16px; }
 .input-inner { max-width: 820px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
-.input-box {
-    flex: 1; background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 10px 14px;
-    font-family: 'Syne', sans-serif; font-size: 14px; color: var(--text);
-    outline: none; resize: none; min-height: 44px; max-height: 120px;
-    transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5;
-}
+.input-box { flex: 1; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: 'Syne', sans-serif; font-size: 14px; color: var(--text); outline: none; resize: none; min-height: 44px; max-height: 120px; transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5; }
 .input-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 .input-box::placeholder { color: var(--text-light); }
 .input-box:disabled { opacity: 0.45; cursor: not-allowed; }
-.send-btn {
-    width: 44px; height: 44px; border-radius: var(--radius);
-    border: none; background: var(--gradient-primary); color: white; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: all 0.2s; box-shadow: var(--shadow-sm);
-}
+.send-btn { width: 44px; height: 44px; border-radius: var(--radius); border: none; background: var(--gradient-primary); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: var(--shadow-sm); }
 .send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow); }
 .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.cooldown-bar-wrap {
-    height: 3px; background: var(--border); border-radius: 2px;
-    overflow: hidden; margin-top: 8px;
-    max-width: 820px; margin-left: auto; margin-right: auto; display: none;
-}
+.cooldown-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 8px; max-width: 820px; margin-left: auto; margin-right: auto; display: none; }
 .cooldown-bar-wrap.active { display: block; }
 .cooldown-bar { height: 100%; background: var(--gradient-primary); border-radius: 2px; }
 
 /* ── MODALS ── */
-.modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(8px); display: none; align-items: center;
-    justify-content: center; z-index: 9999; padding: 1rem;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
 .modal-overlay.open { display: flex; }
-.modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 420px;
-    box-shadow: var(--shadow-xl); animation: pop-in 0.25s cubic-bezier(0.4,0,0.2,1);
-    max-height: 90vh; overflow-y: auto;
-}
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-xl); animation: pop-in 0.25s cubic-bezier(0.4,0,0.2,1); max-height: 90vh; overflow-y: auto; }
 @keyframes pop-in { from{transform:scale(0.92) translateY(16px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
 .modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; color: var(--text); }
 .modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
-.modal-input {
-    width: 100%; padding: 11px 14px;
-    border: 1.5px solid var(--border); border-radius: var(--radius);
-    background: var(--bg-secondary); color: var(--text);
-    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
-    outline: none; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s;
-}
+.modal-input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; outline: none; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s; }
 .modal-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-.modal-btn {
-    width: 100%; padding: 12px; border: none; border-radius: var(--radius);
-    background: var(--gradient-primary); color: white;
-    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm);
-}
+.modal-btn { width: 100%; padding: 12px; border: none; border-radius: var(--radius); background: var(--gradient-primary); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
 .modal-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .modal-error { font-size: 12px; color: #ef4444; margin-top: -6px; margin-bottom: 10px; display: none; line-height: 1.4; }
 .modal-error.show { display: block; }
 .modal-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
 
+/* ── BAN MODAL ── */
+.ban-modal { max-width: 380px; }
+.ban-modal .modal-title { color: #ef4444; }
+.ban-reason-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; resize: none; outline: none; min-height: 80px; margin-bottom: 12px; transition: border-color 0.2s; }
+.ban-reason-input:focus { border-color: #ef4444; }
+.ban-confirm-btn { width: 100%; padding: 11px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.ban-confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(239,68,68,0.4); }
+.ban-cancel-btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: none; color: var(--text-muted); font-family: 'Syne', sans-serif; font-size: 14px; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+.ban-cancel-btn:hover { background: var(--surface-hover); color: var(--text); }
+
+/* ── MUTE MODAL ── */
+.mute-duration-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.mute-dur-btn { padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
+.mute-dur-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+.mute-dur-btn.selected { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+.mute-confirm-btn { width: 100%; padding: 11px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.mute-confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245,158,11,0.4); }
+
+/* ── BANNED SCREEN ── */
+.banned-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 2rem; }
+.banned-overlay.show { display: flex; }
+.banned-card { background: var(--surface); border: 2px solid #ef4444; border-radius: var(--radius-lg); padding: 40px 32px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(239,68,68,0.3); animation: pop-in 0.3s cubic-bezier(0.4,0,0.2,1); }
+.banned-icon { font-size: 56px; margin-bottom: 16px; }
+.banned-title { font-size: 1.5rem; font-weight: 800; color: #ef4444; margin-bottom: 8px; }
+.banned-reason { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; padding: 12px 16px; background: var(--bg-secondary); border-radius: var(--radius-sm); border-left: 3px solid #ef4444; text-align: left; }
+.banned-reason strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.banned-ok-btn { padding: 12px 32px; border: none; border-radius: var(--radius); background: var(--gradient-primary); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.banned-ok-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
 /* ── AVATAR PICKER ── */
 .avatar-section { margin-bottom: 18px; }
-.avatar-section-label {
-    font-size: 12px; font-weight: 700; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
-}
-
-/* current avatar preview */
-.avatar-preview-wrap {
-    display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
-}
-.avatar-preview-img {
-    width: 60px; height: 60px; border-radius: 50%;
-    border: 3px solid var(--primary); overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 4px var(--primary-light); flex-shrink: 0;
-    background: var(--bg-secondary);
-}
-.avatar-preview-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.avatar-preview-label { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-.avatar-preview-label strong { color: var(--text); display: block; font-size: 13px; }
-
-/* upload / drag zone */
-.avatar-drop-zone {
-    border: 2px dashed var(--border); border-radius: var(--radius);
-    padding: 18px 14px; text-align: center; cursor: pointer;
-    transition: all 0.2s; margin-bottom: 10px; position: relative;
-    background: var(--bg-secondary);
-}
-.avatar-drop-zone:hover, .avatar-drop-zone.dragover {
-    border-color: var(--primary); background: var(--primary-lighter);
-}
-.avatar-drop-zone input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-}
+.avatar-section-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.avatar-preview-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.avatar-preview-img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 4px var(--primary-light); flex-shrink: 0; background: var(--bg-secondary); }
+.avatar-drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 18px 14px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 10px; position: relative; background: var(--bg-secondary); }
+.avatar-drop-zone:hover, .avatar-drop-zone.dragover { border-color: var(--primary); background: var(--primary-lighter); }
+.avatar-drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .avatar-drop-text { font-size: 13px; color: var(--text-muted); pointer-events: none; }
 .avatar-drop-text strong { color: var(--primary); }
-
-/* URL input row */
 .avatar-url-row { display: flex; gap: 8px; margin-bottom: 4px; }
-.avatar-url-input {
-    flex: 1; padding: 9px 12px;
-    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--bg-secondary); color: var(--text);
-    font-family: 'Syne', sans-serif; font-size: 13px; outline: none;
-    transition: border-color 0.2s;
-}
+.avatar-url-input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
 .avatar-url-input:focus { border-color: var(--primary); }
 .avatar-url-input::placeholder { color: var(--text-light); }
-.avatar-url-btn {
-    padding: 9px 14px; border: none; border-radius: var(--radius-sm);
-    background: var(--primary); color: white;
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
-}
+.avatar-url-btn { padding: 9px 14px; border: none; border-radius: var(--radius-sm); background: var(--primary); color: white; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
 .avatar-url-btn:hover { opacity: 0.85; }
-.avatar-clear-btn {
-    display: none; width: 100%; padding: 7px; border: 1px solid var(--border);
-    border-radius: var(--radius-sm); background: none; color: var(--text-muted);
-    font-family: 'Syne', sans-serif; font-size: 12px; cursor: pointer;
-    margin-top: 4px; transition: all 0.15s;
-}
+.avatar-clear-btn { display: none; width: 100%; padding: 7px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; color: var(--text-muted); font-family: 'Syne', sans-serif; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
 .avatar-clear-btn:hover { background: var(--surface-hover); color: var(--text); }
 .avatar-clear-btn.show { display: block; }
 .avatar-error { font-size: 11px; color: #ef4444; margin-top: 4px; display: none; }
 .avatar-error.show { display: block; }
 
 /* ── SCROLL BTN ── */
-.scroll-btn {
-    position: fixed; bottom: 86px; right: 20px; width: 36px; height: 36px;
-    border-radius: 50%; background: var(--gradient-primary); border: none;
-    color: white; cursor: pointer; display: none; align-items: center;
-    justify-content: center; box-shadow: var(--shadow-lg); z-index: 50; font-size: 16px;
-}
+.scroll-btn { position: fixed; bottom: 86px; right: 20px; width: 36px; height: 36px; border-radius: 50%; background: var(--gradient-primary); border: none; color: white; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); z-index: 50; font-size: 16px; }
 .scroll-btn.show { display: flex; }
 
 /* ── EMPTY STATE ── */
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .empty-state .ei { font-size: 44px; margin-bottom: 12px; opacity: 0.35; }
 .empty-state p { font-size: 13px; line-height: 1.6; }
-
-/* DM indicator */
-.dm-indicator {
-    font-size: 10px; background: rgba(255,255,255,0.2);
-    padding: 1px 6px; border-radius: 8px; margin-left: 4px;
-}
 
 @media (max-width: 700px) {
     .sidebar { position: absolute; left: 0; top: 60px; bottom: 0; z-index: 20; box-shadow: var(--shadow-xl); }
@@ -462,6 +358,7 @@ body {
     .messages-inner { padding: 0 10px; }
     .input-area { padding: 10px; }
     .msg { max-width: 85%; }
+    .admin-panel { width: calc(100vw - 32px); }
 }
 </style>
 </head>
@@ -469,42 +366,79 @@ body {
 
 <!-- USERNAME MODAL -->
 <div class="modal-overlay" id="usernameModal">
-    <div class="modal">
-        <div class="modal-title">Welcome 👋</div>
-        <div class="modal-sub" id="usernameModalSub">Choose a username and set a profile picture.</div>
+    <div class="modal" id="usernameModalInner">
+        <div class="modal-title" id="usernameModalTitle">Welcome 👋</div>
+        <div class="modal-sub" id="usernameModalSub">Choose a username to get started.</div>
+        <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off">
+        <div class="modal-error" id="usernameError"></div>
+        <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
+        <div class="modal-note" id="usernameNote">Your username is locked to this browser. You can set a profile picture after joining.</div>
 
-        <!-- Avatar preview -->
-        <div class="avatar-preview-wrap">
-            <div class="avatar-preview-img" id="avatarPreviewImg">
-                <span id="avatarPreviewFallback" style="font-size:22px;font-weight:700;color:var(--text-muted)">?</span>
+        <!-- Avatar section — hidden until user has username -->
+        <div id="avatarSection" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
+            <div class="avatar-section-label">Profile Picture</div>
+            <div class="avatar-preview-wrap">
+                <div class="avatar-preview-img" id="avatarPreviewImg">
+                    <span id="avatarPreviewFallback" style="font-size:18px;font-weight:700;color:var(--text-muted)">?</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">Upload, drag in, or paste a URL.<br>Broken images fall back to your initials.</div>
             </div>
-            <div class="avatar-preview-label">
-                <strong>Profile Picture</strong>
-                Upload, drag in, or paste a URL below.<br>Broken images fall back to your initials.
-            </div>
-        </div>
-
-        <!-- Drop zone for upload/drag -->
-        <div class="avatar-section">
-            <div class="avatar-section-label">Upload or Drag an Image</div>
             <div class="avatar-drop-zone" id="avatarDropZone">
                 <input type="file" id="avatarFileInput" accept="image/*">
-                <div class="avatar-drop-text">📁 <strong>Click to upload</strong> or drag &amp; drop an image here</div>
+                <div class="avatar-drop-text">📁 <strong>Click to upload</strong> or drag &amp; drop</div>
             </div>
-
-            <div class="avatar-section-label" style="margin-top:12px;">Or paste an image URL</div>
+            <div class="avatar-section-label" style="margin-top:10px;">Or paste an image URL</div>
             <div class="avatar-url-row">
                 <input class="avatar-url-input" id="avatarUrlInput" type="text" placeholder="https://example.com/pic.jpg">
                 <button class="avatar-url-btn" id="avatarUrlBtn">Use URL</button>
             </div>
-            <div class="avatar-error" id="avatarError">That URL didn't load — try another image.</div>
+            <div class="avatar-error" id="avatarError">That URL didn't load — try another.</div>
             <button class="avatar-clear-btn" id="avatarClearBtn">✕ Remove profile picture</button>
         </div>
+    </div>
+</div>
 
-        <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off">
-        <div class="modal-error" id="usernameError"></div>
-        <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
-        <div class="modal-note" id="usernameNote">Your username is locked to this browser. Clearing browser data would release it.</div>
+<!-- BAN MODAL -->
+<div class="modal-overlay" id="banModal">
+    <div class="modal ban-modal">
+        <div class="modal-title">🔇 Ban User</div>
+        <div class="modal-sub" id="banModalSub">Banning <strong id="banTargetName"></strong>. This removes all their data and forces them to pick a new username.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason for ban (shown to user)</div>
+        <textarea class="ban-reason-input" id="banReasonInput" placeholder="e.g. Spamming, harassment, inappropriate content..."></textarea>
+        <button class="ban-confirm-btn" id="banConfirmBtn">🔇 Confirm Ban</button>
+        <button class="ban-cancel-btn" id="banCancelBtn">Cancel</button>
+    </div>
+</div>
+
+<!-- MUTE MODAL -->
+<div class="modal-overlay" id="muteModal">
+    <div class="modal" style="max-width:360px;">
+        <div class="modal-title">🔕 Mute User</div>
+        <div class="modal-sub" id="muteModalSub">Select how long to mute <strong id="muteTargetName"></strong>.</div>
+        <div class="mute-duration-grid" id="muteDurationGrid">
+            <div class="mute-dur-btn" data-mins="15">15 min</div>
+            <div class="mute-dur-btn" data-mins="30">30 min</div>
+            <div class="mute-dur-btn" data-mins="60">1 hour</div>
+            <div class="mute-dur-btn" data-mins="360">6 hours</div>
+            <div class="mute-dur-btn" data-mins="1440">1 day</div>
+            <div class="mute-dur-btn" data-mins="10080">1 week</div>
+        </div>
+        <button class="mute-confirm-btn" id="muteConfirmBtn">🔕 Mute</button>
+        <button class="ban-cancel-btn" id="muteCancelBtn" style="margin-top:8px;">Cancel</button>
+    </div>
+</div>
+
+<!-- BANNED OVERLAY (shown to the banned user) -->
+<div class="banned-overlay" id="bannedOverlay">
+    <div class="banned-card">
+        <div class="banned-icon">🔇</div>
+        <div class="banned-title">You've Been Banned</div>
+        <div class="banned-reason" id="bannedReason">
+            <strong>Reason</strong>
+            <span id="bannedReasonText">No reason provided.</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">You can return with a new username, but your previous messages have been removed.</p>
+        <button class="banned-ok-btn" id="bannedOkBtn">OK, I Understand →</button>
     </div>
 </div>
 
@@ -524,8 +458,9 @@ body {
         <a href="https://tmorris01.github.io/gnlinks/" style="text-decoration:none !important;"><button class="online-badge">Go Home</button></a>
     </div>
     <div class="header-right">
+        <button class="admin-btn" id="adminPanelBtn">🛡 Admin</button>
         <button class="theme-btn" id="themeBtn">🌙</button>
-        <button class="username-btn" id="changeUsernameBtn" title="Change username / profile picture">
+        <button class="username-btn" id="changeUsernameBtn" title="Edit profile">
             ✏️ <span id="headerUsername">Set username</span>
         </button>
     </div>
@@ -533,40 +468,59 @@ body {
 
 <div class="conn-banner" id="connBanner"></div>
 
+<!-- ADMIN PANEL OVERLAY -->
+<div class="admin-panel-overlay" id="adminPanelOverlay">
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-panel-header">
+            <div class="admin-panel-title">🛡 Admin Panel</div>
+            <button class="admin-panel-close" id="adminPanelClose">✕</button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="admin-section">
+            <div class="admin-section-title">Quick Actions</div>
+            <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users</button>
+            <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
+        </div>
+
+        <!-- Broadcast Announcement -->
+        <div class="admin-section">
+            <div class="admin-section-title">📢 Broadcast Announcement</div>
+            <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
+            <button class="announce-send-btn" id="announceSendBtn">📢 Send to Everyone</button>
+        </div>
+
+        <!-- User List -->
+        <div class="admin-section">
+            <div class="admin-section-title" style="margin-bottom:8px;">👥 All Users <span id="apUserCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
+            <div class="admin-user-list" id="adminUserList">
+                <div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- BODY -->
 <div class="body-wrap">
-
-    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header" style="flex-direction:column;align-items:stretch;gap:6px;padding-bottom:10px;">
-            <button id="globalChatBtn" style="
-                background:var(--gradient-primary);color:white;border:none;
-                border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;
-                font-size:13px;font-weight:700;cursor:pointer;text-align:left;
-                display:flex;align-items:center;gap:8px;transition:opacity 0.2s;
-            ">🌐 Global Chat</button>
+            <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat</button>
             <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding-top:4px;">💬 Direct Messages</span>
         </div>
         <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
-        <div class="sidebar-list" id="sidebarList">
-            <div class="sidebar-empty">Loading users...</div>
-        </div>
+        <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
     </div>
-
-    <!-- SIDEBAR TOGGLE -->
     <div class="sidebar-toggle" id="sidebarToggle" title="Toggle DMs">‹</div>
 
-    <!-- MAIN CHAT -->
     <div class="main-chat">
-
-        <!-- DM HEADER -->
         <div class="dm-header" id="dmHeader">
-            <div class="dm-header-avatar" id="dmHeaderAvatar"></div>
+            <div class="dm-header-avatar" id="dmHeaderAvatar" title="Click for options"></div>
             <div class="dm-header-name" id="dmHeaderName"></div>
             <button class="dm-back-btn" id="dmBackBtn">← Back to chat</button>
         </div>
 
-        <!-- MESSAGES -->
+        <div class="muted-banner" id="mutedBanner">🔕 You are currently muted and cannot send messages.</div>
+
         <div class="messages-wrap" id="messagesWrap">
             <div class="messages-inner" id="messagesInner">
                 <div class="empty-state" id="emptyState">
@@ -578,35 +532,26 @@ body {
 
         <button class="scroll-btn" id="scrollBtn">↓</button>
 
-        <!-- REPLY BAR -->
         <div class="reply-bar" id="replyBar">
             <span class="reply-bar-text" id="replyBarText"></span>
             <button class="reply-cancel" id="replyCancelBtn" title="Cancel reply">✕</button>
         </div>
 
-        <!-- INPUT -->
         <div class="input-area">
             <div class="input-inner">
-                <textarea class="input-box" id="msgInput"
-                    placeholder="Set a username to start chatting..."
-                    rows="1" maxlength="500" disabled></textarea>
+                <textarea class="input-box" id="msgInput" placeholder="Set a username to start chatting..." rows="1" maxlength="500" disabled></textarea>
                 <button class="send-btn" id="sendBtn" disabled>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2.5"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                     </svg>
                 </button>
             </div>
-            <div class="cooldown-bar-wrap" id="cooldownWrap">
-                <div class="cooldown-bar" id="cooldownBar" style="width:0%"></div>
-            </div>
+            <div class="cooldown-bar-wrap" id="cooldownWrap"><div class="cooldown-bar" id="cooldownBar" style="width:0%"></div></div>
         </div>
     </div>
 </div>
 
-<!-- USERNAME CONTEXT MENU — must be in DOM before scripts -->
+<!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctxMenu">
     <div class="ctx-menu-header" id="ctxMenuName"></div>
     <div class="ctx-menu-item" id="ctxDmBtn">💬 Send DM</div>
@@ -614,10 +559,14 @@ body {
 
 <script>
 // ════════════════════════════════════════════════
-// CREDENTIALS
+// CONFIG
 // ════════════════════════════════════════════════
 const SUPABASE_URL  = 'https://oootjrtweyqrlegipyok.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vb3RqcnR3ZXlxcmxlZ2lweW9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzcxNDQsImV4cCI6MjA4NzUxMzE0NH0.YCGWff6GH6nEN7nNQI8TQKvA4pTZrSff_oXc-sBdNr8';
+
+// ── ADD ADMIN USERNAMES HERE ──────────────────
+// To add another admin later, just add their username to this array.
+const ADMIN_USERNAMES = ['lamb'];
 
 const COOLDOWN_MS  = 5000;
 const POLL_MS      = 2000;
@@ -629,8 +578,8 @@ const AVATAR_KEY   = 'gnChatAvatar';
 // ── STATE ─────────────────────────────────────
 let deviceId         = '';
 let username         = '';
-let myAvatar         = '';        // URL or empty string
-let pendingAvatar    = '';        // staging area while modal is open
+let myAvatar         = '';
+let pendingAvatar    = '';
 let lastSendTime     = 0;
 let cooldownRaf      = null;
 let autoScroll       = true;
@@ -638,58 +587,51 @@ let lastRenderedUser = null;
 let lastRenderedId   = 0;
 let lastDmId         = 0;
 let presenceChannel  = null;
-let adminChannel     = null;      // for force-refresh broadcast
+let adminChannel     = null;
 let sb               = null;
 let sidebarOpen      = true;
 let dmMode           = false;
 let dmPartner        = null;
 let dmPartnerDevId   = null;
 let allUsers         = [];
+let dmUnreadMap      = {};   // device_id → { count, lastId, lastTime }
+let isMuted          = false;
+let muteUntil        = null; // Date object
+let banTarget        = null; // for the ban modal
+let muteTarget       = null; // for the mute modal
+let msgCounts        = {};   // device_id → count (fetched for admin panel)
 
 // ── HELPERS ───────────────────────────────────
-const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6',
-                '#ec4899','#ef4444','#06b6d4','#84cc16','#f97316','#6366f1'];
+const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#ef4444','#06b6d4','#84cc16','#f97316','#6366f1'];
 function colorFor(name) {
     let h = 0;
     for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
     return COLORS[Math.abs(h) % COLORS.length];
 }
 function initials(n) { return n.trim().slice(0,2).toUpperCase(); }
-function esc(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function fmtTime(ts) {
-    return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function isAdmin() { return username && ADMIN_USERNAMES.includes(username.toLowerCase()); }
+
 function showBanner(msg, color) {
     const b = document.getElementById('connBanner');
     b.textContent = msg;
     b.style.background = color === 'red' ? '#fde8e8' : color === 'green' ? '#d1fae5' : '#fef3c7';
     b.style.color = color === 'red' ? '#991b1b' : color === 'green' ? '#065f46' : '#92400e';
     b.classList.toggle('show', !!msg);
+    if (msg) setTimeout(() => showBanner(''), 4000);
 }
-function genId() {
-    return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
-}
+function genId() { return 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); }
 
 // ── AVATAR RENDERING ──────────────────────────
-// Renders an avatar element (div) for a given user
-// avatarUrl: a URL string, or '' for fallback
-// name: username (for color + initials fallback)
-// size: pixel size
 function makeAvatarEl(avatarUrl, name, size) {
     const div = document.createElement('div');
-    div.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;
-        display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${colorFor(name)};`;
+    div.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${colorFor(name)};`;
     if (avatarUrl) {
         const img = document.createElement('img');
         img.src = avatarUrl;
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;';
-        img.onerror = () => {
-            div.removeChild(img);
-            div.appendChild(makeFallbackSpan(name, size));
-        };
+        img.onerror = () => { div.removeChild(img); div.appendChild(makeFallbackSpan(name, size)); };
         div.appendChild(img);
     } else {
         div.appendChild(makeFallbackSpan(name, size));
@@ -702,8 +644,6 @@ function makeFallbackSpan(name, size) {
     span.style.cssText = `font-size:${Math.round(size*0.38)}px;font-weight:700;color:white;`;
     return span;
 }
-
-// Get stored avatar URL for a user by name from allUsers cache
 function getAvatarFor(name) {
     if (name === username) return myAvatar;
     const u = allUsers.find(x => x.username === name);
@@ -717,10 +657,7 @@ function getAvatarForDev(devId) {
 
 // ── DEVICE ID ─────────────────────────────────
 deviceId = localStorage.getItem(DEVICE_KEY);
-if (!deviceId) {
-    deviceId = genId();
-    localStorage.setItem(DEVICE_KEY, deviceId);
-}
+if (!deviceId) { deviceId = genId(); localStorage.setItem(DEVICE_KEY, deviceId); }
 
 // ── THEME ─────────────────────────────────────
 let isDark = localStorage.getItem(THEME_KEY) !== 'light';
@@ -739,52 +676,36 @@ document.getElementById('sidebarToggle').addEventListener('click', () => {
     document.getElementById('sidebarToggle').textContent = sidebarOpen ? '‹' : '›';
 });
 
-// ── SUPABASE FETCH HELPERS ─────────────────────
+// ── SUPABASE HELPERS ──────────────────────────
 async function sbGet(path) {
-    const r = await fetch(SUPABASE_URL + path, {
-        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
-    });
+    const r = await fetch(SUPABASE_URL + path, { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }});
     if (!r.ok) throw new Error(await r.text());
     return r.json();
 }
 async function sbPost(path, body, extra = {}) {
-    const r = await fetch(SUPABASE_URL + path, {
-        method: 'POST',
-        headers: {
-            'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON,
-            'Content-Type': 'application/json', 'Prefer': 'return=representation',
-            ...extra
-        },
-        body: JSON.stringify(body)
-    });
+    const r = await fetch(SUPABASE_URL + path, { method: 'POST', headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...extra }, body: JSON.stringify(body) });
     if (!r.ok) throw new Error(await r.text());
     return r.json();
 }
 async function sbDelete(path) {
-    const r = await fetch(SUPABASE_URL + path, {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
-    });
-    if (!r.ok) {
-        const txt = await r.text();
-        throw new Error(txt);
-    }
+    const r = await fetch(SUPABASE_URL + path, { method: 'DELETE', headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }});
+    if (!r.ok) throw new Error(await r.text());
+}
+async function sbPatch(path, body) {
+    const r = await fetch(SUPABASE_URL + path, { method: 'PATCH', headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
 }
 
 // ════════════════════════════════════════════════
-// AVATAR PICKER — upload / drag / URL
+// AVATAR PICKER
 // ════════════════════════════════════════════════
 function updateAvatarPreview(url) {
     pendingAvatar = url || '';
-    const wrap   = document.getElementById('avatarPreviewImg');
-    const fb     = document.getElementById('avatarPreviewFallback');
-    const clearBtn = document.getElementById('avatarClearBtn');
-    const errEl  = document.getElementById('avatarError');
+    const wrap = document.getElementById('avatarPreviewImg');
+    const errEl = document.getElementById('avatarError');
     errEl.classList.remove('show');
-
-    // Clear old content
     wrap.innerHTML = '';
-
     if (url) {
         const img = document.createElement('img');
         img.src = url;
@@ -792,87 +713,52 @@ function updateAvatarPreview(url) {
         img.onerror = () => {
             wrap.innerHTML = '';
             const sp = document.createElement('span');
-            sp.style.cssText = 'font-size:22px;font-weight:700;color:var(--text-muted)';
+            sp.style.cssText = 'font-size:18px;font-weight:700;color:var(--text-muted)';
             sp.textContent = username ? initials(username) : '?';
             wrap.appendChild(sp);
             pendingAvatar = '';
-            clearBtn.classList.remove('show');
+            document.getElementById('avatarClearBtn').classList.remove('show');
             errEl.classList.add('show');
         };
         wrap.appendChild(img);
-        clearBtn.classList.add('show');
+        document.getElementById('avatarClearBtn').classList.add('show');
     } else {
         const sp = document.createElement('span');
-        sp.style.cssText = 'font-size:22px;font-weight:700;color:var(--text-muted)';
+        sp.style.cssText = 'font-size:18px;font-weight:700;color:var(--text-muted)';
         sp.textContent = username ? initials(username) : '?';
         wrap.appendChild(sp);
-        clearBtn.classList.remove('show');
+        document.getElementById('avatarClearBtn').classList.remove('show');
     }
 }
-
-// File → base64 data URL
 function fileToDataUrl(file) {
-    return new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.onload = e => res(e.target.result);
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-    });
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsDataURL(file); });
 }
-
 function initAvatarPicker() {
     const dropZone  = document.getElementById('avatarDropZone');
     const fileInput = document.getElementById('avatarFileInput');
     const urlInput  = document.getElementById('avatarUrlInput');
     const urlBtn    = document.getElementById('avatarUrlBtn');
     const clearBtn  = document.getElementById('avatarClearBtn');
-
-    // File input change
     fileInput.addEventListener('change', async () => {
-        const file = fileInput.files[0];
-        if (!file) return;
-        try {
-            const dataUrl = await fileToDataUrl(file);
-            updateAvatarPreview(dataUrl);
-            urlInput.value = '';
-        } catch(e) { console.error(e); }
+        const file = fileInput.files[0]; if (!file) return;
+        try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(e) {}
     });
-
-    // Drag over styling
-    dropZone.addEventListener('dragover', e => {
-        e.preventDefault(); dropZone.classList.add('dragover');
-    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', async e => {
         e.preventDefault(); dropZone.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
-            try {
-                const dataUrl = await fileToDataUrl(file);
-                updateAvatarPreview(dataUrl);
-                urlInput.value = '';
-            } catch(ex) { console.error(ex); }
+            try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(ex) {}
         }
     });
-
-    // URL button
-    urlBtn.addEventListener('click', () => {
-        const url = urlInput.value.trim();
-        if (url) updateAvatarPreview(url);
-    });
-    urlInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); urlBtn.click(); }
-    });
-
-    // Clear
-    clearBtn.addEventListener('click', () => {
-        urlInput.value = '';
-        updateAvatarPreview('');
-    });
+    urlBtn.addEventListener('click', () => { const url = urlInput.value.trim(); if (url) updateAvatarPreview(url); });
+    urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); urlBtn.click(); } });
+    clearBtn.addEventListener('click', () => { urlInput.value = ''; updateAvatarPreview(''); });
 }
 
 // ════════════════════════════════════════════════
-// USERNAME / IDENTITY SYSTEM
+// USERNAME / IDENTITY MODAL
 // ════════════════════════════════════════════════
 const modal  = document.getElementById('usernameModal');
 const uInput = document.getElementById('usernameInput');
@@ -883,16 +769,27 @@ function openUsernameModal(isChange = false) {
     pendingAvatar = myAvatar || '';
     uInput.value = username || '';
     uError.classList.remove('show');
-    document.getElementById('usernameModalSub').textContent = isChange
-        ? 'Update your username or profile picture.'
-        : 'Choose a username and set a profile picture!';
-    document.getElementById('usernameNote').style.display = isChange ? 'none' : '';
-    document.getElementById('avatarUrlInput').value = '';
-    document.getElementById('avatarError').classList.remove('show');
-    updateAvatarPreview(myAvatar || '');
-    modal.classList.add('open');
     uBtn.disabled = false;
-    uBtn.textContent = 'Enter Chat →';
+    uBtn.textContent = isChange ? 'Save Changes →' : 'Enter Chat →';
+
+    // Show avatar section only if user already has a username (either changing or already logged in)
+    const avatarSec = document.getElementById('avatarSection');
+    if (isChange || username) {
+        avatarSec.style.display = 'block';
+        document.getElementById('avatarUrlInput').value = '';
+        document.getElementById('avatarError').classList.remove('show');
+        updateAvatarPreview(myAvatar || '');
+        document.getElementById('usernameModalTitle').textContent = isChange ? 'Edit Profile' : 'Welcome Back';
+        document.getElementById('usernameModalSub').textContent = isChange ? 'Update your username or profile picture.' : 'You already have a username set.';
+        document.getElementById('usernameNote').style.display = 'none';
+    } else {
+        avatarSec.style.display = 'none';
+        document.getElementById('usernameModalTitle').textContent = 'Welcome 👋';
+        document.getElementById('usernameModalSub').textContent = 'Choose a username to get started. You can add a profile picture after.';
+        document.getElementById('usernameNote').style.display = '';
+    }
+
+    modal.classList.add('open');
     setTimeout(() => { uInput.focus(); if (username) uInput.select(); }, 30);
 }
 
@@ -900,15 +797,10 @@ async function submitUsername() {
     const name = uInput.value.trim().replace(/\s+/g,' ');
     if (!name) { uError.textContent = 'Please enter a username.'; uError.classList.add('show'); return; }
     if (name === username && pendingAvatar === myAvatar) { modal.classList.remove('open'); return; }
-
-    uBtn.disabled = true;
-    uBtn.textContent = 'Saving...';
-
+    uBtn.disabled = true; uBtn.textContent = 'Saving...';
     try {
         if (name !== username) {
-            const existing = await sbGet(
-                `/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`
-            );
+            const existing = await sbGet(`/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`);
             if (existing && existing.length && existing[0].device_id !== deviceId) {
                 uError.textContent = `That username is already taken (as "${existing[0].username}").`;
                 uError.classList.add('show');
@@ -916,36 +808,31 @@ async function submitUsername() {
                 return;
             }
         }
-
-        // Upsert user with avatar (avatar is stored as URL string, can be data: URL or http URL)
         await fetch(SUPABASE_URL + '/rest/v1/users', {
             method: 'POST',
-            headers: {
-                'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates,return=minimal'
-            },
+            headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
             body: JSON.stringify({ device_id: deviceId, username: name, avatar: pendingAvatar || null })
         });
-
-        username  = name;
-        myAvatar  = pendingAvatar;
+        username = name; myAvatar = pendingAvatar;
         localStorage.setItem(USERNAME_KEY, name);
         localStorage.setItem(AVATAR_KEY, myAvatar);
         modal.classList.remove('open');
         document.getElementById('headerUsername').textContent = name;
-        document.getElementById('msgInput').disabled  = false;
         document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-        document.getElementById('sendBtn').disabled   = false;
-        document.getElementById('msgInput').focus();
-        uBtn.textContent = 'Enter Chat →';
+        uBtn.textContent = 'Save Changes →';
 
+        // Show admin button if applicable
+        if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
+        else document.getElementById('adminPanelBtn').classList.remove('visible');
+
+        checkMuteStatus();
         if (sb) joinPresence();
         loadAllUsers();
+        if (!isMuted) enableInput();
     } catch(e) {
         uError.textContent = 'Error saving. Try again.';
         uError.classList.add('show');
-        uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
+        uBtn.disabled = false; uBtn.textContent = 'Save Changes →';
         console.error(e);
     }
 }
@@ -954,28 +841,88 @@ uBtn.addEventListener('click', submitUsername);
 uInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitUsername(); } });
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
 
-// ── BOOT ──────────────────────────────────────
+function enableInput() {
+    document.getElementById('msgInput').disabled = false;
+    document.getElementById('sendBtn').disabled  = false;
+}
+function disableInput() {
+    document.getElementById('msgInput').disabled = true;
+    document.getElementById('sendBtn').disabled  = true;
+}
+
+// ════════════════════════════════════════════════
+// MUTE SYSTEM
+// ════════════════════════════════════════════════
+async function checkMuteStatus() {
+    if (!username) return;
+    try {
+        const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=muted_until`);
+        if (!rows || !rows.length) return;
+        const mu = rows[0].muted_until;
+        if (mu && new Date(mu) > new Date()) {
+            isMuted = true;
+            muteUntil = new Date(mu);
+            applyMute();
+        } else {
+            isMuted = false; muteUntil = null;
+            removeMute();
+        }
+    } catch(e) { /* silent */ }
+}
+
+function applyMute() {
+    isMuted = true;
+    disableInput();
+    const banner = document.getElementById('mutedBanner');
+    const timeLeft = muteUntil ? formatMuteTime(muteUntil) : '';
+    banner.textContent = `🔕 You are muted${timeLeft ? ' for ' + timeLeft : ''}. You cannot send messages.`;
+    banner.classList.add('show');
+}
+function removeMute() {
+    isMuted = false; muteUntil = null;
+    if (username) enableInput();
+    document.getElementById('mutedBanner').classList.remove('show');
+}
+function formatMuteTime(until) {
+    const ms = until - new Date();
+    if (ms <= 0) return '';
+    const mins = Math.floor(ms / 60000);
+    if (mins < 60) return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hour${hrs !== 1 ? 's' : ''}`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days !== 1 ? 's' : ''}`;
+}
+// Re-check mute every minute
+setInterval(() => {
+    if (isMuted && muteUntil && new Date() > muteUntil) removeMute();
+}, 60000);
+
+// ════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════
 async function boot() {
     initAvatarPicker();
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON); }
+    catch(e) { showBanner('⚠ Supabase failed to init', 'red'); console.error(e); return; }
 
     try {
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    } catch(e) {
-        showBanner('⚠ Supabase failed to init');
-        console.error(e); return;
-    }
-
-    try {
-        const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=username,avatar`);
+        const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=username,avatar,muted_until`);
         if (rows && rows.length) {
             username = rows[0].username;
             myAvatar = rows[0].avatar || '';
             localStorage.setItem(USERNAME_KEY, username);
             localStorage.setItem(AVATAR_KEY, myAvatar);
             document.getElementById('headerUsername').textContent = username;
-            document.getElementById('msgInput').disabled  = false;
-            document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-            document.getElementById('sendBtn').disabled   = false;
+            // Check mute
+            const mu = rows[0].muted_until;
+            if (mu && new Date(mu) > new Date()) {
+                isMuted = true; muteUntil = new Date(mu); applyMute();
+            } else {
+                enableInput();
+                document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
+            }
+            if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
         } else {
             myAvatar = localStorage.getItem(AVATAR_KEY) || '';
             openUsernameModal(false);
@@ -986,9 +933,9 @@ async function boot() {
         if (saved) {
             username = saved;
             document.getElementById('headerUsername').textContent = username;
-            document.getElementById('msgInput').disabled  = false;
+            enableInput();
             document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-            document.getElementById('sendBtn').disabled   = false;
+            if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
         } else {
             openUsernameModal(false);
         }
@@ -998,184 +945,164 @@ async function boot() {
     startPolling();
     loadAllUsers();
     if (username) joinPresence();
-    subscribeAdminChannel(); // listen for force-refresh commands
+    subscribeAdminChannel();
 }
-
 boot();
 
 // ════════════════════════════════════════════════
 // ADMIN BROADCAST CHANNEL
-// Supabase Realtime broadcast — no table needed.
-// Admin sends a command; all clients receive and act.
 // ════════════════════════════════════════════════
 function subscribeAdminChannel() {
     adminChannel = sb.channel('gn-admin-commands');
-    adminChannel
-        .on('broadcast', { event: 'command' }, ({ payload }) => {
-            if (!payload || !payload.action) return;
-            console.log('[admin cmd]', payload);
+    adminChannel.on('broadcast', { event: 'command' }, ({ payload }) => {
+        if (!payload || !payload.action) return;
 
-            if (payload.action === 'force_refresh') {
-                fullRefresh();
-            } else if (payload.action === 'user_banned' && payload.device_id === deviceId) {
-                // WE were banned — force them to pick a new username
-                username = '';
-                myAvatar = '';
-                localStorage.removeItem(USERNAME_KEY);
-                localStorage.removeItem(AVATAR_KEY);
-                document.getElementById('msgInput').disabled = true;
-                document.getElementById('sendBtn').disabled  = true;
-                document.getElementById('headerUsername').textContent = 'Set username';
-                fullRefresh();
-                setTimeout(() => openUsernameModal(false), 600);
-            } else if (payload.action === 'messages_cleared') {
-                // Someone's messages were deleted — non-banned users just refresh
-                fullRefresh();
-            }
-        })
-        .subscribe();
+        if (payload.action === 'force_refresh') {
+            fullRefresh();
+        } else if (payload.action === 'force_refresh_target' && payload.device_id === deviceId) {
+            fullRefresh(); // silent — no banner for targeted refresh
+        } else if (payload.action === 'user_banned' && payload.device_id === deviceId) {
+            showBannedScreen(payload.reason || 'No reason provided.');
+        } else if (payload.action === 'messages_cleared') {
+            fullRefresh();
+        } else if (payload.action === 'user_muted' && payload.device_id === deviceId) {
+            isMuted = true;
+            muteUntil = new Date(payload.until);
+            applyMute();
+        } else if (payload.action === 'user_unmuted' && payload.device_id === deviceId) {
+            removeMute();
+        } else if (payload.action === 'announcement') {
+            renderAnnouncement(payload.text);
+        }
+    }).subscribe();
 }
 
 async function broadcastAdminCmd(payload) {
-    // Admin sends a command to all clients via broadcast
     if (!adminChannel) return;
     await adminChannel.send({ type: 'broadcast', event: 'command', payload });
 }
 
-// Full chat refresh (non-destructive)
+function showBannedScreen(reason) {
+    // Clear their identity
+    username = ''; myAvatar = '';
+    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
+    disableInput();
+    document.getElementById('headerUsername').textContent = 'Set username';
+    document.getElementById('bannedReasonText').textContent = reason;
+    document.getElementById('bannedOverlay').classList.add('show');
+}
+
+document.getElementById('bannedOkBtn').addEventListener('click', () => {
+    document.getElementById('bannedOverlay').classList.remove('show');
+    fullRefresh();
+    openUsernameModal(false);
+});
+
+function renderAnnouncement(text) {
+    const container = document.getElementById('messagesInner');
+    const el = document.createElement('div');
+    el.className = 'msg-system announcement';
+    el.textContent = '📢 ' + text;
+    container.appendChild(el);
+    if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
+}
+
 async function fullRefresh() {
     lastRenderedUser = null;
     if (dmMode && dmPartner) {
-        // Refresh DM view
         const inner = document.getElementById('messagesInner');
-        inner.innerHTML = '';
-        lastDmId = 0;
+        inner.innerHTML = ''; lastDmId = 0;
         try {
-            const msgs = await sbGet(
-                `/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartner.device_id}),and(sender_device_id.eq.${dmPartner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`
-            );
-            if (msgs && msgs.length) {
-                msgs.forEach(m => renderMessage(m, true));
-                lastDmId = msgs[msgs.length - 1].id;
-            } else {
-                inner.innerHTML = `<div class="empty-state"><div class="ei">🤫</div><p>No messages yet.</p></div>`;
-            }
-        } catch(e) { /* silent */ }
+            const msgs = await sbGet(`/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartner.device_id}),and(sender_device_id.eq.${dmPartner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`);
+            if (msgs && msgs.length) { msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id; }
+            else inner.innerHTML = `<div class="empty-state"><div class="ei">🤫</div><p>No messages yet.</p></div>`;
+        } catch(e) {}
     } else {
-        // Refresh public chat
         const inner = document.getElementById('messagesInner');
         inner.innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
-        lastRenderedId = 0;
-        await loadHistory();
+        lastRenderedId = 0; await loadHistory();
     }
     loadAllUsers();
 }
 
 // ════════════════════════════════════════════════
-// PUBLIC CHAT
+// HISTORY + POLLING
 // ════════════════════════════════════════════════
 async function loadHistory() {
     try {
         const msgs = await sbGet('/rest/v1/messages?order=id.asc&limit=200&select=*');
         if (msgs && msgs.length) {
             msgs.forEach(m => renderMessage(m, false));
-            lastRenderedId = msgs[msgs.length - 1].id;
+            lastRenderedId = msgs[msgs.length-1].id;
         }
-    } catch(e) {
-        showBanner('⚠ Could not load messages');
-        console.error('loadHistory error:', e);
-    }
+    } catch(e) { showBanner('⚠ Could not load messages', 'red'); }
 }
 
 function startPolling() {
     setInterval(async () => {
         if (dmMode) return;
         try {
-            const url = lastRenderedId > 0
-                ? `/rest/v1/messages?id=gt.${lastRenderedId}&order=id.asc&select=*`
-                : `/rest/v1/messages?order=id.asc&limit=1&select=*`;
+            const url = lastRenderedId > 0 ? `/rest/v1/messages?id=gt.${lastRenderedId}&order=id.asc&select=*` : `/rest/v1/messages?order=id.asc&limit=1&select=*`;
             const msgs = await sbGet(url);
-            if (msgs && msgs.length) {
-                msgs.forEach(m => {
-                    if (m.id > lastRenderedId) {
-                        renderMessage(m, false);
-                        lastRenderedId = m.id;
-                    }
-                });
-            }
-        } catch(e) { /* silent */ }
+            if (msgs && msgs.length) msgs.forEach(m => { if (m.id > lastRenderedId) { renderMessage(m, false); lastRenderedId = m.id; } });
+        } catch(e) {}
     }, POLL_MS);
 
     setInterval(async () => {
         if (!username) return;
-        if (dmMode && dmPartner) {
-            pollDmThread();
-        } else {
-            pollDmUnreads();
-        }
-    }, POLL_MS);
+        if (dmMode && dmPartner) pollDmThread();
+        else pollDmUnreads();
+        // Re-check mute status every poll cycle
+        checkMuteStatus();
+    }, POLL_MS * 5); // every 10s is enough for mute checks
 }
 
 async function pollDmThread() {
     if (!dmPartner) return;
     try {
-        const msgs = await sbGet(
-            `/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartner.device_id}),and(sender_device_id.eq.${dmPartner.device_id},recipient_device_id.eq.${deviceId}))&id=gt.${lastDmId}&order=id.asc&select=*`
-        );
+        const msgs = await sbGet(`/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartner.device_id}),and(sender_device_id.eq.${dmPartner.device_id},recipient_device_id.eq.${deviceId}))&id=gt.${lastDmId}&order=id.asc&select=*`);
         if (msgs && msgs.length) {
-            msgs.forEach(m => {
-                if (m.id > lastDmId) {
-                    renderMessage(m, true);
-                    lastDmId = m.id;
-                }
-            });
+            msgs.forEach(m => { if (m.id > lastDmId) { renderMessage(m, true); lastDmId = m.id; } });
             const received = msgs.filter(m => m.sender_device_id === dmPartner.device_id);
             if (received.length) markDmRead(dmPartner.device_id, received[received.length-1].id);
         }
-    } catch(e) { /* silent */ }
+    } catch(e) {}
 }
 
 const seenDmIds = {};
 
 async function pollDmUnreads() {
     try {
-        const msgs = await sbGet(
-            `/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.asc&select=*`
-        );
+        const msgs = await sbGet(`/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.desc&limit=100&select=*`);
         if (!msgs) return;
-        const counts = {};
+        const counts = {}; const latest = {}; const latestTime = {};
         msgs.forEach(m => {
             const seen = seenDmIds[m.sender_device_id] || 0;
-            if (m.id > seen) {
-                counts[m.sender_device_id] = (counts[m.sender_device_id] || 0) + 1;
+            if (m.id > seen) counts[m.sender_device_id] = (counts[m.sender_device_id] || 0) + 1;
+            if (!latest[m.sender_device_id] || m.id > latest[m.sender_device_id]) {
+                latest[m.sender_device_id] = m.id;
+                latestTime[m.sender_device_id] = m.created_at;
             }
         });
-        document.querySelectorAll('.sidebar-user[data-devid]').forEach(el => {
-            const devId = el.dataset.devid;
-            const badge = el.querySelector('.sidebar-unread');
-            const count = counts[devId] || 0;
-            if (count > 0) {
-                if (badge) badge.textContent = count;
-                else {
-                    const b = document.createElement('div');
-                    b.className = 'sidebar-unread'; b.textContent = count;
-                    el.appendChild(b);
-                }
-                el.classList.add('has-unread');
-            } else {
-                if (badge) badge.remove();
-                el.classList.remove('has-unread');
-            }
+        // Update dmUnreadMap and re-render sidebar with new ordering
+        let needsRerender = false;
+        Object.keys(counts).forEach(devId => {
+            const prev = (dmUnreadMap[devId] || {}).count || 0;
+            if (counts[devId] !== prev) needsRerender = true;
+            dmUnreadMap[devId] = { count: counts[devId], lastId: latest[devId], lastTime: latestTime[devId] };
         });
-    } catch(e) { /* silent */ }
+        // Also clear counts for users that no longer have unreads
+        Object.keys(dmUnreadMap).forEach(devId => {
+            if (!counts[devId] && dmUnreadMap[devId].count > 0) { dmUnreadMap[devId].count = 0; needsRerender = true; }
+        });
+        if (needsRerender) renderSidebar(document.getElementById('sidebarSearch').value);
+    } catch(e) {}
 }
 
 function markDmRead(senderDevId, highestId) {
     seenDmIds[senderDevId] = Math.max(seenDmIds[senderDevId] || 0, highestId);
-    document.querySelectorAll(`.sidebar-user[data-devid="${senderDevId}"]`).forEach(el => {
-        el.querySelector('.sidebar-unread')?.remove();
-        el.classList.remove('has-unread');
-    });
+    if (dmUnreadMap[senderDevId]) { dmUnreadMap[senderDevId].count = 0; }
+    renderSidebar(document.getElementById('sidebarSearch').value);
 }
 
 // ════════════════════════════════════════════════
@@ -1185,35 +1112,22 @@ function joinPresence() {
     if (presenceChannel) { presenceChannel.unsubscribe(); presenceChannel = null; }
     const tabKey = deviceId + '_' + Math.random().toString(36).slice(2,7);
     presenceChannel = sb.channel('gn-chat-presence', { config: { presence: { key: tabKey } } });
-    presenceChannel
-        .on('presence', { event: 'sync' }, () => {
-            const state = presenceChannel.presenceState();
-            const users = [];
-            Object.values(state).forEach(presences => {
-                presences.forEach(p => {
-                    if (p.username && !users.find(u => u === p.username)) users.push(p.username);
-                });
-            });
-            document.getElementById('onlineCount').textContent = users.length;
-            document.getElementById('onlineList').innerHTML = users.length
-                ? users.map(u => `
-                    <div class="online-tooltip-row">
-                        <div class="online-tooltip-dot"></div>
-                        <span style="color:${colorFor(u)};font-weight:600">${esc(u)}</span>
-                        ${u === username ? '<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>' : ''}
-                    </div>`).join('')
-                : '<em style="color:#64748b">No one online</em>';
-        })
-        .subscribe(async status => {
-            if (status === 'SUBSCRIBED') {
-                await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
-            }
-        });
+    presenceChannel.on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const users = [];
+        Object.values(state).forEach(ps => ps.forEach(p => { if (p.username && !users.find(u => u === p.username)) users.push(p.username); }));
+        document.getElementById('onlineCount').textContent = users.length;
+        document.getElementById('onlineList').innerHTML = users.length
+            ? users.map(u => `<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:${colorFor(u)};font-weight:600">${esc(u)}</span>${u === username ? '<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>' : ''}</div>`).join('')
+            : '<em style="color:#64748b">No one online</em>';
+    }).subscribe(async status => {
+        if (status === 'SUBSCRIBED') await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
+    });
 }
 window.addEventListener('beforeunload', () => { if (presenceChannel) presenceChannel.untrack(); });
 
 // ════════════════════════════════════════════════
-// SIDEBAR — USER LIST
+// SIDEBAR — sorted by most recent DM unread
 // ════════════════════════════════════════════════
 async function loadAllUsers() {
     try {
@@ -1225,9 +1139,19 @@ async function loadAllUsers() {
 
 function renderSidebar(filter) {
     const list = document.getElementById('sidebarList');
-    const filtered = filter
-        ? allUsers.filter(u => u.username.toLowerCase().includes(filter.toLowerCase()))
-        : allUsers;
+    let filtered = filter ? allUsers.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())) : [...allUsers];
+
+    // Sort: users with unread messages go to top, sorted by most recent message time
+    filtered.sort((a, b) => {
+        const aUnread = (dmUnreadMap[a.device_id] || {});
+        const bUnread = (dmUnreadMap[b.device_id] || {});
+        const aHas = (aUnread.count || 0) > 0;
+        const bHas = (bUnread.count || 0) > 0;
+        if (aHas && !bHas) return -1;
+        if (!aHas && bHas) return 1;
+        if (aHas && bHas) return new Date(bUnread.lastTime) - new Date(aUnread.lastTime);
+        return a.username.localeCompare(b.username);
+    });
 
     if (!filtered.length) {
         list.innerHTML = `<div class="sidebar-empty">${filter ? 'No users found' : 'No other users yet'}</div>`;
@@ -1237,67 +1161,56 @@ function renderSidebar(filter) {
     list.innerHTML = '';
     filtered.forEach(u => {
         const row = document.createElement('div');
-        row.className = 'sidebar-user' + (dmPartner && dmPartner.device_id === u.device_id ? ' active' : '');
-        row.dataset.devid    = u.device_id;
-        row.dataset.username = u.username;
+        const unread = (dmUnreadMap[u.device_id] || {}).count || 0;
+        row.className = 'sidebar-user' + (dmPartner && dmPartner.device_id === u.device_id ? ' active' : '') + (unread > 0 ? ' has-unread' : '');
+        row.dataset.devid = u.device_id; row.dataset.username = u.username;
 
         const avWrap = document.createElement('div');
         avWrap.className = 'sidebar-avatar';
         avWrap.style.background = colorFor(u.username);
-        const avEl = makeAvatarEl(u.avatar || '', u.username, 30);
-        avEl.style.cssText = ''; // clear inline size, use class
-        avWrap.appendChild(avEl);
+        avWrap.appendChild(makeAvatarEl(u.avatar || '', u.username, 30));
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = u.username;
+        row.appendChild(avWrap); row.appendChild(nameSpan);
 
-        row.appendChild(avWrap);
-        row.appendChild(nameSpan);
+        if (unread > 0) {
+            const badge = document.createElement('div');
+            badge.className = 'sidebar-unread'; badge.textContent = unread;
+            row.appendChild(badge);
+        }
         list.appendChild(row);
-
-        row.addEventListener('click', () => {
-            openDm({ device_id: row.dataset.devid, username: row.dataset.username, avatar: u.avatar || '' });
-        });
+        row.addEventListener('click', () => openDm({ device_id: row.dataset.devid, username: row.dataset.username, avatar: u.avatar || '' }));
     });
 }
-
-document.getElementById('sidebarSearch').addEventListener('input', function() {
-    renderSidebar(this.value);
-});
+document.getElementById('sidebarSearch').addEventListener('input', function() { renderSidebar(this.value); });
 
 // ════════════════════════════════════════════════
 // DM VIEW
 // ════════════════════════════════════════════════
 async function openDm(partner) {
-    dmPartner = partner;
-    dmPartnerDevId = partner.device_id;
-    dmMode = true;
-    lastDmId = 0;
-
+    dmPartner = partner; dmPartnerDevId = partner.device_id;
+    dmMode = true; lastDmId = 0;
     const inner = document.getElementById('messagesInner');
-    inner.innerHTML = '';
-    lastRenderedUser = null;
+    inner.innerHTML = ''; lastRenderedUser = null;
 
     const hdr = document.getElementById('dmHeader');
     hdr.classList.add('show');
     document.getElementById('dmHeaderName').textContent = partner.username;
 
-    // DM header avatar
     const avContainer = document.getElementById('dmHeaderAvatar');
     avContainer.innerHTML = '';
-    const avEl = makeAvatarEl(partner.avatar || getAvatarForDev(partner.device_id), partner.username, 28);
+    const avEl = makeAvatarEl(partner.avatar || getAvatarForDev(partner.device_id), partner.username, 32);
     avContainer.appendChild(avEl);
 
     document.getElementById('msgInput').placeholder = `Message ${partner.username}...`;
     renderSidebar(document.getElementById('sidebarSearch').value);
 
     try {
-        const msgs = await sbGet(
-            `/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${partner.device_id}),and(sender_device_id.eq.${partner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`
-        );
+        const msgs = await sbGet(`/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${partner.device_id}),and(sender_device_id.eq.${partner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`);
         if (msgs && msgs.length) {
             msgs.forEach(m => renderMessage(m, true));
-            lastDmId = msgs[msgs.length - 1].id;
+            lastDmId = msgs[msgs.length-1].id;
             const received = msgs.filter(m => m.sender_device_id === partner.device_id);
             if (received.length) markDmRead(partner.device_id, received[received.length-1].id);
         } else {
@@ -1307,39 +1220,34 @@ async function openDm(partner) {
 }
 
 function closeDm() {
-    dmMode = false;
-    dmPartner = null;
-    dmPartnerDevId = null;
-    lastRenderedUser = null;
+    dmMode = false; dmPartner = null; dmPartnerDevId = null; lastRenderedUser = null;
     document.getElementById('dmHeader').classList.remove('show');
     document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-
     const inner = document.getElementById('messagesInner');
     inner.innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
-    lastRenderedId = 0;
-    loadHistory();
+    lastRenderedId = 0; loadHistory();
     renderSidebar(document.getElementById('sidebarSearch').value);
 }
 
 document.getElementById('dmBackBtn').addEventListener('click', closeDm);
 document.getElementById('globalChatBtn').addEventListener('click', () => { if (dmMode) closeDm(); });
 
+// Clicking DM header avatar (admin can use this to pull up context menu for the DM partner)
+document.getElementById('dmHeaderAvatar').addEventListener('click', (e) => {
+    if (dmPartner) showCtxMenu(e, dmPartner.username, dmPartner.device_id);
+});
+
 // ════════════════════════════════════════════════
-// REPLY STATE
+// REPLY
 // ════════════════════════════════════════════════
 let replyTo = null;
-
 function setReply(msgId, senderName, text) {
     replyTo = { id: msgId, username: senderName, text };
     document.getElementById('replyBar').classList.add('show');
-    document.getElementById('replyBarText').innerHTML =
-        `Replying to <strong>${esc(senderName)}</strong>: ${esc(text.slice(0,60))}${text.length>60?'…':''}`;
+    document.getElementById('replyBarText').innerHTML = `Replying to <strong>${esc(senderName)}</strong>: ${esc(text.slice(0,60))}${text.length>60?'…':''}`;
     document.getElementById('msgInput').focus();
 }
-function clearReply() {
-    replyTo = null;
-    document.getElementById('replyBar').classList.remove('show');
-}
+function clearReply() { replyTo = null; document.getElementById('replyBar').classList.remove('show'); }
 document.getElementById('replyCancelBtn').addEventListener('click', clearReply);
 
 // ════════════════════════════════════════════════
@@ -1347,116 +1255,53 @@ document.getElementById('replyCancelBtn').addEventListener('click', clearReply);
 // ════════════════════════════════════════════════
 function renderMessage(msg, isDm) {
     const container = document.getElementById('messagesInner');
-    const es = document.getElementById('emptyState');
-    if (es) es.remove();
+    const es = document.getElementById('emptyState'); if (es) es.remove();
 
     if (msg.type === 'system') {
         const el = document.createElement('div');
-        el.className = 'msg-system';
-        el.textContent = msg.text;
-        container.appendChild(el);
-        lastRenderedUser = null;
-        return;
+        el.className = 'msg-system'; el.textContent = msg.text;
+        container.appendChild(el); lastRenderedUser = null; return;
     }
 
     const senderDevId = isDm ? msg.sender_device_id : msg.device_id;
     const senderName  = isDm ? msg.sender_username  : msg.username;
-    const isMe        = isDm
-        ? msg.sender_device_id === deviceId
-        : msg.device_id === deviceId || msg.username === username;
-    const sameSender  = lastRenderedUser === (senderDevId || senderName);
-    const color       = colorFor(senderName);
-
+    const isMe = isDm ? msg.sender_device_id === deviceId : msg.device_id === deviceId || msg.username === username;
+    const sameSender = lastRenderedUser === (senderDevId || senderName);
+    const color = colorFor(senderName);
     const senderAvatar = isMe ? myAvatar : getAvatarFor(senderName);
 
     const el = document.createElement('div');
-    el.className = ['msg', isMe ? 'mine' : 'theirs', sameSender ? 'same-sender' : ''].filter(Boolean).join(' ');
-    if (isDm) el.dataset.dmId  = msg.id;
-    else      el.dataset.msgId = msg.id;
+    el.className = ['msg', isMe?'mine':'theirs', sameSender?'same-sender':''].filter(Boolean).join(' ');
+    if (isDm) el.dataset.dmId = msg.id; else el.dataset.msgId = msg.id;
 
-    // Meta row
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'msg-meta';
+    const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
     if (!isMe) {
-        const uSpan = document.createElement('span');
-        uSpan.className = 'msg-username';
-        uSpan.style.color = color;
-        uSpan.dataset.username = senderName;
-        uSpan.textContent = senderName;
+        const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = color; uSpan.dataset.username = senderName; uSpan.textContent = senderName;
         metaDiv.appendChild(uSpan);
     }
-    const tSpan = document.createElement('span');
-    tSpan.className = 'msg-time';
-    tSpan.textContent = fmtTime(msg.created_at || Date.now());
-    metaDiv.appendChild(tSpan);
-    if (isDm) {
-        const dmBadge = document.createElement('span');
-        dmBadge.className = 'dm-indicator';
-        dmBadge.textContent = 'DM';
-        metaDiv.appendChild(dmBadge);
-    }
+    const tSpan = document.createElement('span'); tSpan.className = 'msg-time'; tSpan.textContent = fmtTime(msg.created_at || Date.now()); metaDiv.appendChild(tSpan);
+    if (isDm) { const dmBadge = document.createElement('span'); dmBadge.className = 'dm-indicator'; dmBadge.textContent = 'DM'; metaDiv.appendChild(dmBadge); }
 
-    // Row (avatar + bubble)
-    const rowDiv = document.createElement('div');
-    rowDiv.className = 'msg-row';
-
-    // Avatar
+    const rowDiv = document.createElement('div'); rowDiv.className = 'msg-row';
     if (!isMe) {
         const avEl = makeAvatarEl(senderAvatar, senderName, 28);
-        avEl.className = 'msg-avatar';
-        avEl.dataset.username = senderName;
-        avEl.dataset.devid    = senderDevId || '';
-        avEl.title = senderName;
+        avEl.className = 'msg-avatar'; avEl.dataset.username = senderName; avEl.dataset.devid = senderDevId || ''; avEl.title = senderName;
         rowDiv.appendChild(avEl);
     }
-
-    // Bubble wrap
-    const bWrap = document.createElement('div');
-    bWrap.className = 'msg-bubble-wrap';
-
-    // Reply snippet
+    const bWrap = document.createElement('div'); bWrap.className = 'msg-bubble-wrap';
     if (!isDm && msg.reply_to_username && msg.reply_to_text) {
-        const rp = document.createElement('div');
-        rp.className = 'reply-preview';
+        const rp = document.createElement('div'); rp.className = 'reply-preview';
         rp.innerHTML = `<strong>${esc(msg.reply_to_username)}</strong> ${esc(msg.reply_to_text.slice(0,80))}`;
         bWrap.appendChild(rp);
     }
-
-    // Bubble
-    const bubble = document.createElement('div');
-    bubble.className = 'msg-bubble';
-    bubble.textContent = msg.text;
-    bWrap.appendChild(bubble);
-
-    // Reply button (public only)
+    const bubble = document.createElement('div'); bubble.className = 'msg-bubble'; bubble.textContent = msg.text; bWrap.appendChild(bubble);
     if (!isDm) {
-        const rBtn = document.createElement('button');
-        rBtn.className = 'msg-reply msg-reply-btn';
-        rBtn.title = 'Reply';
-        rBtn.dataset.id     = msg.id;
-        rBtn.dataset.sender = senderName;
-        rBtn.dataset.text   = msg.text;
-        rBtn.textContent = '↩';
-        bWrap.appendChild(rBtn);
+        const rBtn = document.createElement('button'); rBtn.className = 'msg-reply msg-reply-btn'; rBtn.title = 'Reply'; rBtn.dataset.id = msg.id; rBtn.dataset.sender = senderName; rBtn.dataset.text = msg.text; rBtn.textContent = '↩'; bWrap.appendChild(rBtn);
     }
-
-    // Delete button
     if (isMe || isAdmin()) {
-        const dBtn = document.createElement('button');
-        dBtn.className = 'msg-delete';
-        dBtn.title = 'Delete';
-        dBtn.dataset.id   = msg.id;
-        dBtn.dataset.isdm = isDm ? '1' : '0';
-        dBtn.textContent = '✕';
-        dBtn.addEventListener('click', deleteMsg);
-        bWrap.appendChild(dBtn);
+        const dBtn = document.createElement('button'); dBtn.className = 'msg-delete'; dBtn.title = 'Delete'; dBtn.dataset.id = msg.id; dBtn.dataset.isdm = isDm?'1':'0'; dBtn.textContent = '✕'; dBtn.addEventListener('click', deleteMsg); bWrap.appendChild(dBtn);
     }
-
-    rowDiv.appendChild(bWrap);
-    el.appendChild(metaDiv);
-    el.appendChild(rowDiv);
-    container.appendChild(el);
-
+    rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
     lastRenderedUser = senderDevId || senderName;
     if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
 }
@@ -1466,20 +1311,13 @@ function renderMessage(msg, isDm) {
 // ════════════════════════════════════════════════
 async function deleteMsg(e) {
     e.stopPropagation();
-    const btn   = e.currentTarget;
-    const id    = parseInt(btn.dataset.id);
-    const isDm  = btn.dataset.isdm === '1';
-    const msgEl = btn.closest('.msg');
-    if (!msgEl) return;
+    const btn = e.currentTarget; const id = parseInt(btn.dataset.id); const isDm = btn.dataset.isdm === '1';
+    const msgEl = btn.closest('.msg'); if (!msgEl) return;
     try {
         if (isDm) await sbDelete(`/rest/v1/dms?id=eq.${id}`);
-        else      await sbDelete(`/rest/v1/messages?id=eq.${id}`);
+        else await sbDelete(`/rest/v1/messages?id=eq.${id}`);
         msgEl.remove();
-    } catch(err) {
-        console.error('delete error:', err);
-        showBanner('⚠ Could not delete message', 'red');
-        setTimeout(() => showBanner(''), 3000);
-    }
+    } catch(err) { console.error('delete error:', err); showBanner('⚠ Could not delete message', 'red'); }
 }
 
 // ════════════════════════════════════════════════
@@ -1489,157 +1327,262 @@ const messagesWrap = document.getElementById('messagesWrap');
 const scrollBtn    = document.getElementById('scrollBtn');
 messagesWrap.addEventListener('scroll', () => {
     const dist = messagesWrap.scrollHeight - messagesWrap.scrollTop - messagesWrap.clientHeight;
-    autoScroll = dist < 60;
-    scrollBtn.classList.toggle('show', dist > 120);
+    autoScroll = dist < 60; scrollBtn.classList.toggle('show', dist > 120);
 });
-scrollBtn.addEventListener('click', () => {
-    autoScroll = true;
-    messagesWrap.scrollTop = 999999;
-    scrollBtn.classList.remove('show');
-});
+scrollBtn.addEventListener('click', () => { autoScroll = true; messagesWrap.scrollTop = 999999; scrollBtn.classList.remove('show'); });
 
 // ════════════════════════════════════════════════
 // SEND
 // ════════════════════════════════════════════════
 async function sendMessage() {
     const input = document.getElementById('msgInput');
-    const text  = input.value.trim();
+    const text = input.value.trim();
     if (!text || !username) return;
+    if (isMuted) { showBanner('🔕 You are muted and cannot send messages.', 'red'); return; }
     if (Date.now() - lastSendTime < COOLDOWN_MS) return;
-
-    input.value = '';
-    input.style.height = 'auto';
-    lastSendTime = Date.now();
-    startCooldown();
-
+    input.value = ''; input.style.height = 'auto';
+    lastSendTime = Date.now(); startCooldown();
     try {
         if (dmMode && dmPartner) {
-            const inserted = await sbPost('/rest/v1/dms', {
-                sender_device_id: deviceId,
-                recipient_device_id: dmPartner.device_id,
-                sender_username: username,
-                text
-            });
-            if (inserted && inserted.length) {
-                renderMessage(inserted[0], true);
-                lastDmId = inserted[0].id;
-            }
+            const inserted = await sbPost('/rest/v1/dms', { sender_device_id: deviceId, recipient_device_id: dmPartner.device_id, sender_username: username, text });
+            if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
         } else {
             const payload = { username, text, type: 'chat', device_id: deviceId };
-            if (replyTo) {
-                payload.reply_to = replyTo.id;
-                payload.reply_to_username = replyTo.username;
-                payload.reply_to_text = replyTo.text;
-            }
+            if (replyTo) { payload.reply_to = replyTo.id; payload.reply_to_username = replyTo.username; payload.reply_to_text = replyTo.text; }
             clearReply();
             const inserted = await sbPost('/rest/v1/messages', payload);
-            if (inserted && inserted.length) {
-                renderMessage(inserted[0], false);
-                lastRenderedId = inserted[0].id;
-            }
+            if (inserted && inserted.length) { renderMessage(inserted[0], false); lastRenderedId = inserted[0].id; }
         }
-    } catch(e) {
-        showBanner('⚠ Failed to send — check console', 'red');
-        console.error('send error:', e);
-        setTimeout(() => showBanner(''), 3000);
-    }
+    } catch(e) { showBanner('⚠ Failed to send', 'red'); console.error(e); }
 }
-
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-document.getElementById('msgInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-document.getElementById('msgInput').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-});
+document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+document.getElementById('msgInput').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
 
 // ════════════════════════════════════════════════
 // COOLDOWN
 // ════════════════════════════════════════════════
 function startCooldown() {
-    const sendBtn = document.getElementById('sendBtn');
-    const input   = document.getElementById('msgInput');
-    const barWrap = document.getElementById('cooldownWrap');
-    const bar     = document.getElementById('cooldownBar');
-
-    sendBtn.disabled = true; input.disabled = true;
-    barWrap.classList.add('active'); bar.style.width = '0%';
-
+    const sBtn = document.getElementById('sendBtn'); const input = document.getElementById('msgInput');
+    const bWrap = document.getElementById('cooldownWrap'); const bar = document.getElementById('cooldownBar');
+    sBtn.disabled = true; input.disabled = true; bWrap.classList.add('active'); bar.style.width = '0%';
     const start = Date.now();
     const tick = () => {
-        const elapsed = Date.now() - start;
-        bar.style.width = Math.min((elapsed / COOLDOWN_MS) * 100, 100) + '%';
-        if (elapsed < COOLDOWN_MS) {
-            cooldownRaf = requestAnimationFrame(tick);
-        } else {
-            sendBtn.disabled = false; input.disabled = false;
-            barWrap.classList.remove('active'); bar.style.width = '0%';
-            input.focus();
-        }
+        const e = Date.now() - start; bar.style.width = Math.min((e/COOLDOWN_MS)*100,100) + '%';
+        if (e < COOLDOWN_MS) { cooldownRaf = requestAnimationFrame(tick); }
+        else { if (!isMuted) { sBtn.disabled = false; input.disabled = false; } bWrap.classList.remove('active'); bar.style.width = '0%'; input.focus(); }
     };
     cooldownRaf = requestAnimationFrame(tick);
 }
 
 // ════════════════════════════════════════════════
-// ADMIN
+// ADMIN PANEL
 // ════════════════════════════════════════════════
-const ADMIN_USERNAME = 'lamb'; // case-insensitive
-function isAdmin() { return username && username.toLowerCase() === ADMIN_USERNAME; }
+document.getElementById('adminPanelBtn').addEventListener('click', () => {
+    document.getElementById('adminPanelOverlay').classList.add('open');
+    loadAdminUserList();
+});
+document.getElementById('adminPanelClose').addEventListener('click', () => {
+    document.getElementById('adminPanelOverlay').classList.remove('open');
+});
+document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => {
+    if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open');
+});
 
-// Admin: force-refresh all open clients
-async function adminForceRefreshAll() {
+// Force refresh all
+document.getElementById('apForceRefreshAll').addEventListener('click', async () => {
     await broadcastAdminCmd({ action: 'force_refresh' });
-    fullRefresh(); // also refresh admin's own view
-    showBanner('✅ Refreshed all clients', 'green');
-    setTimeout(() => showBanner(''), 3000);
+    fullRefresh();
+    showBanner('✅ All clients refreshed', 'green');
+});
+
+// Clear ALL messages
+document.getElementById('apClearAllMessages').addEventListener('click', async () => {
+    if (!confirm('Delete EVERY message from the public chat? This cannot be undone.')) return;
+    try {
+        await sbDelete('/rest/v1/messages?id=gt.0');
+        await broadcastAdminCmd({ action: 'force_refresh' });
+        fullRefresh();
+        showBanner('✅ All messages cleared', 'green');
+    } catch(e) { showBanner('⚠ Failed: ' + (e.message || 'check console'), 'red'); }
+});
+
+// Announcement
+document.getElementById('announceSendBtn').addEventListener('click', async () => {
+    const text = document.getElementById('announceText').value.trim();
+    if (!text) return;
+    try {
+        // Save as a system message in DB so it persists
+        await sbPost('/rest/v1/messages', { username: '📢 Admin', text: '📢 ' + text, type: 'system', device_id: deviceId });
+        await broadcastAdminCmd({ action: 'announcement', text });
+        document.getElementById('announceText').value = '';
+        showBanner('✅ Announcement sent', 'green');
+    } catch(e) { showBanner('⚠ Failed to send announcement', 'red'); }
+});
+
+async function loadAdminUserList() {
+    const listEl = document.getElementById('adminUserList');
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
+    try {
+        const [users, msgs] = await Promise.all([
+            sbGet('/rest/v1/users?order=username.asc&select=*'),
+            sbGet('/rest/v1/messages?select=device_id')
+        ]);
+        // Count messages per device_id
+        const counts = {};
+        (msgs || []).forEach(m => { counts[m.device_id] = (counts[m.device_id] || 0) + 1; });
+
+        const otherUsers = (users || []).filter(u => u.device_id !== deviceId);
+        document.getElementById('apUserCount').textContent = `(${otherUsers.length})`;
+
+        if (!otherUsers.length) {
+            listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No other users yet</div>';
+            return;
+        }
+        listEl.innerHTML = '';
+        otherUsers.forEach(u => {
+            const isMutedUser = u.muted_until && new Date(u.muted_until) > new Date();
+            const msgCount = counts[u.device_id] || 0;
+
+            const row = document.createElement('div');
+            row.className = 'admin-user-row' + (isMutedUser ? ' muted' : '');
+
+            const avEl = makeAvatarEl(u.avatar || '', u.username, 28);
+            avEl.className = 'admin-user-av';
+
+            const info = document.createElement('div'); info.className = 'admin-user-info';
+            const nameDiv = document.createElement('div'); nameDiv.className = 'admin-user-name';
+            nameDiv.textContent = u.username;
+            if (isMutedUser) {
+                const badge = document.createElement('span');
+                badge.className = 'muted-badge'; badge.textContent = 'muted';
+                nameDiv.appendChild(document.createTextNode(' ')); nameDiv.appendChild(badge);
+            }
+            const metaDiv = document.createElement('div'); metaDiv.className = 'admin-user-meta';
+            metaDiv.textContent = `${msgCount} msg${msgCount !== 1 ? 's' : ''}`;
+            info.appendChild(nameDiv); info.appendChild(metaDiv);
+
+            const actions = document.createElement('div'); actions.className = 'admin-user-actions';
+
+            // Refresh just them
+            const refreshBtn = document.createElement('button');
+            refreshBtn.className = 'admin-user-btn'; refreshBtn.title = 'Refresh this user'; refreshBtn.textContent = '🔄';
+            refreshBtn.onclick = async () => {
+                await broadcastAdminCmd({ action: 'force_refresh_target', device_id: u.device_id });
+                showBanner(`✅ Refreshed ${u.username}`, 'green');
+            };
+
+            // Mute / unmute
+            const muteBtn = document.createElement('button');
+            muteBtn.className = 'admin-user-btn warn'; muteBtn.title = isMutedUser ? 'Unmute' : 'Mute'; muteBtn.textContent = isMutedUser ? '🔊' : '🔕';
+            muteBtn.onclick = () => {
+                if (isMutedUser) adminUnmuteUser(u);
+                else openMuteModal(u);
+            };
+
+            // Clear messages
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'admin-user-btn'; clearBtn.title = 'Clear their messages'; clearBtn.textContent = '🗑';
+            clearBtn.onclick = () => { document.getElementById('adminPanelOverlay').classList.remove('open'); adminDeleteAllFrom(u); };
+
+            // Ban
+            const banBtn = document.createElement('button');
+            banBtn.className = 'admin-user-btn danger'; banBtn.title = 'Ban user'; banBtn.textContent = '🔇';
+            banBtn.onclick = () => { document.getElementById('adminPanelOverlay').classList.remove('open'); openBanModal(u); };
+
+            actions.appendChild(refreshBtn); actions.appendChild(muteBtn); actions.appendChild(clearBtn); actions.appendChild(banBtn);
+            row.appendChild(avEl); row.appendChild(info); row.appendChild(actions);
+            listEl.appendChild(row);
+        });
+    } catch(e) { listEl.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Error loading users</div>'; console.error(e); }
 }
 
-// Admin: delete all PUBLIC messages from a user (by username match)
+// ════════════════════════════════════════════════
+// BAN MODAL
+// ════════════════════════════════════════════════
+function openBanModal(targetUser) {
+    banTarget = targetUser;
+    document.getElementById('banTargetName').textContent = targetUser.username;
+    document.getElementById('banReasonInput').value = '';
+    document.getElementById('banModal').classList.add('open');
+    setTimeout(() => document.getElementById('banReasonInput').focus(), 30);
+}
+document.getElementById('banCancelBtn').addEventListener('click', () => { document.getElementById('banModal').classList.remove('open'); banTarget = null; });
+document.getElementById('banConfirmBtn').addEventListener('click', () => adminBanUser(banTarget));
+
+async function adminBanUser(targetUser) {
+    if (!targetUser) return;
+    const reason = document.getElementById('banReasonInput').value.trim() || 'No reason provided.';
+    document.getElementById('banModal').classList.remove('open');
+    try {
+        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
+        // Tell the banned user's tab to show the ban screen
+        await broadcastAdminCmd({ action: 'user_banned', device_id: targetUser.device_id, reason });
+        // Refresh everyone else
+        await broadcastAdminCmd({ action: 'force_refresh' });
+        showBanner(`✅ Banned ${targetUser.username}`, 'green');
+        fullRefresh(); loadAllUsers(); banTarget = null;
+    } catch(e) { console.error(e); showBanner('⚠ Ban failed: ' + (e.message || ''), 'red'); }
+}
+
+// ════════════════════════════════════════════════
+// MUTE MODAL
+// ════════════════════════════════════════════════
+let selectedMuteMins = 60;
+function openMuteModal(targetUser) {
+    muteTarget = targetUser;
+    document.getElementById('muteTargetName').textContent = targetUser.username;
+    // Reset selection
+    selectedMuteMins = 60;
+    document.querySelectorAll('.mute-dur-btn').forEach(b => { b.classList.toggle('selected', b.dataset.mins === '60'); });
+    document.getElementById('muteModal').classList.add('open');
+}
+document.querySelectorAll('.mute-dur-btn').forEach(b => {
+    b.addEventListener('click', () => {
+        selectedMuteMins = parseInt(b.dataset.mins);
+        document.querySelectorAll('.mute-dur-btn').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+    });
+});
+document.getElementById('muteCancelBtn').addEventListener('click', () => { document.getElementById('muteModal').classList.remove('open'); muteTarget = null; });
+document.getElementById('muteConfirmBtn').addEventListener('click', () => adminMuteUser(muteTarget, selectedMuteMins));
+
+async function adminMuteUser(targetUser, minutes) {
+    if (!targetUser) return;
+    document.getElementById('muteModal').classList.remove('open');
+    const until = new Date(Date.now() + minutes * 60000).toISOString();
+    try {
+        await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`, { muted_until: until });
+        await broadcastAdminCmd({ action: 'user_muted', device_id: targetUser.device_id, until });
+        showBanner(`✅ Muted ${targetUser.username} for ${formatMuteTime(new Date(until))}`, 'green');
+        muteTarget = null;
+        loadAdminUserList();
+    } catch(e) { console.error(e); showBanner('⚠ Mute failed: ' + (e.message || ''), 'red'); }
+}
+
+async function adminUnmuteUser(targetUser) {
+    try {
+        await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`, { muted_until: null });
+        await broadcastAdminCmd({ action: 'user_unmuted', device_id: targetUser.device_id });
+        showBanner(`✅ Unmuted ${targetUser.username}`, 'green');
+        loadAdminUserList();
+    } catch(e) { console.error(e); showBanner('⚠ Unmute failed', 'red'); }
+}
+
+// ════════════════════════════════════════════════
+// DELETE PUBLIC MESSAGES (from context menu)
+// ════════════════════════════════════════════════
 async function adminDeleteAllFrom(targetUser) {
     if (!confirm(`Delete all PUBLIC messages from "${targetUser.username}"?`)) return;
     try {
-        // Delete by device_id (more reliable than username) AND by username as fallback
         await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        showBanner(`✅ Deleted public messages from ${targetUser.username}`, 'green');
-        setTimeout(() => showBanner(''), 3000);
-        // Tell everyone to refresh
         await broadcastAdminCmd({ action: 'messages_cleared', target: targetUser.username });
+        showBanner(`✅ Deleted public messages from ${targetUser.username}`, 'green');
         fullRefresh();
-    } catch(e) {
-        console.error('adminDeleteAllFrom error:', e);
-        showBanner('⚠ Failed: ' + (e.message || 'check console'), 'red');
-        setTimeout(() => showBanner(''), 5000);
-    }
-}
-
-// Admin: ban a user — delete all their data
-async function adminBanUser(targetUser) {
-    if (!confirm(`Ban "${targetUser.username}"?\n\nThis will:\n• Delete all their messages\n• Delete all their DMs\n• Remove their account\n• Force them to pick a new username`)) return;
-    try {
-        // 1. Delete public messages
-        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        // 2. Delete sent DMs
-        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        // 3. Delete received DMs
-        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        // 4. Delete user record
-        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-
-        showBanner(`✅ Banned ${targetUser.username}`, 'green');
-        setTimeout(() => showBanner(''), 4000);
-
-        // Notify the banned user's client to reset, and everyone else to refresh
-        await broadcastAdminCmd({ action: 'user_banned', device_id: targetUser.device_id, username: targetUser.username });
-        await broadcastAdminCmd({ action: 'force_refresh' });
-
-        fullRefresh();
-        loadAllUsers();
-    } catch(e) {
-        console.error('adminBanUser error:', e);
-        showBanner('⚠ Ban failed: ' + (e.message || 'check console'), 'red');
-        setTimeout(() => showBanner(''), 5000);
-    }
+    } catch(e) { console.error(e); showBanner('⚠ Failed: ' + (e.message || ''), 'red'); }
 }
 
 // ════════════════════════════════════════════════
@@ -1650,92 +1593,66 @@ let ctxTarget = null;
 
 function showCtxMenu(e, targetUsername, targetDevId) {
     if (targetUsername === username) return;
-
     let user = allUsers.find(u => u.username === targetUsername);
     if (!user && targetDevId) user = allUsers.find(u => u.device_id === targetDevId);
     if (!user) user = { username: targetUsername, device_id: targetDevId || '' };
     ctxTarget = user;
-
     document.getElementById('ctxMenuName').textContent = targetUsername;
-
-    // Remove old admin items
     ctxMenu.querySelectorAll('.ctx-admin-item').forEach(x => x.remove());
 
     if (isAdmin()) {
-        const div = document.createElement('div');
-        div.className = 'ctx-menu-divider ctx-admin-item';
-        ctxMenu.appendChild(div);
+        const isMutedUser = user.muted_until && new Date(user.muted_until) > new Date();
 
-        const delAllBtn = document.createElement('div');
-        delAllBtn.className = 'ctx-menu-item ctx-admin-item';
-        delAllBtn.style.color = '#ef4444';
-        delAllBtn.innerHTML = '🗑 Clear their messages';
-        delAllBtn.onclick = () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); };
-        ctxMenu.appendChild(delAllBtn);
+        const div = document.createElement('div'); div.className = 'ctx-menu-divider ctx-admin-item'; ctxMenu.appendChild(div);
 
-        const banBtn = document.createElement('div');
-        banBtn.className = 'ctx-menu-item ctx-admin-item';
-        banBtn.style.color = '#ef4444';
-        banBtn.innerHTML = '🔇 Ban user';
-        banBtn.onclick = () => { ctxMenu.classList.remove('open'); adminBanUser(ctxTarget); };
-        ctxMenu.appendChild(banBtn);
-
-        const refreshBtn = document.createElement('div');
-        refreshBtn.className = 'ctx-menu-item ctx-admin-item';
-        refreshBtn.innerHTML = '🔄 Force refresh all';
-        refreshBtn.onclick = () => { ctxMenu.classList.remove('open'); adminForceRefreshAll(); };
+        const refreshBtn = document.createElement('div'); refreshBtn.className = 'ctx-menu-item ctx-admin-item';
+        refreshBtn.innerHTML = '🔄 Refresh their chat';
+        refreshBtn.onclick = async () => { ctxMenu.classList.remove('open'); await broadcastAdminCmd({ action: 'force_refresh_target', device_id: ctxTarget.device_id }); showBanner(`✅ Refreshed ${ctxTarget.username}`, 'green'); };
         ctxMenu.appendChild(refreshBtn);
+
+        const muteBtn = document.createElement('div'); muteBtn.className = 'ctx-menu-item ctx-admin-item';
+        muteBtn.innerHTML = isMutedUser ? '🔊 Unmute' : '🔕 Mute';
+        muteBtn.onclick = () => { ctxMenu.classList.remove('open'); isMutedUser ? adminUnmuteUser(ctxTarget) : openMuteModal(ctxTarget); };
+        ctxMenu.appendChild(muteBtn);
+
+        const clearBtn = document.createElement('div'); clearBtn.className = 'ctx-menu-item ctx-admin-item danger';
+        clearBtn.innerHTML = '🗑 Clear their messages';
+        clearBtn.onclick = () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); };
+        ctxMenu.appendChild(clearBtn);
+
+        const banBtn = document.createElement('div'); banBtn.className = 'ctx-menu-item ctx-admin-item danger';
+        banBtn.innerHTML = '🔇 Ban user';
+        banBtn.onclick = () => { ctxMenu.classList.remove('open'); openBanModal(ctxTarget); };
+        ctxMenu.appendChild(banBtn);
     }
 
-    ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 210) + 'px';
-    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 200) + 'px';
-    ctxJustOpened = true;
-    ctxMenu.classList.add('open');
-    e.stopPropagation();
+    ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
+    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 250) + 'px';
+    ctxJustOpened = true; ctxMenu.classList.add('open'); e.stopPropagation();
 }
 
 document.getElementById('ctxDmBtn').addEventListener('click', () => {
-    if (ctxTarget) { openDm(ctxTarget); ctxTarget = null; }
-    ctxMenu.classList.remove('open');
+    if (ctxTarget) { openDm(ctxTarget); ctxTarget = null; } ctxMenu.classList.remove('open');
 });
 
 let ctxJustOpened = false;
-document.addEventListener('mousedown', (e) => {
+document.addEventListener('mousedown', e => {
     if (ctxJustOpened) { ctxJustOpened = false; return; }
     if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('open');
 });
 
 // Unified click handler
 document.getElementById('messagesInner').addEventListener('click', e => {
-    // Reply button
     const replyBtn = e.target.closest('.msg-reply-btn');
-    if (replyBtn) {
-        e.stopPropagation();
-        setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text);
-        return;
-    }
-
-    // Delete button — has its own listener
+    if (replyBtn) { e.stopPropagation(); setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text); return; }
     if (e.target.closest('.msg-delete')) return;
-
-    // Avatar click
     const avatar = e.target.closest('.msg-avatar');
     if (avatar) {
         const msgEl = avatar.closest('.msg');
-        if (msgEl && msgEl.classList.contains('theirs')) {
-            const targetName = avatar.dataset.username;
-            const targetDev  = avatar.dataset.devid;
-            if (targetName) showCtxMenu(e, targetName, targetDev);
-            return;
-        }
+        if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; }
     }
-
-    // Username click
     const usernameSpan = e.target.closest('.msg-username');
-    if (usernameSpan) {
-        showCtxMenu(e, usernameSpan.dataset.username || usernameSpan.textContent, null);
-        return;
-    }
+    if (usernameSpan) { showCtxMenu(e, usernameSpan.dataset.username || usernameSpan.textContent, null); return; }
 });
 </script>
 </body>
