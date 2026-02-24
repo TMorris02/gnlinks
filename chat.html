@@ -1080,8 +1080,8 @@ function renderMessage(msg, isDm) {
             <div class="msg-bubble-wrap">
                 ${replySnippet}
                 <div class="msg-bubble">${esc(msg.text)}</div>
-                ${!isDm ? `<button class="msg-reply" title="Reply" onclick="setReply(${msg.id}, '${esc(senderName)}', '${esc(msg.text.replace(/'/g,"\'"))}')">↩</button>` : ''}
-                ${(isMe || isAdmin()) ? `<button class="msg-delete" title="Delete" onclick="deleteMsg(event, ${msg.id}, ${isDm})">✕</button>` : ''}
+                ${!isDm ? `<button class="msg-reply msg-reply-btn" title="Reply" data-id="${msg.id}" data-sender="${esc(senderName)}" data-text="${esc(msg.text).replace(/"/g,'&quot;')}">↩</button>` : ''}
+                ${(isMe || isAdmin()) ? `<button class="msg-delete" title="Delete" data-id="${msg.id}" data-isdm="${isDm ? '1' : '0'}" onclick="deleteMsg(event)">✕</button>` : ''}
             </div>
         </div>`;
 
@@ -1094,9 +1094,12 @@ function renderMessage(msg, isDm) {
 // ════════════════════════════════════════════════
 // DELETE MESSAGE
 // ════════════════════════════════════════════════
-async function deleteMsg(e, id, isDm) {
+async function deleteMsg(e) {
     e.stopPropagation();
-    const msgEl = e.target.closest('.msg');
+    const btn   = e.currentTarget;
+    const id    = parseInt(btn.dataset.id);
+    const isDm  = btn.dataset.isdm === '1';
+    const msgEl = btn.closest('.msg');
     if (!msgEl) return;
     try {
         if (isDm) {
@@ -1281,8 +1284,8 @@ function showCtxMenu(e, targetUsername) {
 
     ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
     ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 120) + 'px';
+    ctxJustOpened = true;
     ctxMenu.classList.add('open');
-    e.stopPropagation();
 }
 
 document.getElementById('ctxDmBtn').addEventListener('click', () => {
@@ -1290,17 +1293,35 @@ document.getElementById('ctxDmBtn').addEventListener('click', () => {
     ctxMenu.classList.remove('open');
 });
 
-document.addEventListener('click', () => ctxMenu.classList.remove('open'));
+// Close menu on next click outside — use mousedown with a flag to avoid same-event close
+let ctxJustOpened = false;
+document.addEventListener('mousedown', (e) => {
+    if (ctxJustOpened) { ctxJustOpened = false; return; }
+    if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('open');
+});
 
-// Click on username label OR on another user's bubble → show menu
+// Unified click handler for messages area
 document.getElementById('messagesInner').addEventListener('click', e => {
-    // Don't trigger if clicking reply/delete buttons
-    if (e.target.closest('.msg-reply') || e.target.closest('.msg-delete')) return;
+    // Handle reply button clicks
+    const replyBtn = e.target.closest('.msg-reply-btn');
+    if (replyBtn) {
+        e.stopPropagation();
+        const id   = parseInt(replyBtn.dataset.id);
+        const sender = replyBtn.dataset.sender;
+        const text   = replyBtn.dataset.text
+            .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+        setReply(id, sender, text);
+        return;
+    }
 
+    // Handle delete button — already has onclick, just don't propagate
+    if (e.target.closest('.msg-delete')) return;
+
+    // Click on username label → context menu
     const span = e.target.closest('.msg-username');
     if (span) { showCtxMenu(e, span.textContent); return; }
 
-    // Clicking on someone else's bubble
+    // Click on another user's bubble → context menu
     const bubble = e.target.closest('.msg-bubble-wrap');
     if (bubble) {
         const msgEl = bubble.closest('.msg');
