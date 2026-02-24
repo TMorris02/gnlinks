@@ -36,6 +36,44 @@
 .ctx-menu-item.danger:hover { background: #fef2f2; color: #dc2626; }
 .ctx-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
+
+/* ── REPLY ── */
+.reply-preview {
+    font-size: 11px; padding: 4px 8px; margin-bottom: 3px;
+    border-left: 3px solid var(--primary); background: var(--primary-lighter);
+    border-radius: 0 6px 6px 0; color: var(--text-muted); cursor: pointer;
+    max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.reply-preview strong { color: var(--text); font-weight: 700; }
+.msg.mine .reply-preview { border-left-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+.msg.mine .reply-preview strong { color: white; }
+
+/* reply bar above input */
+.reply-bar {
+    display: none; align-items: center; gap: 10px;
+    padding: 6px 16px; background: var(--primary-lighter);
+    border-top: 1px solid var(--primary-light); font-size: 12px; color: var(--text-muted);
+    max-width: 100%;
+}
+.reply-bar.show { display: flex; }
+.reply-bar-text { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.reply-bar-text strong { color: var(--primary); font-weight: 700; }
+.reply-cancel {
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 16px; line-height: 1; padding: 2px 4px; flex-shrink: 0;
+}
+.reply-cancel:hover { color: var(--text); }
+
+/* reply button on hover */
+.msg-reply {
+    display: none; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); width: 26px; height: 26px; border-radius: 50%;
+    cursor: pointer; font-size: 12px; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+}
+.msg-bubble-wrap:hover .msg-reply { display: flex; }
+.msg-reply:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
 /* ── RESET ── */
 .main-toggle-btn { display: none !important; }
 header { background: var(--gradient-primary) !important; position: relative !important; box-shadow: var(--shadow-lg) !important; }
@@ -440,6 +478,12 @@ body {
 
         <button class="scroll-btn" id="scrollBtn">↓</button>
 
+        <!-- REPLY BAR -->
+        <div class="reply-bar" id="replyBar">
+            <span class="reply-bar-text" id="replyBarText"></span>
+            <button class="reply-cancel" id="replyCancelBtn" title="Cancel reply">✕</button>
+        </div>
+
         <!-- INPUT -->
         <div class="input-area">
             <div class="input-inner">
@@ -775,39 +819,58 @@ async function pollDmThread() {
                     lastDmId = m.id;
                 }
             });
+            // Mark received ones as read
+            const received = msgs.filter(m => m.sender_device_id === dmPartner.device_id);
+            if (received.length) markDmRead(dmPartner.device_id, received[received.length-1].id);
         }
     } catch(e) { /* silent */ }
 }
 
+// Track the highest DM id we've actually READ per sender
+const seenDmIds = {}; // sender_device_id -> highest id seen
+
 async function pollDmUnreads() {
-    // Check for any DMs sent TO me that I haven't seen
     try {
         const msgs = await sbGet(
-            `/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.desc&limit=50&select=*`
+            `/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.asc&select=*`
         );
-        if (msgs) {
-            const counts = {};
-            msgs.forEach(m => {
-                if (!counts[m.sender_device_id]) counts[m.sender_device_id] = 0;
-                counts[m.sender_device_id]++;
-            });
-            // Update unread badges in sidebar
-            document.querySelectorAll('.sidebar-user[data-devid]').forEach(el => {
-                const devId = el.dataset.devid;
-                const badge = el.querySelector('.sidebar-unread');
-                if (counts[devId]) {
-                    if (badge) badge.textContent = counts[devId];
-                    else {
-                        const b = document.createElement('div');
-                        b.className = 'sidebar-unread';
-                        b.textContent = counts[devId];
-                        el.appendChild(b);
-                    }
-                    el.classList.add('has-unread');
+        if (!msgs) return;
+        // Count only messages newer than what we've seen
+        const counts = {};
+        msgs.forEach(m => {
+            const seen = seenDmIds[m.sender_device_id] || 0;
+            if (m.id > seen) {
+                counts[m.sender_device_id] = (counts[m.sender_device_id] || 0) + 1;
+            }
+        });
+        // Update sidebar badges
+        document.querySelectorAll('.sidebar-user[data-devid]').forEach(el => {
+            const devId = el.dataset.devid;
+            const badge = el.querySelector('.sidebar-unread');
+            const count = counts[devId] || 0;
+            if (count > 0) {
+                if (badge) badge.textContent = count;
+                else {
+                    const b = document.createElement('div');
+                    b.className = 'sidebar-unread'; b.textContent = count;
+                    el.appendChild(b);
                 }
-            });
-        }
+                el.classList.add('has-unread');
+            } else {
+                if (badge) badge.remove();
+                el.classList.remove('has-unread');
+            }
+        });
     } catch(e) { /* silent */ }
+}
+
+function markDmRead(senderDevId, highestId) {
+    seenDmIds[senderDevId] = Math.max(seenDmIds[senderDevId] || 0, highestId);
+    // Clear badge immediately
+    document.querySelectorAll(`.sidebar-user[data-devid="${senderDevId}"]`).forEach(el => {
+        el.querySelector('.sidebar-unread')?.remove();
+        el.classList.remove('has-unread');
+    });
 }
 
 // ════════════════════════════════════════════════
@@ -920,6 +983,9 @@ async function openDm(partner) {
         if (msgs && msgs.length) {
             msgs.forEach(m => renderMessage(m, true));
             lastDmId = msgs[msgs.length - 1].id;
+            // Mark all received DMs from this partner as read
+            const received = msgs.filter(m => m.sender_device_id === partner.device_id);
+            if (received.length) markDmRead(partner.device_id, received[received.length-1].id);
         } else {
             inner.innerHTML = `<div class="empty-state"><div class="ei">🤫</div><p>No messages yet.<br>Say hi to ${esc(partner.username)}!</p></div>`;
         }
@@ -946,6 +1012,25 @@ document.getElementById('dmBackBtn').addEventListener('click', closeDm);
 document.getElementById('globalChatBtn').addEventListener('click', () => {
     if (dmMode) closeDm();
 });
+
+// ════════════════════════════════════════════════
+// REPLY STATE
+// ════════════════════════════════════════════════
+let replyTo = null; // { id, username, text }
+
+function setReply(msgId, senderName, text) {
+    replyTo = { id: msgId, username: senderName, text };
+    const bar = document.getElementById('replyBar');
+    bar.classList.add('show');
+    document.getElementById('replyBarText').innerHTML =
+        `Replying to <strong>${esc(senderName)}</strong>: ${esc(text.slice(0,60))}${text.length>60?'…':''}`;
+    document.getElementById('msgInput').focus();
+}
+function clearReply() {
+    replyTo = null;
+    document.getElementById('replyBar').classList.remove('show');
+}
+document.getElementById('replyCancelBtn').addEventListener('click', clearReply);
 
 // ════════════════════════════════════════════════
 // RENDER MESSAGE
@@ -980,6 +1065,10 @@ function renderMessage(msg, isDm) {
         el.dataset.msgId = msg.id;
     }
 
+    const replySnippet = (!isDm && msg.reply_to_username && msg.reply_to_text)
+        ? `<div class="reply-preview"><strong>${esc(msg.reply_to_username)}</strong> ${esc(msg.reply_to_text.slice(0,80))}</div>`
+        : '';
+
     el.innerHTML = `
         <div class="msg-meta">
             ${!isMe ? `<span class="msg-username" style="color:${color}">${esc(senderName)}</span>` : ''}
@@ -989,8 +1078,10 @@ function renderMessage(msg, isDm) {
         <div class="msg-row">
             ${!isMe ? `<div class="msg-avatar" style="background:${color}">${initials(senderName)}</div>` : ''}
             <div class="msg-bubble-wrap">
+                ${replySnippet}
                 <div class="msg-bubble">${esc(msg.text)}</div>
-                ${(isMe || isAdmin()) ? `<button class="msg-delete" title="Delete message" onclick="deleteMsg(event, ${msg.id}, ${isDm})">✕</button>` : ''}
+                ${!isDm ? `<button class="msg-reply" title="Reply" onclick="setReply(${msg.id}, '${esc(senderName)}', '${esc(msg.text.replace(/'/g,"\'"))}')">↩</button>` : ''}
+                ${(isMe || isAdmin()) ? `<button class="msg-delete" title="Delete" onclick="deleteMsg(event, ${msg.id}, ${isDm})">✕</button>` : ''}
             </div>
         </div>`;
 
@@ -1066,9 +1157,14 @@ async function sendMessage() {
             }
         } else {
             // Send public message
-            const inserted = await sbPost('/rest/v1/messages', {
-                username, text, type: 'chat', device_id: deviceId
-            });
+            const payload = { username, text, type: 'chat', device_id: deviceId };
+            if (replyTo) {
+                payload.reply_to = replyTo.id;
+                payload.reply_to_username = replyTo.username;
+                payload.reply_to_text = replyTo.text;
+            }
+            clearReply();
+            const inserted = await sbPost('/rest/v1/messages', payload);
             if (inserted && inserted.length) {
                 renderMessage(inserted[0], false);
                 lastRenderedId = inserted[0].id;
@@ -1196,9 +1292,23 @@ document.getElementById('ctxDmBtn').addEventListener('click', () => {
 
 document.addEventListener('click', () => ctxMenu.classList.remove('open'));
 
+// Click on username label OR on another user's bubble → show menu
 document.getElementById('messagesInner').addEventListener('click', e => {
+    // Don't trigger if clicking reply/delete buttons
+    if (e.target.closest('.msg-reply') || e.target.closest('.msg-delete')) return;
+
     const span = e.target.closest('.msg-username');
-    if (span) showCtxMenu(e, span.textContent);
+    if (span) { showCtxMenu(e, span.textContent); return; }
+
+    // Clicking on someone else's bubble
+    const bubble = e.target.closest('.msg-bubble-wrap');
+    if (bubble) {
+        const msgEl = bubble.closest('.msg');
+        if (msgEl && msgEl.classList.contains('theirs')) {
+            const nameEl = msgEl.querySelector('.msg-username');
+            if (nameEl) showCtxMenu(e, nameEl.textContent);
+        }
+    }
 });
 </script>
 
