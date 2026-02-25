@@ -1017,21 +1017,18 @@ function subscribeAdminChannel() {
     adminChannel = sb.channel('gn-admin-commands');
     adminChannel.on('broadcast', { event: 'command' }, ({ payload }) => {
         if (!payload || !payload.action) return;
+        (async () => {
         if (payload.action === 'force_refresh') {
             fullRefresh();
         } else if (payload.action === 'force_refresh_target' && payload.device_id === deviceId) {
             fullRefresh();
         } else if (payload.action === 'identity_changed') {
-            // If this rename is for our own device, update our username display
             if (payload.device_id === deviceId && payload.username) {
                 username = payload.username;
                 localStorage.setItem(USERNAME_KEY, payload.username);
                 document.getElementById('headerUsername').textContent = payload.username;
             }
-            // Refresh the user list so sidebar names update immediately
             await loadAllUsers();
-            // Only do a full message refresh if we're in global chat (not DM)
-            // so that renamed users' messages show the new name
             if (!dmMode) {
                 lastRenderedUser = null;
                 const inner = document.getElementById('messagesInner');
@@ -1048,11 +1045,11 @@ function subscribeAdminChannel() {
         } else if (payload.action === 'user_unmuted' && payload.device_id === deviceId) {
             removeMute();
         } else if (payload.action === 'announcement') {
-            // Everyone gets it unless targeted
             if (!payload.target_device_id || payload.target_device_id === deviceId) {
                 renderAnnouncementOverlay(payload.text);
             }
         }
+        })();
     }).subscribe();
 }
 
