@@ -999,6 +999,10 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById("site1").style.display = "block";
         document.getElementById("site2").style.display = "none";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
+    } else {
+        document.getElementById("site1").style.display = "none";
+        document.getElementById("site2").style.display = "flex";
+        document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
 
