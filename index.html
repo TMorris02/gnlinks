@@ -56,8 +56,9 @@ height: 100vh;
 </style>
 <script>
 (function() {
-const savedSite = localStorage.getItem("selectedSite") || "site1";
-document.write('<style>#' + savedSite + '{ display: block; }</style>');
+const savedSite = localStorage.getItem("selectedSite") || "site2";
+const otherSite = savedSite === "site1" ? "site2" : "site1";
+document.write('<style>#' + savedSite + '{ display: ' + (savedSite === 'site2' ? 'flex' : 'block') + ' !important; } #' + otherSite + '{ display: none !important; }</style>');
 
 // Apply tab cloak immediately
 try {
