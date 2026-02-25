@@ -102,76 +102,45 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .username-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: var(--radius); cursor: pointer; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0; }
 .username-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
 
-/* ── ADMIN PANEL BUTTON ── */
-.admin-btn {
-    display: none; /* shown via JS for admins only */
-    align-items: center; gap: 6px;
-    background: rgba(239,68,68,0.25); border: 1px solid rgba(239,68,68,0.5);
-    color: white; padding: 6px 12px; border-radius: var(--radius); cursor: pointer;
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-    transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0;
-}
+/* ── ADMIN BUTTON ── */
+.admin-btn { display: none; align-items: center; gap: 6px; background: rgba(239,68,68,0.25); border: 1px solid rgba(239,68,68,0.5); color: white; padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; transition: all 0.2s; backdrop-filter: blur(10px); flex-shrink: 0; }
 .admin-btn:hover { background: rgba(239,68,68,0.4); transform: translateY(-1px); }
 .admin-btn.visible { display: flex; }
 
-/* ── ADMIN PANEL OVERLAY ── */
-.admin-panel-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(6px); z-index: 9990; display: none;
-    align-items: flex-start; justify-content: flex-end; padding: 70px 16px 16px;
-}
+/* ── ADMIN PANEL ── */
+.admin-panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 9990; display: none; align-items: flex-start; justify-content: flex-end; padding: 70px 16px 16px; }
 .admin-panel-overlay.open { display: flex; }
-.admin-panel {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); width: 360px; max-height: calc(100vh - 100px);
-    overflow-y: auto; box-shadow: var(--shadow-xl);
-    animation: slide-in-right 0.2s cubic-bezier(0.4,0,0.2,1);
-    display: flex; flex-direction: column;
-}
+.admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 420px; max-height: calc(100vh - 100px); overflow-y: auto; box-shadow: var(--shadow-xl); animation: slide-in-right 0.2s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; }
 @keyframes slide-in-right { from{transform:translateX(30px);opacity:0} to{transform:translateX(0);opacity:1} }
-.admin-panel-header {
-    padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0; background: linear-gradient(135deg, #ef4444, #dc2626);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
+.admin-panel-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .admin-panel-title { font-size: 15px; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; }
 .admin-panel-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
 .admin-panel-close:hover { background: rgba(255,255,255,0.35); }
 .admin-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .admin-section:last-child { border-bottom: none; }
 .admin-section-title { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-.admin-action-btn {
-    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-    border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text);
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; gap: 8px;
-    transition: all 0.15s; margin-bottom: 6px; text-align: left;
-}
+.admin-action-btn { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; margin-bottom: 6px; text-align: left; }
 .admin-action-btn:hover { background: var(--surface-hover); border-color: var(--primary); color: var(--primary); }
 .admin-action-btn.danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
 .admin-action-btn:last-child { margin-bottom: 0; }
 
-/* Admin user list in panel */
-.admin-user-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
-.admin-user-row {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-    border-radius: var(--radius-sm); border: 1px solid var(--border);
-    background: var(--bg-secondary); transition: background 0.15s;
-}
+/* ── ADMIN USER LIST — wider panel, wrapping names ── */
+.admin-user-list { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.admin-user-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-secondary); transition: background 0.15s; }
 .admin-user-row:hover { background: var(--surface-hover); }
-.admin-user-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
-.admin-user-info { flex: 1; min-width: 0; }
-.admin-user-name { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin-user-meta { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-.admin-user-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.admin-user-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; margin-top: 2px; }
+.admin-user-info { flex: 1; min-width: 0; overflow: visible; }
+.admin-user-name { font-size: 13px; font-weight: 700; color: var(--text); word-break: break-word; white-space: normal; line-height: 1.35; overflow: visible; }
+.admin-user-meta { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.admin-user-actions { display: flex; flex-wrap: wrap; gap: 3px; flex-shrink: 0; max-width: 110px; justify-content: flex-end; }
 .admin-user-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .admin-user-btn:hover { background: var(--surface-hover); color: var(--text); }
 .admin-user-btn.danger:hover { background: #fef2f2; color: #ef4444; border-color: #ef4444; }
 .admin-user-btn.warn:hover { background: #fffbeb; color: #d97706; border-color: #d97706; }
-.admin-user-row.muted .admin-user-name { color: var(--text-muted); text-decoration: line-through; }
+.admin-user-row.muted .admin-user-name { text-decoration: line-through; }
 .muted-badge { font-size: 9px; background: #fbbf24; color: #78350f; padding: 1px 5px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
 .locked-badge { font-size: 9px; background: #e0e7ff; color: #3730a3; padding: 1px 5px; border-radius: 6px; font-weight: 700; text-transform: uppercase; margin-left: 4px; }
+.banned-badge { font-size: 9px; background: #fee2e2; color: #991b1b; padding: 1px 5px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
 
 .admin-subsection-title { font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .admin-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -180,19 +149,62 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .admin-mini-row:last-child { border-bottom: none; }
 .admin-mini-row:hover { background: var(--surface-hover); }
 .admin-mini-row.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
-.admin-dm-transcript { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); max-height: 240px; overflow-y: auto; background: var(--bg-secondary); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-.admin-dm-line { font-size: 12px; line-height: 1.45; padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); }
+.admin-dm-transcript { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); max-height: 280px; overflow-y: auto; background: var(--bg-secondary); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.admin-dm-line { font-size: 12px; line-height: 1.45; padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); position: relative; }
 .admin-dm-line .t { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.admin-dm-actions { display: flex; gap: 4px; margin-top: 4px; }
+.admin-dm-act-btn { font-size: 11px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; background: none; color: var(--text-muted); cursor: pointer; font-family: 'Syne', sans-serif; transition: all 0.15s; }
+.admin-dm-act-btn:hover { background: var(--surface-hover); color: var(--text); }
+.admin-dm-act-btn.del:hover { background: #fef2f2; color: #ef4444; border-color: #ef4444; }
 
-.announce-overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); z-index: 40; padding: 18px; }
-.announce-overlay.show { display: flex; animation: fade-in 0.2s ease; }
-.announce-card { width: min(760px, 100%); background: linear-gradient(145deg, #1d4ed8, #7c3aed); color: white; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.4); padding: 24px 22px; border: 1px solid rgba(255,255,255,0.25); }
-.announce-title { font-size: 13px; font-weight: 800; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px; }
-.announce-text { font-size: 22px; font-weight: 700; line-height: 1.35; }
+/* ── ANNOUNCEMENT OVERLAY ── */
+.announce-overlay {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.55); z-index: 40; padding: 18px;
+    user-select: none; -webkit-user-select: none;
+}
+.announce-overlay.show { display: flex; animation: fade-in 0.25s ease; }
+.announce-card {
+    width: min(720px, 100%); background: linear-gradient(145deg, #1d4ed8, #7c3aed);
+    color: white; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    padding: 28px 26px 22px; border: 1px solid rgba(255,255,255,0.25);
+    text-align: center; position: relative;
+    user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+}
+.announce-close-btn {
+    position: absolute; top: 12px; right: 14px;
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    color: white; width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s; z-index: 2;
+}
+.announce-close-btn:hover { background: rgba(255,255,255,0.32); }
+.announce-text {
+    font-size: clamp(16px, 3.5vw, 24px); font-weight: 700;
+    line-height: 1.4; text-align: center; word-break: break-word;
+    user-select: none; -webkit-user-select: none;
+}
 
+/* ── MODLOG ── */
 .modlog { position: relative; cursor: default; }
 .modlog-reason { position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.94); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 6px 8px; font-size: 11px; white-space: nowrap; box-shadow: 0 10px 24px rgba(0,0,0,0.35); display: none; z-index: 20; }
 .modlog:hover .modlog-reason { display: block; }
+
+/* ── BAN / KICK system message in chat — styled like announcement ── */
+.msg-system.modlog-ban {
+    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+    color: #fecaca; font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700; padding: 8px 16px;
+    border-radius: 20px; box-shadow: var(--shadow-sm);
+    cursor: default;
+}
+.msg-system.modlog-kick {
+    background: linear-gradient(135deg, #78350f, #92400e);
+    color: #fed7aa; font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700; padding: 8px 16px;
+    border-radius: 20px; box-shadow: var(--shadow-sm);
+    cursor: default;
+}
 
 .inline-input { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; margin-top: 6px; }
 .inline-input-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
@@ -200,19 +212,15 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
 
 /* Announce textarea */
-.announce-textarea {
-    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif;
-    font-size: 13px; resize: none; outline: none; min-height: 60px; transition: border-color 0.2s;
-    margin-bottom: 6px;
-}
+.announce-textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; resize: none; outline: none; min-height: 60px; transition: border-color 0.2s; margin-bottom: 6px; }
 .announce-textarea:focus { border-color: var(--primary); }
-.announce-send-btn {
-    width: 100%; padding: 8px; border: none; border-radius: var(--radius-sm);
-    background: var(--gradient-primary); color: white; font-family: 'Syne', sans-serif;
-    font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
-}
+.announce-send-btn { width: 100%; padding: 8px; border: none; border-radius: var(--radius-sm); background: var(--gradient-primary); color: white; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
 .announce-send-btn:hover { opacity: 0.85; }
+
+/* targeted announce */
+.announce-target-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+.announce-target-select { flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; outline: none; }
+.announce-target-select:focus { border-color: var(--primary); }
 
 /* ── LAYOUT ── */
 .body-wrap { display: flex; flex: 1; overflow: hidden; }
@@ -227,13 +235,18 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .sidebar-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .sidebar-list::-webkit-scrollbar { width: 3px; }
 .sidebar-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; transition: background 0.15s; font-size: 13px; font-weight: 600; color: var(--text); }
+.sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; transition: background 0.15s; font-size: 13px; font-weight: 600; color: var(--text); position: relative; }
 .sidebar-user:hover { background: var(--surface-hover); }
 .sidebar-user.active { background: var(--primary-light); color: var(--primary); }
 .sidebar-user.has-unread { font-weight: 800; }
 .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
 .sidebar-unread { margin-left: auto; background: var(--primary); color: white; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; min-width: 18px; text-align: center; }
 .sidebar-empty { padding: 20px 14px; font-size: 12px; color: var(--text-muted); text-align: center; }
+/* star button on sidebar rows */
+.sidebar-star { display: none; background: none; border: none; font-size: 14px; cursor: pointer; color: var(--text-muted); padding: 2px 4px; line-height: 1; flex-shrink: 0; transition: all 0.15s; }
+.sidebar-user:hover .sidebar-star { display: flex; }
+.sidebar-user .sidebar-star.starred { display: flex; color: #f59e0b; }
+.sidebar-star:hover { transform: scale(1.2); }
 .sidebar-toggle { position: relative; z-index: 5; width: 28px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; font-size: 14px; color: var(--text-muted); }
 .sidebar-toggle:hover { background: var(--surface-hover); color: var(--text); }
 
@@ -256,7 +269,7 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .conn-banner.show { display: block; }
 
 /* ── MESSAGES ── */
-.messages-wrap { flex: 1; overflow-y: auto; padding: 16px 0; }
+.messages-wrap { flex: 1; overflow-y: auto; padding: 16px 0; position: relative; }
 .messages-wrap::-webkit-scrollbar { width: 4px; }
 .messages-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 .messages-inner { max-width: 820px; margin: 0 auto; padding: 0 16px; display: flex; flex-direction: column; gap: 2px; }
@@ -285,7 +298,7 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .msg-bubble-wrap:hover .msg-delete { display: flex; }
 .msg-delete:hover { background: #dc2626; }
 .msg-system { align-self: center; font-size: 11px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; padding: 4px 12px; margin: 6px 0; background: var(--border-light); border-radius: 20px; }
-.msg-system.announcement { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 20px; box-shadow: var(--shadow-sm); }
+.msg-system.announcement { background: linear-gradient(135deg, #1d4ed8, #7c3aed); color: white; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 20px; box-shadow: var(--shadow-sm); }
 .dm-indicator { font-size: 10px; background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
 
 /* ── INPUT ── */
@@ -321,18 +334,20 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 /* ── BAN MODAL ── */
 .ban-modal { max-width: 380px; }
 .ban-modal .modal-title { color: #ef4444; }
-.ban-reason-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; resize: none; outline: none; min-height: 80px; margin-bottom: 12px; transition: border-color 0.2s; }
+.ban-reason-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; resize: none; outline: none; min-height: 70px; margin-bottom: 10px; transition: border-color 0.2s; }
 .ban-reason-input:focus { border-color: #ef4444; }
 .ban-confirm-btn { width: 100%; padding: 11px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .ban-confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(239,68,68,0.4); }
 .ban-cancel-btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: none; color: var(--text-muted); font-family: 'Syne', sans-serif; font-size: 14px; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
 .ban-cancel-btn:hover { background: var(--surface-hover); color: var(--text); }
+/* timed ban duration row */
+.ban-duration-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.ban-dur-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
+.ban-dur-input { padding: 7px 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'JetBrains Mono', sans-serif; font-size: 13px; text-align: center; outline: none; width: 100%; }
+.ban-dur-input:focus { border-color: #ef4444; }
+.ban-dur-hint { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
 
 /* ── MUTE MODAL ── */
-.mute-duration-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
-.mute-dur-btn { padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
-.mute-dur-btn:hover { border-color: #f59e0b; color: #f59e0b; }
-.mute-dur-btn.selected { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
 .mute-confirm-btn { width: 100%; padding: 11px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .mute-confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245,158,11,0.4); }
 
@@ -400,14 +415,10 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
         <div class="modal-error" id="usernameError"></div>
         <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
         <div class="modal-note" id="usernameNote">Your username is locked to this browser. You can set a profile picture after joining.</div>
-
-        <!-- Avatar section — hidden until user has username -->
         <div id="avatarSection" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
             <div class="avatar-section-label">Profile Picture</div>
             <div class="avatar-preview-wrap">
-                <div class="avatar-preview-img" id="avatarPreviewImg">
-                    <span id="avatarPreviewFallback" style="font-size:18px;font-weight:700;color:var(--text-muted)">?</span>
-                </div>
+                <div class="avatar-preview-img" id="avatarPreviewImg"><span id="avatarPreviewFallback" style="font-size:18px;font-weight:700;color:var(--text-muted)">?</span></div>
                 <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">Upload, drag in, or paste a URL.<br>Broken images fall back to your initials.</div>
             </div>
             <div class="avatar-drop-zone" id="avatarDropZone">
@@ -429,9 +440,9 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 <div class="modal-overlay" id="kickModal">
     <div class="modal ban-modal">
         <div class="modal-title">👢 Kick User</div>
-        <div class="modal-sub" id="kickModalSub">Kicking <strong id="kickTargetName"></strong>. This removes all their data and forces them to pick a new username.</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason for kick (shown on hover in mod log)</div>
-        <textarea class="ban-reason-input" id="kickReasonInput" placeholder="e.g. Spamming, harassment, inappropriate content..."></textarea>
+        <div class="modal-sub" id="kickModalSub">Kicking <strong id="kickTargetName"></strong>. Removes their data and forces a new username.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason (shown on hover in mod log)</div>
+        <textarea class="ban-reason-input" id="kickReasonInput" placeholder="e.g. Spamming, harassment..."></textarea>
         <button class="ban-confirm-btn" id="kickConfirmBtn">👢 Confirm Kick</button>
         <button class="ban-cancel-btn" id="kickCancelBtn">Cancel</button>
     </div>
@@ -441,9 +452,17 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 <div class="modal-overlay" id="banModal">
     <div class="modal ban-modal">
         <div class="modal-title">⛔ Ban Device</div>
-        <div class="modal-sub" id="banModalSub">Banning <strong id="banTargetName"></strong>. This blocks their device from using chat at all until unbanned.</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason for ban (shown to user + on hover in mod log)</div>
-        <textarea class="ban-reason-input" id="banReasonInput" placeholder="e.g. Severe harassment, raids, ban evasion..."></textarea>
+        <div class="modal-sub" id="banModalSub">Banning <strong id="banTargetName"></strong>. Blocks their device from chat.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason (shown to user + mod log)</div>
+        <textarea class="ban-reason-input" id="banReasonInput" placeholder="e.g. Severe harassment, raids..."></textarea>
+        <div class="ban-duration-label">Ban Duration (leave all 0 for permanent)</div>
+        <div class="ban-dur-row">
+            <input class="ban-dur-input" id="banDays" type="number" min="0" value="0" placeholder="d">
+            <input class="ban-dur-input" id="banHours" type="number" min="0" value="0" placeholder="h">
+            <input class="ban-dur-input" id="banMinutes" type="number" min="0" value="0" placeholder="m">
+            <input class="ban-dur-input" id="banSeconds" type="number" min="0" value="0" placeholder="s">
+        </div>
+        <div class="ban-dur-hint">Days · Hours · Minutes · Seconds</div>
         <button class="ban-confirm-btn" id="banConfirmBtn">⛔ Confirm Ban</button>
         <button class="ban-cancel-btn" id="banCancelBtn">Cancel</button>
     </div>
@@ -454,7 +473,7 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
     <div class="modal" style="max-width:360px;">
         <div class="modal-title">🔕 Mute User</div>
         <div class="modal-sub" id="muteModalSub">Select how long to mute <strong id="muteTargetName"></strong>.</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Custom duration (1 second is always added automatically)</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Custom duration (1 second always added)</div>
         <div class="inline-input-row">
             <input class="inline-input" id="muteDays" type="number" min="0" value="0" placeholder="Days">
             <input class="inline-input" id="muteHours" type="number" min="0" value="0" placeholder="Hours">
@@ -466,15 +485,16 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
     </div>
 </div>
 
-<!-- BANNED OVERLAY (shown to the banned user) -->
+<!-- BANNED OVERLAY -->
 <div class="banned-overlay" id="bannedOverlay">
     <div class="banned-card">
-        <div class="banned-icon">🔇</div>
+        <div class="banned-icon">⛔</div>
         <div class="banned-title">You've Been Banned</div>
         <div class="banned-reason" id="bannedReason">
             <strong>Reason</strong>
             <span id="bannedReasonText">No reason provided.</span>
         </div>
+        <div id="bannedExpiry" style="font-size:12px;color:var(--text-muted);margin-bottom:20px;"></div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">This device is blocked by an admin and cannot access chat features.</p>
         <button class="banned-ok-btn" id="bannedOkBtn">Reload</button>
     </div>
@@ -514,21 +534,23 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
             <button class="admin-panel-close" id="adminPanelClose">✕</button>
         </div>
 
-        <!-- Quick Actions -->
         <div class="admin-section">
             <div class="admin-section-title">Quick Actions</div>
             <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users</button>
             <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
         </div>
 
-        <!-- Broadcast Announcement -->
         <div class="admin-section">
             <div class="admin-section-title">📢 Broadcast Announcement</div>
+            <div class="announce-target-row">
+                <select class="announce-target-select" id="announceTarget">
+                    <option value="all">→ Everyone</option>
+                </select>
+            </div>
             <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
-            <button class="announce-send-btn" id="announceSendBtn">📢 Send to Everyone</button>
+            <button class="announce-send-btn" id="announceSendBtn">📢 Send</button>
         </div>
 
-        <!-- User List -->
         <div class="admin-section">
             <div class="admin-section-title" style="margin-bottom:8px;">👥 All Users <span id="apUserCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
             <div class="admin-user-list" id="adminUserList">
@@ -579,9 +601,14 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 
         <div class="muted-banner" id="mutedBanner">🔕 You are currently muted and cannot send messages.</div>
 
-        <div class="announce-overlay" id="announceOverlay"><div class="announce-card"><div class="announce-title">Broadcast Announcement</div><div class="announce-text" id="announceOverlayText"></div></div></div>
-
-        <div class="messages-wrap" id="messagesWrap">
+        <!-- Announcement overlay lives inside messages-wrap so it doesn't cover header -->
+        <div class="messages-wrap" id="messagesWrap" style="position:relative;">
+            <div class="announce-overlay" id="announceOverlay">
+                <div class="announce-card">
+                    <button class="announce-close-btn" id="announceCloseBtn">✕</button>
+                    <div class="announce-text" id="announceOverlayText"></div>
+                </div>
+            </div>
             <div class="messages-inner" id="messagesInner">
                 <div class="empty-state" id="emptyState">
                     <div class="ei">🗨️</div>
@@ -623,17 +650,14 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 // ════════════════════════════════════════════════
 const SUPABASE_URL  = 'https://oootjrtweyqrlegipyok.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vb3RqcnR3ZXlxcmxlZ2lweW9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzcxNDQsImV4cCI6MjA4NzUxMzE0NH0.YCGWff6GH6nEN7nNQI8TQKvA4pTZrSff_oXc-sBdNr8';
-
-// ── ADD ADMIN USERNAMES HERE ──────────────────
-// To add another admin later, just add their username to this array.
 const ADMIN_USERNAMES = ['lamb'];
-
 const COOLDOWN_MS  = 5000;
 const POLL_MS      = 2000;
 const DEVICE_KEY   = 'gnChatDeviceId';
 const USERNAME_KEY = 'gnChatUsername';
 const THEME_KEY    = 'gnChatTheme';
 const AVATAR_KEY   = 'gnChatAvatar';
+const STARS_KEY    = 'gnChatStarred'; // localStorage key for starred DMs
 
 // ── STATE ─────────────────────────────────────
 let deviceId         = '';
@@ -654,16 +678,27 @@ let dmMode           = false;
 let dmPartner        = null;
 let dmPartnerDevId   = null;
 let allUsers         = [];
-let dmUnreadMap      = {};   // device_id → { count, lastId, lastTime }
+let dmUnreadMap      = {};
 let isMuted          = false;
-let muteUntil        = null; // Date object
-let banTarget        = null; // for the ban modal
-let kickTarget       = null; // for the kick modal
-let muteTarget       = null; // for the mute modal
-let msgCounts        = {};   // device_id → count (fetched for admin panel)
+let muteUntil        = null;
+let banTarget        = null;
+let kickTarget       = null;
+let muteTarget       = null;
 let isNameLocked     = false;
-let selectedDmViewerUser = null;
+let selectedDmViewerUser    = null;
 let selectedDmViewerPartner = null;
+// Presence state from the channel (device_id → username)
+let onlineDeviceMap  = {}; // filled by presence sync
+
+// ── STARRED DMs ────────────────────────────────
+function loadStarred() {
+    try { return new Set(JSON.parse(localStorage.getItem(STARS_KEY) || '[]')); }
+    catch(e) { return new Set(); }
+}
+function saveStarred() {
+    localStorage.setItem(STARS_KEY, JSON.stringify([...starredDevIds]));
+}
+const starredDevIds = loadStarred();
 
 // ── HELPERS ───────────────────────────────────
 const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#ef4444','#06b6d4','#84cc16','#f97316','#6366f1'];
@@ -676,7 +711,11 @@ function initials(n) { return n.trim().slice(0,2).toUpperCase(); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmtTime(ts) { return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function isAdmin() { return username && ADMIN_USERNAMES.includes(username.toLowerCase()); }
-function nameForDev(devId, fallback='Unknown') { const u = allUsers.find(x => x.device_id === devId); return (u && u.username) || fallback; }
+function nameForDev(devId, fallback='Unknown') {
+    if (devId === deviceId) return username || fallback;
+    const u = allUsers.find(x => x.device_id === devId);
+    return (u && u.username) || fallback;
+}
 
 function showBanner(msg, color) {
     const b = document.getElementById('connBanner');
@@ -762,14 +801,18 @@ async function sbPatch(path, body) {
     return r.json();
 }
 
-
 async function isDeviceBlocked(devId) {
     try {
-        const rows = await sbGet(`/rest/v1/banned_devices?device_id=eq.${encodeURIComponent(devId)}&select=device_id,reason`);
-        return rows && rows.length ? rows[0] : null;
-    } catch(e) {
-        return null;
-    }
+        const rows = await sbGet(`/rest/v1/banned_devices?device_id=eq.${encodeURIComponent(devId)}&select=device_id,reason,expires_at`);
+        if (!rows || !rows.length) return null;
+        const b = rows[0];
+        // auto-unban if expired
+        if (b.expires_at && new Date(b.expires_at) <= new Date()) {
+            await sbDelete(`/rest/v1/banned_devices?device_id=eq.${encodeURIComponent(devId)}`);
+            return null;
+        }
+        return b;
+    } catch(e) { return null; }
 }
 
 // ════════════════════════════════════════════════
@@ -779,29 +822,21 @@ function updateAvatarPreview(url) {
     pendingAvatar = url || '';
     const wrap = document.getElementById('avatarPreviewImg');
     const errEl = document.getElementById('avatarError');
-    errEl.classList.remove('show');
-    wrap.innerHTML = '';
+    errEl.classList.remove('show'); wrap.innerHTML = '';
     if (url) {
         const img = document.createElement('img');
-        img.src = url;
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+        img.src = url; img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
         img.onerror = () => {
-            wrap.innerHTML = '';
-            const sp = document.createElement('span');
+            wrap.innerHTML = ''; const sp = document.createElement('span');
             sp.style.cssText = 'font-size:18px;font-weight:700;color:var(--text-muted)';
-            sp.textContent = username ? initials(username) : '?';
-            wrap.appendChild(sp);
-            pendingAvatar = '';
-            document.getElementById('avatarClearBtn').classList.remove('show');
-            errEl.classList.add('show');
+            sp.textContent = username ? initials(username) : '?'; wrap.appendChild(sp);
+            pendingAvatar = ''; document.getElementById('avatarClearBtn').classList.remove('show'); errEl.classList.add('show');
         };
-        wrap.appendChild(img);
-        document.getElementById('avatarClearBtn').classList.add('show');
+        wrap.appendChild(img); document.getElementById('avatarClearBtn').classList.add('show');
     } else {
         const sp = document.createElement('span');
         sp.style.cssText = 'font-size:18px;font-weight:700;color:var(--text-muted)';
-        sp.textContent = username ? initials(username) : '?';
-        wrap.appendChild(sp);
+        sp.textContent = username ? initials(username) : '?'; wrap.appendChild(sp);
         document.getElementById('avatarClearBtn').classList.remove('show');
     }
 }
@@ -809,24 +844,15 @@ function fileToDataUrl(file) {
     return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsDataURL(file); });
 }
 function initAvatarPicker() {
-    const dropZone  = document.getElementById('avatarDropZone');
+    const dropZone = document.getElementById('avatarDropZone');
     const fileInput = document.getElementById('avatarFileInput');
-    const urlInput  = document.getElementById('avatarUrlInput');
-    const urlBtn    = document.getElementById('avatarUrlBtn');
-    const clearBtn  = document.getElementById('avatarClearBtn');
-    fileInput.addEventListener('change', async () => {
-        const file = fileInput.files[0]; if (!file) return;
-        try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(e) {}
-    });
+    const urlInput = document.getElementById('avatarUrlInput');
+    const urlBtn = document.getElementById('avatarUrlBtn');
+    const clearBtn = document.getElementById('avatarClearBtn');
+    fileInput.addEventListener('change', async () => { const file = fileInput.files[0]; if (!file) return; try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(e) {} });
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', async e => {
-        e.preventDefault(); dropZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(ex) {}
-        }
-    });
+    dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); const file = e.dataTransfer.files[0]; if (file && file.type.startsWith('image/')) { try { updateAvatarPreview(await fileToDataUrl(file)); urlInput.value = ''; } catch(ex) {} } });
     urlBtn.addEventListener('click', () => { const url = urlInput.value.trim(); if (url) updateAvatarPreview(url); });
     urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); urlBtn.click(); } });
     clearBtn.addEventListener('click', () => { urlInput.value = ''; updateAvatarPreview(''); });
@@ -844,11 +870,8 @@ function openUsernameModal(isChange = false) {
     pendingAvatar = myAvatar || '';
     uInput.value = username || '';
     uInput.disabled = isNameLocked && isChange;
-    uError.classList.remove('show');
-    uBtn.disabled = false;
+    uError.classList.remove('show'); uBtn.disabled = false;
     uBtn.textContent = isChange ? 'Save Changes →' : 'Enter Chat →';
-
-    // Show avatar section only if user already has a username (either changing or already logged in)
     const avatarSec = document.getElementById('avatarSection');
     if (isChange || username) {
         avatarSec.style.display = 'block';
@@ -856,7 +879,7 @@ function openUsernameModal(isChange = false) {
         document.getElementById('avatarError').classList.remove('show');
         updateAvatarPreview(myAvatar || '');
         document.getElementById('usernameModalTitle').textContent = isChange ? 'Edit Profile' : 'Welcome Back';
-        document.getElementById('usernameModalSub').textContent = isChange ? (isNameLocked ? 'Your username is locked by an admin. You can still update avatar.' : 'Update your username or profile picture.') : 'You already have a username set.';
+        document.getElementById('usernameModalSub').textContent = isChange ? (isNameLocked ? 'Your username is locked. You can still update your avatar.' : 'Update your username or profile picture.') : 'You already have a username set.';
         document.getElementById('usernameNote').style.display = 'none';
     } else {
         avatarSec.style.display = 'none';
@@ -864,7 +887,6 @@ function openUsernameModal(isChange = false) {
         document.getElementById('usernameModalSub').textContent = 'Choose a username to get started. You can add a profile picture after.';
         document.getElementById('usernameNote').style.display = '';
     }
-
     modal.classList.add('open');
     setTimeout(() => { uInput.focus(); if (username) uInput.select(); }, 30);
 }
@@ -880,9 +902,7 @@ async function submitUsername() {
             const existing = await sbGet(`/rest/v1/users?username=ilike.${encodeURIComponent(name)}&select=device_id,username`);
             if (existing && existing.length && existing[0].device_id !== deviceId) {
                 uError.textContent = `That username is already taken (as "${existing[0].username}").`;
-                uError.classList.add('show');
-                uBtn.disabled = false; uBtn.textContent = 'Enter Chat →';
-                return;
+                uError.classList.add('show'); uBtn.disabled = false; uBtn.textContent = 'Enter Chat →'; return;
             }
         }
         await fetch(SUPABASE_URL + '/rest/v1/users', {
@@ -891,28 +911,22 @@ async function submitUsername() {
             body: JSON.stringify({ device_id: deviceId, username: name, avatar: pendingAvatar || null })
         });
         username = name; myAvatar = pendingAvatar;
-        localStorage.setItem(USERNAME_KEY, name);
-        localStorage.setItem(AVATAR_KEY, myAvatar);
+        localStorage.setItem(USERNAME_KEY, name); localStorage.setItem(AVATAR_KEY, myAvatar);
         modal.classList.remove('open');
         document.getElementById('headerUsername').textContent = name;
         document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
         uBtn.textContent = 'Save Changes →';
-
-        // Show admin button if applicable
         if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
         else document.getElementById('adminPanelBtn').classList.remove('visible');
-
         checkMuteStatus();
         if (sb) joinPresence();
         loadAllUsers();
+        // Broadcast identity change so everyone refreshes sidebar immediately
         await broadcastAdminCmd({ action: 'identity_changed', device_id: deviceId, username: name });
-        await broadcastAdminCmd({ action: 'force_refresh' });
         if (!isMuted) enableInput();
     } catch(e) {
-        uError.textContent = 'Error saving. Try again.';
-        uError.classList.add('show');
-        uBtn.disabled = false; uBtn.textContent = 'Save Changes →';
-        console.error(e);
+        uError.textContent = 'Error saving. Try again.'; uError.classList.add('show');
+        uBtn.disabled = false; uBtn.textContent = 'Save Changes →'; console.error(e);
     }
 }
 
@@ -920,14 +934,8 @@ uBtn.addEventListener('click', submitUsername);
 uInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitUsername(); } });
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
 
-function enableInput() {
-    document.getElementById('msgInput').disabled = false;
-    document.getElementById('sendBtn').disabled  = false;
-}
-function disableInput() {
-    document.getElementById('msgInput').disabled = true;
-    document.getElementById('sendBtn').disabled  = true;
-}
+function enableInput() { document.getElementById('msgInput').disabled = false; document.getElementById('sendBtn').disabled = false; }
+function disableInput() { document.getElementById('msgInput').disabled = true; document.getElementById('sendBtn').disabled = true; }
 
 // ════════════════════════════════════════════════
 // MUTE SYSTEM
@@ -937,22 +945,14 @@ async function checkMuteStatus() {
     try {
         const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=muted_until,name_locked`);
         if (!rows || !rows.length) return;
+        isNameLocked = !!rows[0].name_locked;
         const mu = rows[0].muted_until;
-            isNameLocked = !!rows[0].name_locked;
-        if (mu && new Date(mu) > new Date()) {
-            isMuted = true;
-            muteUntil = new Date(mu);
-            applyMute();
-        } else {
-            isMuted = false; muteUntil = null;
-            removeMute();
-        }
-    } catch(e) { /* silent */ }
+        if (mu && new Date(mu) > new Date()) { isMuted = true; muteUntil = new Date(mu); applyMute(); }
+        else { isMuted = false; muteUntil = null; removeMute(); }
+    } catch(e) {}
 }
-
 function applyMute() {
-    isMuted = true;
-    disableInput();
+    isMuted = true; disableInput();
     const banner = document.getElementById('mutedBanner');
     const timeLeft = muteUntil ? formatMuteTime(muteUntil) : '';
     banner.textContent = `🔕 You are muted${timeLeft ? ' for ' + timeLeft : ''}. You cannot send messages.`;
@@ -964,19 +964,14 @@ function removeMute() {
     document.getElementById('mutedBanner').classList.remove('show');
 }
 function formatMuteTime(until) {
-    const ms = until - new Date();
-    if (ms <= 0) return '';
+    const ms = until - new Date(); if (ms <= 0) return '';
     const mins = Math.floor(ms / 60000);
     if (mins < 60) return `${mins} minute${mins !== 1 ? 's' : ''}`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs} hour${hrs !== 1 ? 's' : ''}`;
-    const days = Math.floor(hrs / 24);
-    return `${days} day${days !== 1 ? 's' : ''}`;
+    return `${Math.floor(hrs / 24)} day${Math.floor(hrs/24) !== 1 ? 's' : ''}`;
 }
-// Re-check mute every minute
-setInterval(() => {
-    if (isMuted && muteUntil && new Date() > muteUntil) removeMute();
-}, 60000);
+setInterval(() => { if (isMuted && muteUntil && new Date() > muteUntil) removeMute(); }, 60000);
 
 // ════════════════════════════════════════════════
 // BOOT
@@ -987,47 +982,29 @@ async function boot() {
     catch(e) { showBanner('⚠ Supabase failed to init', 'red'); console.error(e); return; }
 
     const blocked = await isDeviceBlocked(deviceId);
-    if (blocked) { showBannedScreen(blocked.reason || 'No reason provided.'); subscribeAdminChannel(); return; }
+    if (blocked) { showBannedScreen(blocked.reason || 'No reason provided.', blocked.expires_at); subscribeAdminChannel(); return; }
 
     try {
         const rows = await sbGet(`/rest/v1/users?device_id=eq.${deviceId}&select=username,avatar,muted_until,name_locked`);
         if (rows && rows.length) {
-            username = rows[0].username;
-            myAvatar = rows[0].avatar || '';
-            localStorage.setItem(USERNAME_KEY, username);
-            localStorage.setItem(AVATAR_KEY, myAvatar);
+            username = rows[0].username; myAvatar = rows[0].avatar || '';
+            localStorage.setItem(USERNAME_KEY, username); localStorage.setItem(AVATAR_KEY, myAvatar);
             document.getElementById('headerUsername').textContent = username;
-            // Check mute
-            const mu = rows[0].muted_until;
             isNameLocked = !!rows[0].name_locked;
-            if (mu && new Date(mu) > new Date()) {
-                isMuted = true; muteUntil = new Date(mu); applyMute();
-            } else {
-                enableInput();
-                document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-            }
+            const mu = rows[0].muted_until;
+            if (mu && new Date(mu) > new Date()) { isMuted = true; muteUntil = new Date(mu); applyMute(); }
+            else { enableInput(); document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)'; }
             if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
         } else {
-            myAvatar = localStorage.getItem(AVATAR_KEY) || '';
-            openUsernameModal(false);
+            myAvatar = localStorage.getItem(AVATAR_KEY) || ''; openUsernameModal(false);
         }
     } catch(e) {
-        const saved = localStorage.getItem(USERNAME_KEY);
-        myAvatar = localStorage.getItem(AVATAR_KEY) || '';
-        if (saved) {
-            username = saved;
-            document.getElementById('headerUsername').textContent = username;
-            enableInput();
-            document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
-            if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible');
-        } else {
-            openUsernameModal(false);
-        }
+        const saved = localStorage.getItem(USERNAME_KEY); myAvatar = localStorage.getItem(AVATAR_KEY) || '';
+        if (saved) { username = saved; document.getElementById('headerUsername').textContent = username; enableInput(); document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)'; if (isAdmin()) document.getElementById('adminPanelBtn').classList.add('visible'); }
+        else openUsernameModal(false);
     }
 
-    await loadHistory();
-    startPolling();
-    loadAllUsers();
+    await loadHistory(); startPolling(); loadAllUsers();
     if (username) joinPresence();
     subscribeAdminChannel();
 }
@@ -1040,27 +1017,41 @@ function subscribeAdminChannel() {
     adminChannel = sb.channel('gn-admin-commands');
     adminChannel.on('broadcast', { event: 'command' }, ({ payload }) => {
         if (!payload || !payload.action) return;
-
         if (payload.action === 'force_refresh') {
             fullRefresh();
         } else if (payload.action === 'force_refresh_target' && payload.device_id === deviceId) {
-            fullRefresh(); // silent — no banner for targeted refresh
+            fullRefresh();
+        } else if (payload.action === 'identity_changed') {
+            // If this rename is for our own device, update our username display
+            if (payload.device_id === deviceId && payload.username) {
+                username = payload.username;
+                localStorage.setItem(USERNAME_KEY, payload.username);
+                document.getElementById('headerUsername').textContent = payload.username;
+            }
+            // Refresh the user list so sidebar names update immediately
+            await loadAllUsers();
+            // Only do a full message refresh if we're in global chat (not DM)
+            // so that renamed users' messages show the new name
+            if (!dmMode) {
+                lastRenderedUser = null;
+                const inner = document.getElementById('messagesInner');
+                inner.innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
+                lastRenderedId = 0;
+                await loadHistory();
+            }
         } else if (payload.action === 'user_banned' && payload.device_id === deviceId) {
-            showBannedScreen(payload.reason || 'No reason provided.');
+            showBannedScreen(payload.reason || 'No reason provided.', payload.expires_at || null);
         } else if (payload.action === 'messages_cleared') {
             fullRefresh();
         } else if (payload.action === 'user_muted' && payload.device_id === deviceId) {
-            isMuted = true;
-            muteUntil = new Date(payload.until);
-            applyMute();
+            isMuted = true; muteUntil = new Date(payload.until); applyMute();
         } else if (payload.action === 'user_unmuted' && payload.device_id === deviceId) {
             removeMute();
         } else if (payload.action === 'announcement') {
-            renderAnnouncement(payload.text);
-            renderAnnouncementOverlay(payload.text);
-        } else if (payload.action === 'identity_changed') {
-            loadAllUsers();
-            fullRefresh();
+            // Everyone gets it unless targeted
+            if (!payload.target_device_id || payload.target_device_id === deviceId) {
+                renderAnnouncementOverlay(payload.text);
+            }
         }
     }).subscribe();
 }
@@ -1070,18 +1061,37 @@ async function broadcastAdminCmd(payload) {
     await adminChannel.send({ type: 'broadcast', event: 'command', payload });
 }
 
-function showBannedScreen(reason) {
-    // Clear their identity
+function showBannedScreen(reason, expiresAt) {
     username = ''; myAvatar = '';
     localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
     disableInput();
     document.getElementById('headerUsername').textContent = 'Set username';
     document.getElementById('bannedReasonText').textContent = reason;
+    const expEl = document.getElementById('bannedExpiry');
+    if (expiresAt) {
+        expEl.textContent = `Ban expires: ${new Date(expiresAt).toLocaleString()}`;
+    } else {
+        expEl.textContent = 'This ban is permanent.';
+    }
     document.getElementById('bannedOverlay').classList.add('show');
 }
-
 document.getElementById('bannedOkBtn').addEventListener('click', () => { window.location.reload(); });
 
+// Announcement overlay
+function renderAnnouncementOverlay(text) {
+    const overlay = document.getElementById('announceOverlay');
+    document.getElementById('announceOverlayText').textContent = text;
+    overlay.classList.add('show');
+    // Auto-dismiss after 8s but user can close early
+    clearTimeout(window._announceTimer);
+    window._announceTimer = setTimeout(() => overlay.classList.remove('show'), 8000);
+}
+document.getElementById('announceCloseBtn').addEventListener('click', () => {
+    clearTimeout(window._announceTimer);
+    document.getElementById('announceOverlay').classList.remove('show');
+});
+
+// Render announcement in chat log
 function renderAnnouncement(text) {
     const container = document.getElementById('messagesInner');
     const el = document.createElement('div');
@@ -1090,19 +1100,11 @@ function renderAnnouncement(text) {
     container.appendChild(el);
     if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
 }
-function renderAnnouncementOverlay(text) {
-    const overlay = document.getElementById('announceOverlay');
-    const t = document.getElementById('announceOverlayText');
-    t.textContent = text;
-    overlay.classList.add('show');
-    setTimeout(() => overlay.classList.remove('show'), 8000);
-}
 
 async function fullRefresh() {
     lastRenderedUser = null;
     if (dmMode && dmPartner) {
-        const inner = document.getElementById('messagesInner');
-        inner.innerHTML = ''; lastDmId = 0;
+        const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastDmId = 0;
         try {
             const msgs = await sbGet(`/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${dmPartner.device_id}),and(sender_device_id.eq.${dmPartner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`);
             if (msgs && msgs.length) { msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id; }
@@ -1122,9 +1124,15 @@ async function fullRefresh() {
 async function loadHistory() {
     try {
         const msgs = await sbGet('/rest/v1/messages?order=id.asc&limit=200&select=*');
+        const inner = document.getElementById('messagesInner');
+        const es = inner.querySelector('.empty-state');
         if (msgs && msgs.length) {
+            if (es) es.remove();
             msgs.forEach(m => renderMessage(m, false));
             lastRenderedId = msgs[msgs.length-1].id;
+        } else {
+            if (es) es.innerHTML = '<div class="ei">🗨️</div><p>No messages yet.<br>Be the first to say something!</p>';
+            else inner.innerHTML = '<div class="empty-state"><div class="ei">🗨️</div><p>No messages yet.<br>Be the first to say something!</p></div>';
         }
     } catch(e) { showBanner('⚠ Could not load messages', 'red'); }
 }
@@ -1141,11 +1149,9 @@ function startPolling() {
 
     setInterval(async () => {
         if (!username) return;
-        if (dmMode && dmPartner) pollDmThread();
-        else pollDmUnreads();
-        // Re-check mute status every poll cycle
+        if (dmMode && dmPartner) pollDmThread(); else pollDmUnreads();
         checkMuteStatus();
-    }, POLL_MS * 5); // every 10s is enough for mute checks
+    }, POLL_MS * 5);
 }
 
 async function pollDmThread() {
@@ -1161,7 +1167,6 @@ async function pollDmThread() {
 }
 
 const seenDmIds = {};
-
 async function pollDmUnreads() {
     try {
         const msgs = await sbGet(`/rest/v1/dms?recipient_device_id=eq.${deviceId}&order=id.desc&limit=100&select=*`);
@@ -1170,19 +1175,14 @@ async function pollDmUnreads() {
         msgs.forEach(m => {
             const seen = seenDmIds[m.sender_device_id] || 0;
             if (m.id > seen) counts[m.sender_device_id] = (counts[m.sender_device_id] || 0) + 1;
-            if (!latest[m.sender_device_id] || m.id > latest[m.sender_device_id]) {
-                latest[m.sender_device_id] = m.id;
-                latestTime[m.sender_device_id] = m.created_at;
-            }
+            if (!latest[m.sender_device_id] || m.id > latest[m.sender_device_id]) { latest[m.sender_device_id] = m.id; latestTime[m.sender_device_id] = m.created_at; }
         });
-        // Update dmUnreadMap and re-render sidebar with new ordering
         let needsRerender = false;
         Object.keys(counts).forEach(devId => {
             const prev = (dmUnreadMap[devId] || {}).count || 0;
             if (counts[devId] !== prev) needsRerender = true;
             dmUnreadMap[devId] = { count: counts[devId], lastId: latest[devId], lastTime: latestTime[devId] };
         });
-        // Also clear counts for users that no longer have unreads
         Object.keys(dmUnreadMap).forEach(devId => {
             if (!counts[devId] && dmUnreadMap[devId].count > 0) { dmUnreadMap[devId].count = 0; needsRerender = true; }
         });
@@ -1192,7 +1192,7 @@ async function pollDmUnreads() {
 
 function markDmRead(senderDevId, highestId) {
     seenDmIds[senderDevId] = Math.max(seenDmIds[senderDevId] || 0, highestId);
-    if (dmUnreadMap[senderDevId]) { dmUnreadMap[senderDevId].count = 0; }
+    if (dmUnreadMap[senderDevId]) dmUnreadMap[senderDevId].count = 0;
     renderSidebar(document.getElementById('sidebarSearch').value);
 }
 
@@ -1205,26 +1205,45 @@ function joinPresence() {
     presenceChannel = sb.channel('gn-chat-presence', { config: { presence: { key: tabKey } } });
     presenceChannel.on('presence', { event: 'sync' }, () => {
         const state = presenceChannel.presenceState();
-        const users = [];
-        Object.values(state).forEach(ps => ps.forEach(p => { if (p.username && !users.find(u => u === p.username)) users.push(p.username); }));
+        const users = []; onlineDeviceMap = {};
+        Object.values(state).forEach(ps => ps.forEach(p => {
+            if (p.username && !users.find(u => u === p.username)) users.push(p.username);
+            if (p.device_id) onlineDeviceMap[p.device_id] = p.username;
+        }));
         document.getElementById('onlineCount').textContent = users.length;
         document.getElementById('onlineList').innerHTML = users.length
             ? users.map(u => `<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:${colorFor(u)};font-weight:600">${esc(u)}</span>${u === username ? '<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>' : ''}</div>`).join('')
             : '<em style="color:#64748b">No one online</em>';
+        // Update announcement target dropdown with online users
+        updateAnnounceTargetDropdown();
     }).subscribe(async status => {
         if (status === 'SUBSCRIBED') await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
     });
 }
 window.addEventListener('beforeunload', () => { if (presenceChannel) presenceChannel.untrack(); });
 
+function updateAnnounceTargetDropdown() {
+    const sel = document.getElementById('announceTarget');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="all">→ Everyone</option>';
+    Object.entries(onlineDeviceMap).forEach(([devId, uname]) => {
+        if (devId === deviceId) return; // skip self
+        const opt = document.createElement('option');
+        opt.value = devId; opt.textContent = `→ ${uname} (online)`;
+        if (current === devId) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+
 // ════════════════════════════════════════════════
-// SIDEBAR — sorted by most recent DM unread
+// SIDEBAR — sorted by starred > unread > alpha
 // ════════════════════════════════════════════════
 async function loadAllUsers() {
     try {
         const users = await sbGet('/rest/v1/users?order=username.asc&select=*');
         allUsers = (users || []).filter(u => u.device_id !== deviceId);
-        renderSidebar('');
+        renderSidebar(document.getElementById('sidebarSearch').value);
     } catch(e) { console.error('loadAllUsers error:', e); }
 }
 
@@ -1232,8 +1251,11 @@ function renderSidebar(filter) {
     const list = document.getElementById('sidebarList');
     let filtered = filter ? allUsers.filter(u => u.username.toLowerCase().includes(filter.toLowerCase())) : [...allUsers];
 
-    // Sort: users with unread messages go to top, sorted by most recent message time
     filtered.sort((a, b) => {
+        const aStarred = starredDevIds.has(a.device_id);
+        const bStarred = starredDevIds.has(b.device_id);
+        if (aStarred && !bStarred) return -1;
+        if (!aStarred && bStarred) return 1;
         const aUnread = (dmUnreadMap[a.device_id] || {});
         const bUnread = (dmUnreadMap[b.device_id] || {});
         const aHas = (aUnread.count || 0) > 0;
@@ -1248,28 +1270,36 @@ function renderSidebar(filter) {
         list.innerHTML = `<div class="sidebar-empty">${filter ? 'No users found' : 'No other users yet'}</div>`;
         return;
     }
-
     list.innerHTML = '';
     filtered.forEach(u => {
         const row = document.createElement('div');
         const unread = (dmUnreadMap[u.device_id] || {}).count || 0;
+        const isStarred = starredDevIds.has(u.device_id);
         row.className = 'sidebar-user' + (dmPartner && dmPartner.device_id === u.device_id ? ' active' : '') + (unread > 0 ? ' has-unread' : '');
         row.dataset.devid = u.device_id; row.dataset.username = u.username;
 
         const avWrap = document.createElement('div');
-        avWrap.className = 'sidebar-avatar';
-        avWrap.style.background = colorFor(u.username);
+        avWrap.className = 'sidebar-avatar'; avWrap.style.background = colorFor(u.username);
         avWrap.appendChild(makeAvatarEl(u.avatar || '', u.username, 30));
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = u.username;
-        row.appendChild(avWrap); row.appendChild(nameSpan);
+        const nameSpan = document.createElement('span'); nameSpan.textContent = u.username;
 
-        if (unread > 0) {
-            const badge = document.createElement('div');
-            badge.className = 'sidebar-unread'; badge.textContent = unread;
-            row.appendChild(badge);
-        }
+        // Star button
+        const starBtn = document.createElement('button');
+        starBtn.className = 'sidebar-star' + (isStarred ? ' starred' : '');
+        starBtn.textContent = isStarred ? '★' : '☆';
+        starBtn.title = isStarred ? 'Unstar' : 'Star conversation';
+        starBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (starredDevIds.has(u.device_id)) starredDevIds.delete(u.device_id);
+            else starredDevIds.add(u.device_id);
+            saveStarred();
+            renderSidebar(document.getElementById('sidebarSearch').value);
+        });
+
+        row.appendChild(avWrap); row.appendChild(nameSpan);
+        if (unread > 0) { const badge = document.createElement('div'); badge.className = 'sidebar-unread'; badge.textContent = unread; row.appendChild(badge); }
+        row.appendChild(starBtn);
         list.appendChild(row);
         row.addEventListener('click', () => openDm({ device_id: row.dataset.devid, username: row.dataset.username, avatar: u.avatar || '' }));
     });
@@ -1284,24 +1314,16 @@ async function openDm(partner) {
     dmMode = true; lastDmId = 0;
     const inner = document.getElementById('messagesInner');
     inner.innerHTML = ''; lastRenderedUser = null;
-
-    const hdr = document.getElementById('dmHeader');
-    hdr.classList.add('show');
+    document.getElementById('dmHeader').classList.add('show');
     document.getElementById('dmHeaderName').textContent = partner.username;
-
-    const avContainer = document.getElementById('dmHeaderAvatar');
-    avContainer.innerHTML = '';
-    const avEl = makeAvatarEl(partner.avatar || getAvatarForDev(partner.device_id), partner.username, 32);
-    avContainer.appendChild(avEl);
-
+    const avContainer = document.getElementById('dmHeaderAvatar'); avContainer.innerHTML = '';
+    avContainer.appendChild(makeAvatarEl(partner.avatar || getAvatarForDev(partner.device_id), partner.username, 32));
     document.getElementById('msgInput').placeholder = `Message ${partner.username}...`;
     renderSidebar(document.getElementById('sidebarSearch').value);
-
     try {
         const msgs = await sbGet(`/rest/v1/dms?or=(and(sender_device_id.eq.${deviceId},recipient_device_id.eq.${partner.device_id}),and(sender_device_id.eq.${partner.device_id},recipient_device_id.eq.${deviceId}))&order=id.asc&limit=200&select=*`);
         if (msgs && msgs.length) {
-            msgs.forEach(m => renderMessage(m, true));
-            lastDmId = msgs[msgs.length-1].id;
+            msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id;
             const received = msgs.filter(m => m.sender_device_id === partner.device_id);
             if (received.length) markDmRead(partner.device_id, received[received.length-1].id);
         } else {
@@ -1319,14 +1341,9 @@ function closeDm() {
     lastRenderedId = 0; loadHistory();
     renderSidebar(document.getElementById('sidebarSearch').value);
 }
-
 document.getElementById('dmBackBtn').addEventListener('click', closeDm);
 document.getElementById('globalChatBtn').addEventListener('click', () => { if (dmMode) closeDm(); });
-
-// Clicking DM header avatar (admin can use this to pull up context menu for the DM partner)
-document.getElementById('dmHeaderAvatar').addEventListener('click', (e) => {
-    if (dmPartner) showCtxMenu(e, dmPartner.username, dmPartner.device_id);
-});
+document.getElementById('dmHeaderAvatar').addEventListener('click', (e) => { if (dmPartner) showCtxMenu(e, dmPartner.username, dmPartner.device_id); });
 
 // ════════════════════════════════════════════════
 // REPLY
@@ -1350,19 +1367,27 @@ function renderMessage(msg, isDm) {
 
     if (msg.type === 'system') {
         const el = document.createElement('div');
-        el.className = 'msg-system';
-        if ((msg.text || '').startsWith('🛡 ')) {
-            el.classList.add('modlog');
-            const [main, reason] = String(msg.text).split('||reason:');
+        const text = msg.text || '';
+        if (text.startsWith('🛡 ') && text.includes('banned')) {
+            el.className = 'msg-system modlog-ban modlog';
+            const [main, reason] = text.split('||reason:');
             el.textContent = main;
-            if (reason) {
-                const r = document.createElement('div');
-                r.className = 'modlog-reason';
-                r.textContent = 'Reason: ' + reason;
-                el.appendChild(r);
-            }
+            if (reason) { const r = document.createElement('div'); r.className = 'modlog-reason'; r.textContent = 'Reason: ' + reason; el.appendChild(r); }
+        } else if (text.startsWith('🛡 ') && text.includes('kicked')) {
+            el.className = 'msg-system modlog-kick modlog';
+            const [main, reason] = text.split('||reason:');
+            el.textContent = main;
+            if (reason) { const r = document.createElement('div'); r.className = 'modlog-reason'; r.textContent = 'Reason: ' + reason; el.appendChild(r); }
+        } else if (text.startsWith('🛡 ')) {
+            el.className = 'msg-system modlog';
+            const [main, reason] = text.split('||reason:');
+            el.textContent = main;
+            if (reason) { const r = document.createElement('div'); r.className = 'modlog-reason'; r.textContent = 'Reason: ' + reason; el.appendChild(r); }
+        } else if (text.startsWith('📢 ')) {
+            el.className = 'msg-system announcement';
+            el.textContent = text;
         } else {
-            el.textContent = msg.text;
+            el.className = 'msg-system'; el.textContent = text;
         }
         container.appendChild(el); lastRenderedUser = null; return;
     }
@@ -1486,53 +1511,42 @@ document.getElementById('adminPanelBtn').addEventListener('click', () => {
     document.getElementById('adminPanelOverlay').classList.add('open');
     loadAdminUserList();
 });
-document.getElementById('adminPanelClose').addEventListener('click', () => {
-    document.getElementById('adminPanelOverlay').classList.remove('open');
-});
-document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => {
-    if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open');
-});
+document.getElementById('adminPanelClose').addEventListener('click', () => { document.getElementById('adminPanelOverlay').classList.remove('open'); });
+document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open'); });
 
-// Force refresh all
 document.getElementById('apForceRefreshAll').addEventListener('click', async () => {
-    await broadcastAdminCmd({ action: 'force_refresh' });
-    fullRefresh();
-    showBanner('✅ All clients refreshed', 'green');
+    await broadcastAdminCmd({ action: 'force_refresh' }); fullRefresh(); showBanner('✅ All clients refreshed', 'green');
 });
-
-// Clear ALL messages
 document.getElementById('apClearAllMessages').addEventListener('click', async () => {
     if (!confirm('Delete EVERY message from the public chat? This cannot be undone.')) return;
-    try {
-        await sbDelete('/rest/v1/messages?id=gt.0');
-        await broadcastAdminCmd({ action: 'force_refresh' });
-        fullRefresh();
-        showBanner('✅ All messages cleared', 'green');
-    } catch(e) { showBanner('⚠ Failed: ' + (e.message || 'check console'), 'red'); }
+    try { await sbDelete('/rest/v1/messages?id=gt.0'); await broadcastAdminCmd({ action: 'force_refresh' }); fullRefresh(); showBanner('✅ All messages cleared', 'green'); }
+    catch(e) { showBanner('⚠ Failed: ' + (e.message || ''), 'red'); }
 });
 
-// Announcement
+// Announcement send — supports targeted (active users only)
 document.getElementById('announceSendBtn').addEventListener('click', async () => {
     const text = document.getElementById('announceText').value.trim();
+    const targetDevId = document.getElementById('announceTarget').value;
     if (!text) return;
     try {
-        // Save as a system message in DB so it persists
-        await sbPost('/rest/v1/messages', { username: '📢 Admin', text: '📢 ' + text, type: 'system', device_id: deviceId });
-        await broadcastAdminCmd({ action: 'announcement', text });
+        // Always save to DB for chat log (only for global)
+        if (targetDevId === 'all') {
+            await sbPost('/rest/v1/messages', { username: '📢 Admin', text: '📢 ' + text, type: 'system', device_id: deviceId });
+            renderAnnouncement(text);
+        }
+        await broadcastAdminCmd({ action: 'announcement', text, target_device_id: targetDevId === 'all' ? null : targetDevId });
         document.getElementById('announceText').value = '';
-        showBanner('✅ Announcement sent', 'green');
+        showBanner(targetDevId === 'all' ? '✅ Announcement sent to everyone' : `✅ Sent to ${onlineDeviceMap[targetDevId] || targetDevId}`, 'green');
     } catch(e) { showBanner('⚠ Failed to send announcement', 'red'); }
 });
 
 async function loadAdminUserList() {
     const listEl = document.getElementById('adminUserList');
     const blockedEl = document.getElementById('blockedUserList');
-    const usersMini = document.getElementById('dmViewerUsers');
-    const partnersMini = document.getElementById('dmViewerPartners');
     listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
     blockedEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
-    usersMini.innerHTML = '<div class="admin-mini-row">Loading...</div>';
-    partnersMini.innerHTML = '<div class="admin-mini-row">Pick a user first</div>';
+    document.getElementById('dmViewerUsers').innerHTML = '<div class="admin-mini-row">Loading...</div>';
+    document.getElementById('dmViewerPartners').innerHTML = '<div class="admin-mini-row">Pick a user first</div>';
     try {
         const [users, msgs] = await Promise.all([
             sbGet('/rest/v1/users?order=username.asc&select=*'),
@@ -1540,20 +1554,17 @@ async function loadAdminUserList() {
         ]);
         let blocked = [];
         try { blocked = await sbGet('/rest/v1/banned_devices?order=created_at.desc&select=*'); } catch(e) { blocked = []; }
-        allUsers = users || [];
+        allUsers = (users || []).filter(u => u.device_id !== deviceId); // keep global in sync
         const counts = {};
         (msgs || []).forEach(m => { counts[m.device_id] = (counts[m.device_id] || 0) + 1; });
-
         const otherUsers = (users || []).filter(u => u.device_id !== deviceId);
         document.getElementById('apUserCount').textContent = `(${otherUsers.length})`;
-
         listEl.innerHTML = '';
         if (!otherUsers.length) listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No other users yet</div>';
 
         otherUsers.forEach(u => {
             const isMutedUser = u.muted_until && new Date(u.muted_until) > new Date();
             const msgCount = counts[u.device_id] || 0;
-
             const row = document.createElement('div');
             row.className = 'admin-user-row' + (isMutedUser ? ' muted' : '');
             const avEl = makeAvatarEl(u.avatar || '', u.username, 28); avEl.className = 'admin-user-av';
@@ -1561,47 +1572,40 @@ async function loadAdminUserList() {
             const info = document.createElement('div'); info.className = 'admin-user-info';
             const nameDiv = document.createElement('div'); nameDiv.className = 'admin-user-name';
             nameDiv.textContent = u.username;
-            if (isMutedUser) { const badge = document.createElement('span'); badge.className = 'muted-badge'; badge.textContent = 'muted'; nameDiv.appendChild(document.createTextNode(' ')); nameDiv.appendChild(badge); }
-            if (u.name_locked) { const lb = document.createElement('span'); lb.className = 'locked-badge'; lb.textContent = 'locked'; nameDiv.appendChild(document.createTextNode(' ')); nameDiv.appendChild(lb); }
+            if (isMutedUser) { const b = document.createElement('span'); b.className = 'muted-badge'; b.textContent = 'muted'; nameDiv.appendChild(document.createTextNode(' ')); nameDiv.appendChild(b); }
+            if (u.name_locked) { const b = document.createElement('span'); b.className = 'locked-badge'; b.textContent = 'locked'; nameDiv.appendChild(document.createTextNode(' ')); nameDiv.appendChild(b); }
             const metaDiv = document.createElement('div'); metaDiv.className = 'admin-user-meta';
             metaDiv.textContent = `${msgCount} msg${msgCount !== 1 ? 's' : ''}`;
             info.appendChild(nameDiv); info.appendChild(metaDiv);
 
             const actions = document.createElement('div'); actions.className = 'admin-user-actions';
-            const refreshBtn = document.createElement('button'); refreshBtn.className = 'admin-user-btn'; refreshBtn.title = 'Refresh this user'; refreshBtn.textContent = '🔄';
-            refreshBtn.onclick = async () => { await broadcastAdminCmd({ action: 'force_refresh_target', device_id: u.device_id }); showBanner(`✅ Refreshed ${u.username}`, 'green'); };
+            const mkBtn = (emoji, title, cls, cb) => {
+                const b = document.createElement('button'); b.className = 'admin-user-btn' + (cls ? ' ' + cls : '');
+                b.title = title; b.textContent = emoji; b.onclick = cb; return b;
+            };
 
-            const muteBtn = document.createElement('button'); muteBtn.className = 'admin-user-btn warn'; muteBtn.title = isMutedUser ? 'Unmute' : 'Mute'; muteBtn.textContent = isMutedUser ? '🔊' : '🔕';
-            muteBtn.onclick = () => { if (isMutedUser) adminUnmuteUser(u); else openMuteModal(u); };
+            actions.appendChild(mkBtn('🔄','Refresh this user','', async () => { await broadcastAdminCmd({ action: 'force_refresh_target', device_id: u.device_id }); showBanner(`✅ Refreshed ${u.username}`, 'green'); }));
+            actions.appendChild(mkBtn(isMutedUser?'🔊':'🔕', isMutedUser?'Unmute':'Mute','warn', () => isMutedUser ? adminUnmuteUser(u) : openMuteModal(u)));
+            actions.appendChild(mkBtn('✏️','Rename / avatar','', () => adminEditIdentity(u)));
+            actions.appendChild(mkBtn(u.name_locked?'🔓':'🔒', u.name_locked?'Unlock username':'Lock username','', () => adminToggleNameLock(u, !u.name_locked)));
+            actions.appendChild(mkBtn('🗑','Clear their messages','', () => { document.getElementById('adminPanelOverlay').classList.remove('open'); adminDeleteAllFrom(u); }));
+            actions.appendChild(mkBtn('👢','Kick user','danger', () => { document.getElementById('adminPanelOverlay').classList.remove('open'); openKickModal(u); }));
+            actions.appendChild(mkBtn('⛔','Ban device','danger', () => { document.getElementById('adminPanelOverlay').classList.remove('open'); openBanModal(u); }));
 
-            const renameBtn = document.createElement('button'); renameBtn.className = 'admin-user-btn'; renameBtn.title = 'Rename / avatar'; renameBtn.textContent = '✏️';
-            renameBtn.onclick = () => adminEditIdentity(u);
-
-            const lockBtn = document.createElement('button'); lockBtn.className = 'admin-user-btn'; lockBtn.title = u.name_locked ? 'Unlock username changes' : 'Lock username changes'; lockBtn.textContent = u.name_locked ? '🔓' : '🔒';
-            lockBtn.onclick = () => adminToggleNameLock(u, !u.name_locked);
-
-            const clearBtn = document.createElement('button'); clearBtn.className = 'admin-user-btn'; clearBtn.title = 'Clear their messages'; clearBtn.textContent = '🗑';
-            clearBtn.onclick = () => { document.getElementById('adminPanelOverlay').classList.remove('open'); adminDeleteAllFrom(u); };
-
-            const kickBtn = document.createElement('button'); kickBtn.className = 'admin-user-btn danger'; kickBtn.title = 'Kick user'; kickBtn.textContent = '👢';
-            kickBtn.onclick = () => { document.getElementById('adminPanelOverlay').classList.remove('open'); openKickModal(u); };
-
-            const banBtn = document.createElement('button'); banBtn.className = 'admin-user-btn danger'; banBtn.title = 'Ban device'; banBtn.textContent = '⛔';
-            banBtn.onclick = () => { document.getElementById('adminPanelOverlay').classList.remove('open'); openBanModal(u); };
-
-            actions.appendChild(refreshBtn); actions.appendChild(muteBtn); actions.appendChild(renameBtn); actions.appendChild(lockBtn); actions.appendChild(clearBtn); actions.appendChild(kickBtn); actions.appendChild(banBtn);
             row.appendChild(avEl); row.appendChild(info); row.appendChild(actions); listEl.appendChild(row);
         });
 
-        const blockedRows = blocked || [];
-        document.getElementById('apBlockedCount').textContent = `(${blockedRows.length})`;
+        // Blocked devices
+        document.getElementById('apBlockedCount').textContent = `(${blocked.length})`;
         blockedEl.innerHTML = '';
-        if (!blockedRows.length) blockedEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No blocked devices</div>';
-        blockedRows.forEach(b => {
+        if (!blocked.length) blockedEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No blocked devices</div>';
+        blocked.forEach(b => {
             const row = document.createElement('div'); row.className = 'admin-user-row';
             const info = document.createElement('div'); info.className = 'admin-user-info';
             const n = document.createElement('div'); n.className = 'admin-user-name'; n.textContent = b.last_username || b.device_id;
-            const m = document.createElement('div'); m.className = 'admin-user-meta'; m.textContent = `${b.device_id} • ${b.reason || 'No reason'}`;
+            const m = document.createElement('div'); m.className = 'admin-user-meta';
+            const expStr = b.expires_at ? `Expires: ${new Date(b.expires_at).toLocaleString()}` : 'Permanent';
+            m.textContent = `${b.reason || 'No reason'} • ${expStr}`;
             info.appendChild(n); info.appendChild(m);
             const actions = document.createElement('div'); actions.className = 'admin-user-actions';
             const ub = document.createElement('button'); ub.className = 'admin-user-btn'; ub.title = 'Unban'; ub.textContent = '✅';
@@ -1613,17 +1617,16 @@ async function loadAdminUserList() {
     } catch(e) { listEl.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Error loading users</div>'; console.error(e); }
 }
 
+// ── DM VIEWER ──────────────────────────────────
 function renderDmViewerUsers(users) {
-    const usersMini = document.getElementById('dmViewerUsers');
-    usersMini.innerHTML = '';
+    const el = document.getElementById('dmViewerUsers'); el.innerHTML = '';
     users.forEach(u => {
-        const r = document.createElement('div');
-        r.className = 'admin-mini-row' + (selectedDmViewerUser === u.device_id ? ' active' : '');
+        const r = document.createElement('div'); r.className = 'admin-mini-row' + (selectedDmViewerUser === u.device_id ? ' active' : '');
         r.textContent = u.username;
         r.onclick = () => { selectedDmViewerUser = u.device_id; selectedDmViewerPartner = null; renderDmViewerUsers(users); loadDmViewerPartners(); };
-        usersMini.appendChild(r);
+        el.appendChild(r);
     });
-    if (!users.length) usersMini.innerHTML = '<div class="admin-mini-row">No users</div>';
+    if (!users.length) el.innerHTML = '<div class="admin-mini-row">No users</div>';
 }
 
 async function loadDmViewerPartners() {
@@ -1643,8 +1646,7 @@ async function loadDmViewerPartners() {
         const partnerIds = Object.keys(map);
         if (!partnerIds.length) { partnersMini.innerHTML = '<div class="admin-mini-row">No DM partners</div>'; return; }
         partnerIds.forEach(pid => {
-            const r = document.createElement('div');
-            r.className = 'admin-mini-row' + (selectedDmViewerPartner === pid ? ' active' : '');
+            const r = document.createElement('div'); r.className = 'admin-mini-row' + (selectedDmViewerPartner === pid ? ' active' : '');
             r.textContent = nameForDev(pid, pid);
             r.onclick = () => { selectedDmViewerPartner = pid; loadDmViewerPartners(); loadDmTranscript(); };
             partnersMini.appendChild(r);
@@ -1663,7 +1665,31 @@ async function loadDmTranscript() {
         msgs.forEach(m => {
             const line = document.createElement('div'); line.className = 'admin-dm-line';
             const sender = nameForDev(m.sender_device_id, m.sender_username || m.sender_device_id);
-            line.innerHTML = `<strong>${esc(sender)}</strong>: ${esc(m.text)}<div class="t">${esc(fmtTime(m.created_at))}</div>`;
+            const textSpan = document.createElement('span'); textSpan.textContent = m.text;
+            line.innerHTML = `<strong>${esc(sender)}</strong>: `;
+            line.appendChild(textSpan);
+            const tDiv = document.createElement('div'); tDiv.className = 't'; tDiv.textContent = fmtTime(m.created_at); line.appendChild(tDiv);
+
+            // Edit / Delete buttons
+            const actRow = document.createElement('div'); actRow.className = 'admin-dm-actions';
+            const editBtn = document.createElement('button'); editBtn.className = 'admin-dm-act-btn'; editBtn.textContent = '✏ Edit';
+            editBtn.onclick = async () => {
+                const newText = prompt('Edit message:', m.text); if (newText === null || newText === m.text) return;
+                try {
+                    await sbPatch(`/rest/v1/dms?id=eq.${m.id}`, { text: newText });
+                    m.text = newText; textSpan.textContent = newText;
+                    showBanner('✅ Message edited', 'green');
+                } catch(e) { showBanner('⚠ Edit failed', 'red'); }
+            };
+            const delBtn = document.createElement('button'); delBtn.className = 'admin-dm-act-btn del'; delBtn.textContent = '✕ Delete';
+            delBtn.onclick = async () => {
+                if (!confirm('Delete this message?')) return;
+                try {
+                    await sbDelete(`/rest/v1/dms?id=eq.${m.id}`);
+                    line.remove(); showBanner('✅ Message deleted', 'green');
+                } catch(e) { showBanner('⚠ Delete failed', 'red'); }
+            };
+            actRow.appendChild(editBtn); actRow.appendChild(delBtn); line.appendChild(actRow);
             transcript.appendChild(line);
         });
         transcript.scrollTop = transcript.scrollHeight;
@@ -1671,27 +1697,29 @@ async function loadDmTranscript() {
 }
 
 async function adminEditIdentity(u) {
-    const newName = prompt(`New username for ${u.username}:`, u.username);
-    if (newName === null) return;
-    const clean = newName.trim().replace(/\s+/g, ' ');
-    if (!clean) return;
-    const newAvatar = prompt(`Optional avatar URL for ${clean} (leave blank to keep current):`, u.avatar || '');
+    const newName = prompt(`New username for ${u.username}:`, u.username); if (newName === null) return;
+    const clean = newName.trim().replace(/\s+/g, ' '); if (!clean) return;
+    const newAvatar = prompt(`Optional avatar URL for ${clean} (blank to keep current):`, u.avatar || '');
     try {
-        await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(u.device_id)}`, { username: clean, avatar: newAvatar === null ? u.avatar : (newAvatar.trim() || null) });
+        const patch = { username: clean };
+        if (newAvatar !== null) patch.avatar = newAvatar.trim() || null;
+        await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(u.device_id)}`, patch);
+        // Update in-memory immediately so admin's sidebar updates right away
+        const localUser = allUsers.find(x => x.device_id === u.device_id);
+        if (localUser) { localUser.username = clean; if (newAvatar !== null) localUser.avatar = newAvatar.trim() || null; }
+        renderSidebar(document.getElementById('sidebarSearch').value);
+        // Broadcast so their tab + everyone else updates immediately
         await broadcastAdminCmd({ action: 'identity_changed', device_id: u.device_id, username: clean });
-        await broadcastAdminCmd({ action: 'force_refresh' });
-        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} changed ${u.username} to ${clean}`, type: 'system', device_id });
-        showBanner(`✅ Updated ${u.username}`, 'green');
-        loadAllUsers();
-        loadAdminUserList();
-    } catch(e) { showBanner('⚠ Failed to update profile', 'red'); }
+        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} renamed ${u.username} to ${clean}`, type: 'system', device_id: deviceId });
+        showBanner(`✅ Updated ${u.username} → ${clean}`, 'green');
+        loadAllUsers(); loadAdminUserList();
+    } catch(e) { showBanner('⚠ Failed to update profile', 'red'); console.error(e); }
 }
 
 async function adminToggleNameLock(u, lockState) {
     try {
         await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(u.device_id)}`, { name_locked: lockState });
         await broadcastAdminCmd({ action: 'force_refresh_target', device_id: u.device_id });
-        await broadcastAdminCmd({ action: 'force_refresh' });
         showBanner(`✅ ${lockState ? 'Locked' : 'Unlocked'} ${u.username}`, 'green');
         loadAdminUserList();
     } catch(e) { showBanner('⚠ Lock update failed', 'red'); }
@@ -1702,13 +1730,12 @@ async function adminUnbanDevice(devId, label) {
     try {
         await sbDelete(`/rest/v1/banned_devices?device_id=eq.${encodeURIComponent(devId)}`);
         await broadcastAdminCmd({ action: 'force_refresh_target', device_id: devId });
-        showBanner(`✅ Unbanned ${label}`, 'green');
-        loadAdminUserList();
+        showBanner(`✅ Unbanned ${label}`, 'green'); loadAdminUserList();
     } catch(e) { showBanner('⚠ Unban failed', 'red'); }
 }
 
 // ════════════════════════════════════════════════
-// KICK / BAN MODALS
+// KICK MODAL
 // ════════════════════════════════════════════════
 function openKickModal(targetUser) {
     kickTarget = targetUser;
@@ -1725,21 +1752,31 @@ async function adminKickUser(targetUser) {
     const reason = document.getElementById('kickReasonInput').value.trim() || 'No reason provided.';
     document.getElementById('kickModal').classList.remove('open');
     try {
-        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} kicked ${targetUser.username}||reason:${reason}`, type: 'system', device_id });
+        // Get the real device_id from allUsers in case it wasn't hydrated
+        const realUser = allUsers.find(u => u.username === targetUser.username) || targetUser;
+        const devId = realUser.device_id || targetUser.device_id;
+        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(devId)}`);
+        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} kicked ${targetUser.username}||reason:${reason}`, type: 'system', device_id: deviceId });
+        // Tell their tab immediately — force a full refresh that drops them to username picker
+        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: devId });
         await broadcastAdminCmd({ action: 'force_refresh' });
         showBanner(`✅ Kicked ${targetUser.username}`, 'green');
         fullRefresh(); loadAllUsers(); kickTarget = null;
     } catch(e) { console.error(e); showBanner('⚠ Kick failed: ' + (e.message || ''), 'red'); }
 }
 
+// ════════════════════════════════════════════════
+// BAN MODAL — with timed ban
+// ════════════════════════════════════════════════
 function openBanModal(targetUser) {
     banTarget = targetUser;
     document.getElementById('banTargetName').textContent = targetUser.username;
     document.getElementById('banReasonInput').value = '';
+    document.getElementById('banDays').value = 0; document.getElementById('banHours').value = 0;
+    document.getElementById('banMinutes').value = 0; document.getElementById('banSeconds').value = 0;
     document.getElementById('banModal').classList.add('open');
     setTimeout(() => document.getElementById('banReasonInput').focus(), 30);
 }
@@ -1749,17 +1786,40 @@ document.getElementById('banConfirmBtn').addEventListener('click', () => adminBa
 async function adminBanUser(targetUser) {
     if (!targetUser) return;
     const reason = document.getElementById('banReasonInput').value.trim() || 'No reason provided.';
+    const d = parseInt(document.getElementById('banDays').value || '0', 10);
+    const h = parseInt(document.getElementById('banHours').value || '0', 10);
+    const m = parseInt(document.getElementById('banMinutes').value || '0', 10);
+    const s = parseInt(document.getElementById('banSeconds').value || '0', 10);
+    const totalSec = d*86400 + h*3600 + m*60 + s;
+    const expiresAt = totalSec > 0 ? new Date(Date.now() + totalSec * 1000).toISOString() : null;
     document.getElementById('banModal').classList.remove('open');
     try {
-        await sbPost('/rest/v1/banned_devices', { device_id: targetUser.device_id, reason, banned_by: username, last_username: targetUser.username }, { Prefer: 'resolution=merge-duplicates,return=representation' });
-        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
-        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} banned ${targetUser.username}||reason:${reason}`, type: 'system', device_id });
-        await broadcastAdminCmd({ action: 'user_banned', device_id: targetUser.device_id, reason });
+        // Use device_id directly from targetUser — it should always be set from allUsers
+        const realUser = allUsers.find(u => u.username === targetUser.username) || targetUser;
+        const devId = realUser.device_id || targetUser.device_id;
+        if (!devId) { showBanner('⚠ Cannot resolve device ID', 'red'); return; }
+
+        await sbPost('/rest/v1/banned_devices', {
+            device_id: devId, reason, banned_by: username, last_username: targetUser.username,
+            ...(expiresAt ? { expires_at: expiresAt } : {})
+        }, { Prefer: 'resolution=merge-duplicates,return=representation' });
+
+        await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/dms?sender_device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(devId)}`);
+        await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(devId)}`);
+
+        await sbPost('/rest/v1/messages', {
+            username: '🛡 Admin',
+            text: `🛡 ${username} banned ${targetUser.username}${expiresAt ? ` (until ${new Date(expiresAt).toLocaleString()})` : ' (permanent)'}||reason:${reason}`,
+            type: 'system', device_id: deviceId
+        });
+
+        // Send ban broadcast with device_id and expires_at
+        await broadcastAdminCmd({ action: 'user_banned', device_id: devId, reason, expires_at: expiresAt });
         await broadcastAdminCmd({ action: 'force_refresh' });
-        showBanner(`✅ Banned ${targetUser.username}`, 'green');
+
+        showBanner(`✅ Banned ${targetUser.username}${expiresAt ? ' (timed)' : ' (permanent)'}`, 'green');
         fullRefresh(); loadAllUsers(); banTarget = null; loadAdminUserList();
     } catch(e) { console.error(e); showBanner('⚠ Ban failed: ' + (e.message || ''), 'red'); }
 }
@@ -1770,10 +1830,8 @@ async function adminBanUser(targetUser) {
 function openMuteModal(targetUser) {
     muteTarget = targetUser;
     document.getElementById('muteTargetName').textContent = targetUser.username;
-    document.getElementById('muteDays').value = 0;
-    document.getElementById('muteHours').value = 0;
-    document.getElementById('muteMinutes').value = 0;
-    document.getElementById('muteSeconds').value = 0;
+    document.getElementById('muteDays').value = 0; document.getElementById('muteHours').value = 0;
+    document.getElementById('muteMinutes').value = 0; document.getElementById('muteSeconds').value = 0;
     document.getElementById('muteModal').classList.add('open');
 }
 document.getElementById('muteCancelBtn').addEventListener('click', () => { document.getElementById('muteModal').classList.remove('open'); muteTarget = null; });
@@ -1792,8 +1850,7 @@ async function adminMuteUser(targetUser) {
         await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`, { muted_until: until });
         await broadcastAdminCmd({ action: 'user_muted', device_id: targetUser.device_id, until });
         showBanner(`✅ Muted ${targetUser.username} for ${formatMuteTime(new Date(until))}`, 'green');
-        muteTarget = null;
-        loadAdminUserList();
+        muteTarget = null; loadAdminUserList();
     } catch(e) { console.error(e); showBanner('⚠ Mute failed: ' + (e.message || ''), 'red'); }
 }
 
@@ -1801,21 +1858,19 @@ async function adminUnmuteUser(targetUser) {
     try {
         await sbPatch(`/rest/v1/users?device_id=eq.${encodeURIComponent(targetUser.device_id)}`, { muted_until: null });
         await broadcastAdminCmd({ action: 'user_unmuted', device_id: targetUser.device_id });
-        showBanner(`✅ Unmuted ${targetUser.username}`, 'green');
-        loadAdminUserList();
+        showBanner(`✅ Unmuted ${targetUser.username}`, 'green'); loadAdminUserList();
     } catch(e) { console.error(e); showBanner('⚠ Unmute failed', 'red'); }
 }
 
 // ════════════════════════════════════════════════
-// DELETE PUBLIC MESSAGES (from context menu)
+// ADMIN: DELETE PUBLIC MESSAGES
 // ════════════════════════════════════════════════
 async function adminDeleteAllFrom(targetUser) {
     if (!confirm(`Delete all PUBLIC messages from "${targetUser.username}"?`)) return;
     try {
         await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(targetUser.device_id)}`);
         await broadcastAdminCmd({ action: 'messages_cleared', target: targetUser.username });
-        showBanner(`✅ Deleted public messages from ${targetUser.username}`, 'green');
-        fullRefresh();
+        showBanner(`✅ Deleted public messages from ${targetUser.username}`, 'green'); fullRefresh();
     } catch(e) { console.error(e); showBanner('⚠ Failed: ' + (e.message || ''), 'red'); }
 }
 
@@ -1833,40 +1888,21 @@ function showCtxMenu(e, targetUsername, targetDevId) {
     ctxTarget = user;
     document.getElementById('ctxMenuName').textContent = targetUsername;
     ctxMenu.querySelectorAll('.ctx-admin-item').forEach(x => x.remove());
-
     if (isAdmin()) {
         const isMutedUser = user.muted_until && new Date(user.muted_until) > new Date();
-
-        const div = document.createElement('div'); div.className = 'ctx-menu-divider ctx-admin-item'; ctxMenu.appendChild(div);
-
-        const refreshBtn = document.createElement('div'); refreshBtn.className = 'ctx-menu-item ctx-admin-item';
-        refreshBtn.innerHTML = '🔄 Refresh their chat';
-        refreshBtn.onclick = async () => { ctxMenu.classList.remove('open'); await broadcastAdminCmd({ action: 'force_refresh_target', device_id: ctxTarget.device_id }); showBanner(`✅ Refreshed ${ctxTarget.username}`, 'green'); };
-        ctxMenu.appendChild(refreshBtn);
-
-        const muteBtn = document.createElement('div'); muteBtn.className = 'ctx-menu-item ctx-admin-item';
-        muteBtn.innerHTML = isMutedUser ? '🔊 Unmute' : '🔕 Mute';
-        muteBtn.onclick = () => { ctxMenu.classList.remove('open'); isMutedUser ? adminUnmuteUser(ctxTarget) : openMuteModal(ctxTarget); };
-        ctxMenu.appendChild(muteBtn);
-
-        const clearBtn = document.createElement('div'); clearBtn.className = 'ctx-menu-item ctx-admin-item danger';
-        clearBtn.innerHTML = '🗑 Clear their messages';
-        clearBtn.onclick = () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); };
-        ctxMenu.appendChild(clearBtn);
-
-        const kickBtn = document.createElement('div'); kickBtn.className = 'ctx-menu-item ctx-admin-item danger';
-        kickBtn.innerHTML = '👢 Kick user';
-        kickBtn.onclick = () => { ctxMenu.classList.remove('open'); openKickModal(ctxTarget); };
-        ctxMenu.appendChild(kickBtn);
-
-        const banBtn = document.createElement('div'); banBtn.className = 'ctx-menu-item ctx-admin-item danger';
-        banBtn.innerHTML = '⛔ Ban device';
-        banBtn.onclick = () => { ctxMenu.classList.remove('open'); openBanModal(ctxTarget); };
-        ctxMenu.appendChild(banBtn);
+        const addItem = (label, cls, cb) => {
+            const d = document.createElement('div'); d.className = 'ctx-menu-item ctx-admin-item' + (cls ? ' '+cls : '');
+            d.innerHTML = label; d.onclick = cb; ctxMenu.appendChild(d);
+        };
+        ctxMenu.appendChild(Object.assign(document.createElement('div'), { className: 'ctx-menu-divider ctx-admin-item' }));
+        addItem('🔄 Refresh their chat', '', async () => { ctxMenu.classList.remove('open'); await broadcastAdminCmd({ action: 'force_refresh_target', device_id: ctxTarget.device_id }); showBanner(`✅ Refreshed ${ctxTarget.username}`, 'green'); });
+        addItem(isMutedUser ? '🔊 Unmute' : '🔕 Mute', '', () => { ctxMenu.classList.remove('open'); isMutedUser ? adminUnmuteUser(ctxTarget) : openMuteModal(ctxTarget); });
+        addItem('🗑 Clear their messages', 'danger', () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); });
+        addItem('👢 Kick user', 'danger', () => { ctxMenu.classList.remove('open'); openKickModal(ctxTarget); });
+        addItem('⛔ Ban device', 'danger', () => { ctxMenu.classList.remove('open'); openBanModal(ctxTarget); });
     }
-
     ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
-    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 250) + 'px';
+    ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight - 260) + 'px';
     ctxJustOpened = true; ctxMenu.classList.add('open'); e.stopPropagation();
 }
 
@@ -1880,19 +1916,28 @@ document.addEventListener('mousedown', e => {
     if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('open');
 });
 
-// Unified click handler
 document.getElementById('messagesInner').addEventListener('click', e => {
     const replyBtn = e.target.closest('.msg-reply-btn');
     if (replyBtn) { e.stopPropagation(); setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text); return; }
     if (e.target.closest('.msg-delete')) return;
     const avatar = e.target.closest('.msg-avatar');
-    if (avatar) {
-        const msgEl = avatar.closest('.msg');
-        if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; }
-    }
+    if (avatar) { const msgEl = avatar.closest('.msg'); if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; } }
     const usernameSpan = e.target.closest('.msg-username');
     if (usernameSpan) { showCtxMenu(e, usernameSpan.dataset.username || usernameSpan.textContent, null); return; }
 });
+
+// ════════════════════════════════════════════════
+// AUTO-UNBAN CHECK (periodic)
+// ════════════════════════════════════════════════
+// Check every 60s if the device's ban has expired
+setInterval(async () => {
+    const blocked = await isDeviceBlocked(deviceId);
+    if (!blocked && document.getElementById('bannedOverlay').classList.contains('show')) {
+        // Ban expired — hide the screen and let them back in
+        document.getElementById('bannedOverlay').classList.remove('show');
+        window.location.reload();
+    }
+}, 60000);
 </script>
 </body>
 </html>
