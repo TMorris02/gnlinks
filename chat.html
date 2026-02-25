@@ -297,6 +297,9 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
 .msg-delete { display: none; position: absolute; top: -8px; right: -8px; background: #ef4444; border: 2px solid var(--bg); color: white; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 10px; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 10; line-height: 1; }
 .msg-bubble-wrap:hover .msg-delete { display: flex; }
 .msg-delete:hover { background: #dc2626; }
+.msg-edit { display: none; position: absolute; top: -8px; right: 18px; background: #6366f1; border: 2px solid var(--bg); color: white; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 10px; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: background 0.15s; z-index: 10; line-height: 1; }
+.msg-bubble-wrap:hover .msg-edit { display: flex; }
+.msg-edit:hover { background: #4f46e5; }
 .msg-system { align-self: center; font-size: 11px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; padding: 4px 12px; margin: 6px 0; background: var(--border-light); border-radius: 20px; }
 .msg-system.announcement { background: linear-gradient(135deg, #1d4ed8, #7c3aed); color: white; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 20px; box-shadow: var(--shadow-sm); }
 .dm-indicator { font-size: 10px; background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
@@ -457,10 +460,10 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
         <textarea class="ban-reason-input" id="banReasonInput" placeholder="e.g. Severe harassment, raids..."></textarea>
         <div class="ban-duration-label">Ban Duration (leave all 0 for permanent)</div>
         <div class="ban-dur-row">
-            <input class="ban-dur-input" id="banDays" type="number" min="0" value="0" placeholder="d">
-            <input class="ban-dur-input" id="banHours" type="number" min="0" value="0" placeholder="h">
-            <input class="ban-dur-input" id="banMinutes" type="number" min="0" value="0" placeholder="m">
-            <input class="ban-dur-input" id="banSeconds" type="number" min="0" value="0" placeholder="s">
+            <input class="ban-dur-input" id="banDays" type="number" min="0" placeholder="d">
+            <input class="ban-dur-input" id="banHours" type="number" min="0" placeholder="h">
+            <input class="ban-dur-input" id="banMinutes" type="number" min="0" placeholder="m">
+            <input class="ban-dur-input" id="banSeconds" type="number" min="0" placeholder="s">
         </div>
         <div class="ban-dur-hint">Days · Hours · Minutes · Seconds</div>
         <button class="ban-confirm-btn" id="banConfirmBtn">⛔ Confirm Ban</button>
@@ -475,10 +478,10 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
         <div class="modal-sub" id="muteModalSub">Select how long to mute <strong id="muteTargetName"></strong>.</div>
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Custom duration (1 second always added)</div>
         <div class="inline-input-row">
-            <input class="inline-input" id="muteDays" type="number" min="0" value="0" placeholder="Days">
-            <input class="inline-input" id="muteHours" type="number" min="0" value="0" placeholder="Hours">
-            <input class="inline-input" id="muteMinutes" type="number" min="0" value="0" placeholder="Minutes">
-            <input class="inline-input" id="muteSeconds" type="number" min="0" value="0" placeholder="Seconds">
+            <input class="inline-input" id="muteDays" type="number" min="0" placeholder="Days">
+            <input class="inline-input" id="muteHours" type="number" min="0" placeholder="Hours">
+            <input class="inline-input" id="muteMinutes" type="number" min="0" placeholder="Minutes">
+            <input class="inline-input" id="muteSeconds" type="number" min="0" placeholder="Seconds">
         </div>
         <button class="mute-confirm-btn" id="muteConfirmBtn">🔕 Mute</button>
         <button class="ban-cancel-btn" id="muteCancelBtn" style="margin-top:8px;">Cancel</button>
@@ -973,13 +976,21 @@ function removeMute() {
 }
 function formatMuteTime(until) {
     const ms = until - new Date(); if (ms <= 0) return '';
-    const mins = Math.floor(ms / 60000);
-    if (mins < 60) return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    const secs = Math.floor(ms / 1000);
+    if (secs < 60) return secs + ' second' + (secs !== 1 ? 's' : '');
+    const mins = Math.floor(secs / 60);
+    if (mins < 60) return mins + ' minute' + (mins !== 1 ? 's' : '');
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs} hour${hrs !== 1 ? 's' : ''}`;
-    return `${Math.floor(hrs / 24)} day${Math.floor(hrs/24) !== 1 ? 's' : ''}`;
+    if (hrs < 24) return hrs + ' hour' + (hrs !== 1 ? 's' : '');
+    const days = Math.floor(hrs / 24); return days + ' day' + (days !== 1 ? 's' : '');
 }
-setInterval(() => { if (isMuted && muteUntil && new Date() > muteUntil) removeMute(); }, 60000);
+// Live countdown — ticks every second, shows seconds when < 1 min left
+setInterval(() => {
+    if (!isMuted || !muteUntil) return;
+    if (new Date() > muteUntil) { removeMute(); return; }
+    document.getElementById('mutedBanner').textContent =
+        '\uD83D\uDD15 You are muted — ' + formatMuteTime(muteUntil) + ' remaining. You cannot send messages.';
+}, 1000);
 
 // ════════════════════════════════════════════════
 // BOOT
@@ -1050,6 +1061,15 @@ function subscribeAdminChannel() {
             showBannedScreen(payload.reason || 'No reason provided.', payload.expires_at || null);
         } else if (payload.action === 'messages_cleared') {
             fullRefresh();
+        } else if (payload.action === 'msg_updated') {
+            // A global message was edited/deleted — refresh everyone's chat
+            if (!dmMode) fullRefresh();
+        } else if (payload.action === 'dm_updated') {
+            // A DM was edited/deleted — refresh only the two parties involved
+            if (dmMode && dmPartner && (payload.partner1 === deviceId || payload.partner2 === deviceId)) {
+                const otherDev = payload.partner1 === deviceId ? payload.partner2 : payload.partner1;
+                if (dmPartner.device_id === otherDev) fullRefresh();
+            }
         } else if (payload.action === 'user_muted' && payload.device_id === deviceId) {
             isMuted = true; muteUntil = new Date(payload.until); applyMute();
         } else if (payload.action === 'user_unmuted' && payload.device_id === deviceId) {
@@ -1453,11 +1473,44 @@ function renderMessage(msg, isDm) {
         const rBtn = document.createElement('button'); rBtn.className = 'msg-reply msg-reply-btn'; rBtn.title = 'Reply'; rBtn.dataset.id = msg.id; rBtn.dataset.sender = senderName; rBtn.dataset.text = msg.text; rBtn.textContent = '↩'; bWrap.appendChild(rBtn);
     }
     if (isMe || isAdmin()) {
+        // Store DM partner device ID on the element for broadcasting
+        if (isDm) {
+            const partnerDev = msg.sender_device_id === deviceId ? msg.recipient_device_id : msg.sender_device_id;
+            bWrap.dataset.dmPartnerDev = partnerDev || '';
+        }
+        const eBtn = document.createElement('button'); eBtn.className = 'msg-edit'; eBtn.title = 'Edit'; eBtn.dataset.id = msg.id; eBtn.dataset.isdm = isDm?'1':'0'; eBtn.textContent = '✎'; eBtn.addEventListener('click', editMsg); bWrap.appendChild(eBtn);
         const dBtn = document.createElement('button'); dBtn.className = 'msg-delete'; dBtn.title = 'Delete'; dBtn.dataset.id = msg.id; dBtn.dataset.isdm = isDm?'1':'0'; dBtn.textContent = '✕'; dBtn.addEventListener('click', deleteMsg); bWrap.appendChild(dBtn);
     }
     rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
     lastRenderedUser = senderDevId || senderName;
     if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
+}
+
+// ════════════════════════════════════════════════
+// EDIT MESSAGE
+// ════════════════════════════════════════════════
+async function editMsg(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget; const id = parseInt(btn.dataset.id); const isDm = btn.dataset.isdm === '1';
+    const bWrap = btn.closest('.msg-bubble-wrap'); if (!bWrap) return;
+    const bubble = bWrap.querySelector('.msg-bubble'); if (!bubble) return;
+    const oldText = bubble.textContent;
+    const newText = prompt('Edit message:', oldText);
+    if (newText === null || newText.trim() === '' || newText === oldText) return;
+    try {
+        if (isDm) {
+            await sbPatch('/rest/v1/dms?id=eq.' + id, { text: newText.trim() });
+            bubble.textContent = newText.trim();
+            // Broadcast to refresh the DM thread for both parties
+            const partnerDev = bWrap.dataset.dmPartnerDev;
+            await broadcastAdminCmd({ action: 'dm_updated', partner1: deviceId, partner2: partnerDev });
+        } else {
+            await sbPatch('/rest/v1/messages?id=eq.' + id, { text: newText.trim() });
+            bubble.textContent = newText.trim();
+            // Tell all clients to pick up the edit
+            await broadcastAdminCmd({ action: 'msg_updated' });
+        }
+    } catch(err) { console.error('edit error:', err); showBanner('⚠ Could not edit message', 'red'); }
 }
 
 // ════════════════════════════════════════════════
@@ -1467,10 +1520,18 @@ async function deleteMsg(e) {
     e.stopPropagation();
     const btn = e.currentTarget; const id = parseInt(btn.dataset.id); const isDm = btn.dataset.isdm === '1';
     const msgEl = btn.closest('.msg'); if (!msgEl) return;
+    const bWrap = btn.closest('.msg-bubble-wrap');
     try {
-        if (isDm) await sbDelete(`/rest/v1/dms?id=eq.${id}`);
-        else await sbDelete(`/rest/v1/messages?id=eq.${id}`);
-        msgEl.remove();
+        if (isDm) {
+            await sbDelete('/rest/v1/dms?id=eq.' + id);
+            msgEl.remove();
+            const partnerDev = bWrap ? bWrap.dataset.dmPartnerDev : '';
+            await broadcastAdminCmd({ action: 'dm_updated', partner1: deviceId, partner2: partnerDev });
+        } else {
+            await sbDelete('/rest/v1/messages?id=eq.' + id);
+            msgEl.remove();
+            await broadcastAdminCmd({ action: 'msg_updated' });
+        }
     } catch(err) { console.error('delete error:', err); showBanner('⚠ Could not delete message', 'red'); }
 }
 
@@ -1799,8 +1860,8 @@ function openBanModal(targetUser) {
     banTarget = targetUser;
     document.getElementById('banTargetName').textContent = targetUser.username;
     document.getElementById('banReasonInput').value = '';
-    document.getElementById('banDays').value = 0; document.getElementById('banHours').value = 0;
-    document.getElementById('banMinutes').value = 0; document.getElementById('banSeconds').value = 0;
+    document.getElementById('banDays').value = ''; document.getElementById('banHours').value = '';
+    document.getElementById('banMinutes').value = ''; document.getElementById('banSeconds').value = '';
     document.getElementById('banModal').classList.add('open');
     setTimeout(() => document.getElementById('banReasonInput').focus(), 30);
 }
@@ -1854,8 +1915,8 @@ async function adminBanUser(targetUser) {
 function openMuteModal(targetUser) {
     muteTarget = targetUser;
     document.getElementById('muteTargetName').textContent = targetUser.username;
-    document.getElementById('muteDays').value = 0; document.getElementById('muteHours').value = 0;
-    document.getElementById('muteMinutes').value = 0; document.getElementById('muteSeconds').value = 0;
+    document.getElementById('muteDays').value = ''; document.getElementById('muteHours').value = '';
+    document.getElementById('muteMinutes').value = ''; document.getElementById('muteSeconds').value = '';
     document.getElementById('muteModal').classList.add('open');
 }
 document.getElementById('muteCancelBtn').addEventListener('click', () => { document.getElementById('muteModal').classList.remove('open'); muteTarget = null; });
@@ -1944,6 +2005,7 @@ document.getElementById('messagesInner').addEventListener('click', e => {
     const replyBtn = e.target.closest('.msg-reply-btn');
     if (replyBtn) { e.stopPropagation(); setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text); return; }
     if (e.target.closest('.msg-delete')) return;
+    if (e.target.closest('.msg-edit')) return;
     const avatar = e.target.closest('.msg-avatar');
     if (avatar) { const msgEl = avatar.closest('.msg'); if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; } }
     const usernameSpan = e.target.closest('.msg-username');
