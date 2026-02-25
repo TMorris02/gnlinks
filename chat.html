@@ -517,6 +517,7 @@ body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text
     </div>
     <div class="header-right">
         <button class="admin-btn" id="adminPanelBtn">🛡 Admin</button>
+        <button class="theme-btn" id="refreshBtn" title="Refresh" style="font-size:14px;">↻</button>
         <button class="theme-btn" id="themeBtn">🌙</button>
         <button class="username-btn" id="changeUsernameBtn" title="Edit profile">
             ✏️ <span id="headerUsername">Set username</span>
@@ -772,6 +773,13 @@ function applyTheme() {
 }
 applyTheme();
 document.getElementById('themeBtn').addEventListener('click', () => { isDark = !isDark; applyTheme(); });
+document.getElementById('refreshBtn').addEventListener('click', () => {
+    const btn = document.getElementById('refreshBtn');
+    btn.style.transition = 'transform 0.5s ease';
+    btn.style.transform = 'rotate(360deg)';
+    setTimeout(() => { btn.style.transition = ''; btn.style.transform = ''; }, 500);
+    fullRefresh(); loadAllUsers();
+});
 
 // ── SIDEBAR TOGGLE ─────────────────────────────
 document.getElementById('sidebarToggle').addEventListener('click', () => {
@@ -1036,6 +1044,8 @@ function subscribeAdminChannel() {
                 lastRenderedId = 0;
                 await loadHistory();
             }
+        } else if (payload.action === 'user_kicked' && payload.device_id === deviceId) {
+            showKickedScreen();
         } else if (payload.action === 'user_banned' && payload.device_id === deviceId) {
             showBannedScreen(payload.reason || 'No reason provided.', payload.expires_at || null);
         } else if (payload.action === 'messages_cleared') {
@@ -1073,6 +1083,24 @@ function showBannedScreen(reason, expiresAt) {
     document.getElementById('bannedOverlay').classList.add('show');
 }
 document.getElementById('bannedOkBtn').addEventListener('click', () => { window.location.reload(); });
+
+function showKickedScreen() {
+    // Wipe identity so they get the username picker on next load
+    username = ''; myAvatar = '';
+    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
+    disableInput();
+    document.getElementById('headerUsername').textContent = 'Set username';
+    document.getElementById('adminPanelBtn').classList.remove('visible');
+    // Re-use the banned overlay with different copy
+    document.getElementById('bannedReasonText').closest('.banned-reason').querySelector('strong').textContent = 'You have been kicked';
+    document.getElementById('bannedReasonText').textContent = 'An admin has removed you. You can rejoin with a new username.';
+    document.getElementById('bannedExpiry').textContent = '';
+    document.getElementById('bannedOverlay').style.setProperty('--ban-color', '#f59e0b');
+    document.getElementById('bannedOverlay').querySelector('.banned-title').textContent = "You've Been Kicked";
+    document.getElementById('bannedOverlay').querySelector('.banned-icon').textContent = '👢';
+    document.getElementById('bannedOverlay').querySelector('.banned-card').style.borderColor = '#f59e0b';
+    document.getElementById('bannedOverlay').classList.add('show');
+}
 
 // Announcement overlay
 function renderAnnouncementOverlay(text) {
@@ -1697,6 +1725,7 @@ async function adminEditIdentity(u) {
     const newName = prompt(`New username for ${u.username}:`, u.username); if (newName === null) return;
     const clean = newName.trim().replace(/\s+/g, ' '); if (!clean) return;
     const newAvatar = prompt(`Optional avatar URL for ${clean} (blank to keep current):`, u.avatar || '');
+    const oldName = u.username; // save BEFORE any mutation
     try {
         const patch = { username: clean };
         if (newAvatar !== null) patch.avatar = newAvatar.trim() || null;
@@ -1705,10 +1734,9 @@ async function adminEditIdentity(u) {
         const localUser = allUsers.find(x => x.device_id === u.device_id);
         if (localUser) { localUser.username = clean; if (newAvatar !== null) localUser.avatar = newAvatar.trim() || null; }
         renderSidebar(document.getElementById('sidebarSearch').value);
-        // Broadcast so their tab + everyone else updates immediately
         await broadcastAdminCmd({ action: 'identity_changed', device_id: u.device_id, username: clean });
-        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} renamed ${u.username} to ${clean}`, type: 'system', device_id: deviceId });
-        showBanner(`✅ Updated ${u.username} → ${clean}`, 'green');
+        await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} renamed ${oldName} to ${clean}`, type: 'system', device_id: deviceId });
+        showBanner(`✅ Updated ${oldName} → ${clean}`, 'green');
         loadAllUsers(); loadAdminUserList();
     } catch(e) { showBanner('⚠ Failed to update profile', 'red'); console.error(e); }
 }
@@ -1749,7 +1777,6 @@ async function adminKickUser(targetUser) {
     const reason = document.getElementById('kickReasonInput').value.trim() || 'No reason provided.';
     document.getElementById('kickModal').classList.remove('open');
     try {
-        // Get the real device_id from allUsers in case it wasn't hydrated
         const realUser = allUsers.find(u => u.username === targetUser.username) || targetUser;
         const devId = realUser.device_id || targetUser.device_id;
         await sbDelete(`/rest/v1/messages?device_id=eq.${encodeURIComponent(devId)}`);
@@ -1757,8 +1784,8 @@ async function adminKickUser(targetUser) {
         await sbDelete(`/rest/v1/dms?recipient_device_id=eq.${encodeURIComponent(devId)}`);
         await sbDelete(`/rest/v1/users?device_id=eq.${encodeURIComponent(devId)}`);
         await sbPost('/rest/v1/messages', { username: '🛡 Admin', text: `🛡 ${username} kicked ${targetUser.username}||reason:${reason}`, type: 'system', device_id: deviceId });
-        // Tell their tab immediately — force a full refresh that drops them to username picker
-        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: devId });
+        // user_kicked tells their tab to wipe identity and show the picker
+        await broadcastAdminCmd({ action: 'user_kicked', device_id: devId, reason });
         await broadcastAdminCmd({ action: 'force_refresh' });
         showBanner(`✅ Kicked ${targetUser.username}`, 'green');
         fullRefresh(); loadAllUsers(); kickTarget = null;
