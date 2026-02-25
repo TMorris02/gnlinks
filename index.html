@@ -995,9 +995,9 @@ renderCards();
 <script>
 window.addEventListener('DOMContentLoaded', () => {
     const lastSite = localStorage.getItem("selectedSite");
-    if (lastSite === "site2") {
-        document.getElementById("site1").style.display = "none";
-        document.getElementById("site2").style.display = "flex";
+    if (lastSite === "site1") {
+        document.getElementById("site1").style.display = "block";
+        document.getElementById("site2").style.display = "none";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
