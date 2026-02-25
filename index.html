@@ -57,8 +57,7 @@ height: 100vh;
 <script>
 (function() {
 const savedSite = localStorage.getItem("selectedSite") || "site2";
-const otherSite = savedSite === "site1" ? "site2" : "site1";
-document.write('<style>#' + savedSite + '{ display: ' + (savedSite === 'site2' ? 'flex' : 'block') + ' !important; } #' + otherSite + '{ display: none !important; }</style>');
+document.write('<style>#' + savedSite + '{ display: block; }</style>');
 
 // Apply tab cloak immediately
 try {
@@ -998,7 +997,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const lastSite = localStorage.getItem("selectedSite");
     if (lastSite === "site2") {
         document.getElementById("site1").style.display = "none";
-        document.getElementById("site2").style.display = "flex";
+        document.getElementById("site2").style.display = "block";
         document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
     }
 });
