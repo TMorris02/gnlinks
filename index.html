@@ -44,7 +44,7 @@ transition: opacity 0.5s ease; /* This handles the smooth fade */
 cursor: default;
 }
     
-#site1, #site2 { display: none; }
+#site1 {display:none; }, #site2 {display: none; }
 #site1 {
 background-color: #0f172a;
 min-height: 100vh;
@@ -998,7 +998,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (lastSite === "site1") {
         document.getElementById("site1").style.display = "block";
         document.getElementById("site2").style.display = "none";
-        document.querySelector('.main-toggle-btn').style.backgroundColor = '#f3f4f6';
+        document.querySelector('.main-toggle-btn').style.backgroundColor = '#FFA500';
     }
 });
 
