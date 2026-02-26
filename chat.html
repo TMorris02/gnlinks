@@ -15,8 +15,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height
 body.dark-mode{
   --bg:#0f172a;--bg-secondary:#1e293b;--surface:#1e293b;--surface-hover:#334155;
   --border:#334155;--border-light:#1e293b;--text:#f1f5f9;--text-muted:#94a3b8;--text-light:#64748b;
-  --primary:#6366f1;--primary-light:rgba(99,102,241,0.15);--primary-lighter:rgba(99,102,241,0.08);
-  --gradient-primary:linear-gradient(135deg,#6366f1,#8b5cf6);
+  --primary:#FFA500;--primary-light:rgba(255,165,0,0.15);--primary-lighter:rgba(255,165,0,0.08);
+  --gradient-primary:linear-gradient(135deg,#ffa500 0%,#ff8800 100%);
   --shadow-xs:0 1px 2px rgba(0,0,0,0.4);--shadow-sm:0 2px 4px rgba(0,0,0,0.4);
   --shadow:0 4px 12px rgba(0,0,0,0.4);--shadow-lg:0 8px 24px rgba(0,0,0,0.5);
   --shadow-xl:0 16px 48px rgba(0,0,0,0.6);--radius:10px;--radius-sm:6px;--radius-lg:14px;
@@ -24,8 +24,8 @@ body.dark-mode{
 body:not(.dark-mode){
   --bg:#f8fafc;--bg-secondary:#f1f5f9;--surface:#ffffff;--surface-hover:#f1f5f9;
   --border:#e2e8f0;--border-light:#f1f5f9;--text:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;
-  --primary:#6366f1;--primary-light:rgba(99,102,241,0.1);--primary-lighter:rgba(99,102,241,0.05);
-  --gradient-primary:linear-gradient(135deg,#6366f1,#8b5cf6);
+  --primary:#FFA500;--primary-light:rgba(255,165,0,0.1);--primary-lighter:rgba(255,165,0,0.05);
+  --gradient-primary:linear-gradient(135deg,#ffa500 0%,#ff8800 100%);
   --shadow-xs:0 1px 2px rgba(0,0,0,0.05);--shadow-sm:0 2px 4px rgba(0,0,0,0.06);
   --shadow:0 4px 12px rgba(0,0,0,0.08);--shadow-lg:0 8px 24px rgba(0,0,0,0.1);
   --shadow-xl:0 16px 48px rgba(0,0,0,0.14);--radius:10px;--radius-sm:6px;--radius-lg:14px;
@@ -204,7 +204,7 @@ body:not(.dark-mode){
 
 /* ── SYSTEM MESSAGES ── */
 .msg-system{align-self:center;font-size:11px;color:var(--text-light);font-family:'JetBrains Mono',monospace;padding:4px 12px;margin:6px 0;background:var(--border-light);border-radius:20px;}
-.msg-system.announcement{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;box-shadow:var(--shadow-sm);}
+.msg-system.announcement{background:var(--gradient-primary);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;box-shadow:var(--shadow-sm);}
 .dm-indicator{font-size:10px;background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:8px;margin-left:4px;}
 .modlog{position:relative;cursor:default;}
 .modlog-reason{position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.94);color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;font-size:11px;white-space:nowrap;box-shadow:0 10px 24px rgba(0,0,0,0.35);display:none;z-index:20;}
@@ -308,9 +308,9 @@ body:not(.dark-mode){
 .empty-state p{font-size:13px;line-height:1.6;}
 
 /* ── ANNOUNCEMENT ── */
-.announce-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);z-index:40;padding:18px;user-select:none;}
+.announce-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:98000;padding:18px;user-select:none;backdrop-filter:blur(6px);}
 .announce-overlay.show{display:flex;animation:fade-in 0.25s ease;}
-.announce-card{width:min(720px,100%);background:linear-gradient(145deg,#1d4ed8,#7c3aed);color:white;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.45);padding:28px 26px 22px;border:1px solid rgba(255,255,255,0.25);text-align:center;position:relative;user-select:none;}
+.announce-card{width:min(720px,100%);background:linear-gradient(145deg,#ffa500,#ff8800);color:white;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.45);padding:28px 26px 22px;border:1px solid rgba(255,255,255,0.25);text-align:center;position:relative;user-select:none;animation:pop-in 0.25s ease;}
 .announce-close-btn{position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;z-index:2;}
 .announce-close-btn:hover{background:rgba(255,255,255,0.32);}
 .announce-text{font-size:clamp(16px,3.5vw,24px);font-weight:700;line-height:1.4;text-align:center;word-break:break-word;user-select:none;}
@@ -551,6 +551,9 @@ body:not(.dark-mode){
     <button class="banned-ok-btn" id="bannedOkBtn">Reload</button>
   </div>
 </div>
+
+<!-- MOD PROMOTION POPUP -->
+<div id="modPromotionPopup" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;border-radius:12px;padding:14px 24px;font-size:14px;font-weight:700;color:#065f46;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:99998;animation:pop-in 0.25s ease;white-space:nowrap;">⭐ You've been promoted to Moderator!</div>
 
 <!-- EMOJI PICKER -->
 <div class="emoji-picker-popup" id="emojiPickerPopup">
@@ -874,16 +877,12 @@ function triggerNotif(type, senderName) {
   if (type === 'dm' && notifPref === 'global') return;
   if (type === 'global') unreadGlobal++;
   else if (type === 'dm') { unreadDm[senderName] = (unreadDm[senderName] || 0) + 1; }
-  startTitleBlink(type, senderName);
-}
-function startTitleBlink(type, senderName) {
-  if (titleBlinkInterval) return; // already blinking
-  const alertMsg = type === 'dm' ? `💬 ${senderName}` : '🌐 New message';
-  let show = true;
-  titleBlinkInterval = setInterval(() => {
-    document.title = show ? alertMsg : originalTitle;
-    show = !show;
-  }, 1200);
+  // Persistent title — no blink, stays until tab is focused
+  const totalUnread = unreadGlobal + Object.values(unreadDm).reduce((a,b)=>a+b, 0);
+  if (totalUnread > 0) {
+    const label = type === 'dm' ? `💬 (${totalUnread}) ${senderName}` : `🌐 (${totalUnread}) GN Chat`;
+    document.title = label;
+  }
 }
 function stopTitleBlink() {
   if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
@@ -1071,6 +1070,10 @@ function updateAdminVisibility() {
     btn.classList.remove('visible');
     modLbl.classList.remove('show');
   }
+  // plusBtn only for admins (if input is enabled)
+  if (!document.getElementById('msgInput').disabled) {
+    document.getElementById('plusBtn').disabled = !isAdmin();
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -1181,7 +1184,7 @@ async function submitUsername() {
 uBtn.addEventListener('click', submitUsername);
 uInput.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); submitUsername(); } });
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
-function enableInput() { document.getElementById('msgInput').disabled = false; document.getElementById('sendBtn').disabled = false; document.getElementById('plusBtn').disabled = false; }
+function enableInput() { document.getElementById('msgInput').disabled = false; document.getElementById('sendBtn').disabled = false; document.getElementById('plusBtn').disabled = !isAdmin(); }
 function disableInput() { document.getElementById('msgInput').disabled = true; document.getElementById('sendBtn').disabled = true; document.getElementById('plusBtn').disabled = true; }
 
 // ════════════════════════════════════════════════
@@ -1262,6 +1265,7 @@ async function boot() {
   await loadHistory(); startPolling(); loadAllUsers();
   if (username) joinPresence();
   subscribeAdminChannel();
+  subscribeRealtimeChanges();
   initEmojiPicker();
 }
 boot();
@@ -1308,7 +1312,14 @@ function subscribeAdminChannel() {
       } else if (payload.action === 'announcement') {
         if (!payload.target_device_id || payload.target_device_id === deviceId) renderAnnouncementOverlay(payload.text);
       } else if (payload.action === 'mods_updated') {
+        const wasAdmin = isAdmin();
         await loadMods();
+        // Show promotion popup if user was just modded
+        if (!wasAdmin && isAdmin() && !isHeadAdmin()) {
+          const popup = document.getElementById('modPromotionPopup');
+          popup.style.display = 'block';
+          setTimeout(() => { popup.style.display = 'none'; }, 5000);
+        }
       } else if (payload.action === 'settings_updated') {
         Object.assign(runtimeSettings, payload.settings);
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(runtimeSettings));
@@ -1328,6 +1339,32 @@ function subscribeAdminChannel() {
 async function broadcastAdminCmd(payload) {
   if (!adminChannel) return;
   await adminChannel.send({ type:'broadcast', event:'command', payload });
+}
+
+// ════════════════════════════════════════════════
+// REALTIME (reactions + poll votes — instant updates)
+// ════════════════════════════════════════════════
+function subscribeRealtimeChanges() {
+  sb.channel('db-realtime-changes')
+    .on('postgres_changes', { event:'*', schema:'public', table:'message_reactions' }, payload => {
+      const msgId = payload.new?.message_id || payload.old?.message_id;
+      if (!msgId) return;
+      const msgEl = document.querySelector('[data-msg-id="'+msgId+'"]');
+      if (msgEl) refreshReactionsOnEl(msgEl, msgId, false);
+    })
+    .on('postgres_changes', { event:'*', schema:'public', table:'dm_reactions' }, payload => {
+      const dmId = payload.new?.dm_id || payload.old?.dm_id;
+      if (!dmId) return;
+      const msgEl = document.querySelector('[data-dm-id="'+dmId+'"]');
+      if (msgEl) refreshReactionsOnEl(msgEl, dmId, true);
+    })
+    .on('postgres_changes', { event:'*', schema:'public', table:'poll_votes' }, payload => {
+      const pollId = payload.new?.poll_id || payload.old?.poll_id;
+      if (!pollId) return;
+      // Find all poll cards for this poll and refresh them
+      document.querySelectorAll('.poll-card[data-poll-id="'+pollId+'"]').forEach(card => loadPollCard(card, pollId));
+    })
+    .subscribe();
 }
 
 // ── BANNED / KICKED SCREENS ───────────────────
@@ -1782,31 +1819,33 @@ function openEmojiPicker(e, msgId, isDm) {
 function closeEmojiPicker() { document.getElementById('emojiPickerPopup').classList.remove('open'); emojiPickerTarget = null; }
 
 async function toggleReaction(msgId, isDm, emoji) {
-  if (!username) return;
+  if (!username) { showBanner('Set a username first', 'red'); return; }
   try {
     const table = isDm ? 'dm_reactions' : 'message_reactions';
     const col   = isDm ? 'dm_id' : 'message_id';
-    // Check if already reacted with this emoji
+    // Check if already reacted with this exact emoji
     const existing = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&device_id=eq.'+encodeURIComponent(deviceId)+'&emoji=eq.'+encodeURIComponent(emoji)+'&select=id');
     if (existing && existing.length) {
-      // Remove
+      // Toggle off: remove this reaction
       await sbDelete('/rest/v1/'+table+'?id=eq.'+existing[0].id);
     } else {
-      // Check if user already reacted to this msg with any emoji (1 emoji per user per message rule)
+      // Remove any existing reaction from this user on this message (1 per user rule)
       const anyExisting = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&device_id=eq.'+encodeURIComponent(deviceId)+'&select=id');
       if (anyExisting && anyExisting.length) {
-        // Replace existing reaction
         await sbDelete('/rest/v1/'+table+'?id=eq.'+anyExisting[0].id);
       }
-      await sbPost('/rest/v1/'+table, { [col]: msgId, device_id: deviceId, username: username, emoji: emoji }, {'Prefer':'resolution=merge-duplicates,return=minimal'});
+      // Add new reaction
+      await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+        method: 'POST',
+        headers: { 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+        body: JSON.stringify({ [col]: msgId, device_id: deviceId, username: username, emoji: emoji })
+      });
     }
-    // Refresh reactions on message
+    // Realtime will auto-refresh for others; update self immediately
     const selector = isDm ? '[data-dm-id="'+msgId+'"]' : '[data-msg-id="'+msgId+'"]';
     const msgEl = document.querySelector(selector);
     if (msgEl) await refreshReactionsOnEl(msgEl, msgId, isDm);
-    // Broadcast so others see the update
-    await broadcastAdminCmd({ action:'reaction_updated', msg_id: msgId, is_dm: isDm });
-  } catch(e) { console.error('reaction error', e); }
+  } catch(e) { console.error('reaction error', e); showBanner('⚠ Reaction failed', 'red'); }
 }
 
 async function loadReactionsForMsg(msgId, isDm, container) {
@@ -1865,6 +1904,7 @@ function renderReactions(rows, container, msgId, isDm) {
 // POLLS
 // ════════════════════════════════════════════════
 document.getElementById('plusBtn').addEventListener('click', () => {
+  if (!isAdmin()) return;
   if (dmMode) return; // polls only in global
   openPollModal();
 });
@@ -1903,18 +1943,30 @@ document.getElementById('pollSendBtn').addEventListener('click', async () => {
 
 async function renderPollMessage(msg, isDm, container) {
   if (isDm) return; // polls only in global for now
-  const el = document.createElement('div'); el.className = 'msg theirs'; el.dataset.msgId = msg.id;
+  const isMe = msg.device_id === deviceId || msg.username === username;
+  const el = document.createElement('div'); el.className = isMe ? 'msg mine' : 'msg theirs'; el.dataset.msgId = msg.id;
   const metaDiv = document.createElement('div'); metaDiv.className = 'msg-meta';
-  const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = colorFor(msg.username||'');
-  uSpan.dataset.username = msg.username||''; uSpan.textContent = msg.username||'';
+  if (!isMe) {
+    const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = colorFor(msg.username||'');
+    uSpan.dataset.username = msg.username||''; uSpan.textContent = msg.username||'';
+    metaDiv.appendChild(uSpan);
+  }
   const tSpan = document.createElement('span'); tSpan.className = 'msg-time'; tSpan.textContent = fmtTime(msg.created_at||Date.now());
-  metaDiv.appendChild(uSpan); metaDiv.appendChild(tSpan);
+  metaDiv.appendChild(tSpan);
   const rowDiv = document.createElement('div'); rowDiv.className = 'msg-row';
-  const avEl = makeAvatarEl(getAvatarFor(msg.username||''), msg.username||'?', 28);
-  avEl.className = 'msg-avatar'; rowDiv.appendChild(avEl);
+  if (!isMe) {
+    const avEl = makeAvatarEl(getAvatarFor(msg.username||''), msg.username||'?', 28);
+    avEl.className = 'msg-avatar'; rowDiv.appendChild(avEl);
+  }
   const bWrap = document.createElement('div'); bWrap.className = 'msg-bubble-wrap';
   const card = document.createElement('div'); card.className = 'poll-card'; card.dataset.pollId = msg.poll_id;
   card.innerHTML = '<div class="poll-question">📊 Loading poll...</div>';
+  // Admin delete button
+  if (isHeadAdmin()) {
+    const delBtn = document.createElement('div'); delBtn.className = 'msg-delete'; delBtn.title = 'Delete poll';
+    delBtn.dataset.id = msg.id; delBtn.dataset.isdm = '0'; delBtn.textContent = '✕';
+    delBtn.addEventListener('click', deleteMsg); bWrap.appendChild(delBtn);
+  }
   bWrap.appendChild(card); rowDiv.appendChild(bWrap);
   el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
   if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
@@ -1945,7 +1997,12 @@ async function loadPollCard(card, pollId) {
       if (!myVote) {
         row.addEventListener('click', async () => {
           try {
-            await sbPost('/rest/v1/poll_votes', { poll_id:pollId, option_index:i, device_id:deviceId }, {'Prefer':'return=minimal'});
+            await fetch(SUPABASE_URL + '/rest/v1/poll_votes', {
+              method: 'POST',
+              headers: { 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON, 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify({ poll_id:pollId, option_index:i, device_id:deviceId })
+            });
+            // Realtime will update for everyone; update self immediately
             loadPollCard(card, pollId);
           } catch(e) { showBanner('\u26A0 Vote failed', 'red'); }
         });
