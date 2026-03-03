@@ -1483,7 +1483,7 @@ async function pollDmThread() {
     }
   } catch(e) {}
 }
-const seenDmIds = {};
+const seenDmIds = (() => { try { return JSON.parse(localStorage.getItem('gnChatSeenDmIds') || '{}'); } catch(e) { return {}; } })();
 async function pollDmUnreads() {
   try {
     const msgs = await sbGet('/rest/v1/dms?recipient_device_id=eq.'+deviceId+'&order=id.desc&limit=100&select=*');
@@ -1506,6 +1506,7 @@ async function pollDmUnreads() {
 }
 function markDmRead(senderDevId, highestId) {
   seenDmIds[senderDevId] = Math.max(seenDmIds[senderDevId] || 0, highestId);
+  try { localStorage.setItem('gnChatSeenDmIds', JSON.stringify(seenDmIds)); } catch(e) {}
   if (dmUnreadMap[senderDevId]) dmUnreadMap[senderDevId].count = 0;
   // Clear DM unread state for this sender
   unreadDm[nameForDev(senderDevId)] = 0;
