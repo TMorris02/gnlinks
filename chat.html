@@ -439,6 +439,17 @@ body:not(.dark-mode){
   .msg{max-width:85%;}
   .admin-panel{width:calc(100vw - 32px);}
 }
+.admin-section-collapsible > .admin-section-body { display: none; }
+.admin-section-collapsible.expanded > .admin-section-body { display: block; }
+.admin-section-toggle-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; padding: 12px 16px; user-select: none;
+  border-bottom: 1px solid var(--border);
+}
+.admin-section-toggle-header:hover .admin-section-title { color: var(--primary); }
+.admin-section-toggle-arrow { font-size: 11px; color: var(--text-muted); transition: transform 0.2s; }
+.admin-section-collapsible.expanded .admin-section-toggle-arrow { transform: rotate(180deg); }
+.admin-section-collapsible > .admin-section-body { padding: 14px 16px; }
 </style>
 </head>
 <body class="dark-mode">
@@ -624,108 +635,158 @@ body:not(.dark-mode){
     </div>
 
     <!-- Quick Actions -->
-    <div class="admin-section" id="apQuickActions">
-      <div class="admin-section-title">Quick Actions</div>
-      <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users (Chat)</button>
-      <button class="admin-action-btn" id="apSuperRefreshAll">🔃 Super Refresh — Reload Everyone's Tab</button>
-      <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
+    <div class="admin-section-collapsible" id="apQuickActions">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">⚡ Quick Actions</span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body">
+        <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users (Chat)</button>
+        <button class="admin-action-btn" id="apSuperRefreshAll">🔃 Super Refresh — Reload Everyone's Tab</button>
+        <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
+      </div>
     </div>
 
-    <!-- Alert Global Toggle (head admin only) -->
-    <div class="admin-section" id="apAlertGlobalSection">
-      <div class="admin-section-title">📣 Global Alert Log</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text);">
-        <div>
-          <span style="font-weight:600;">Alert Global Chat</span>
-          <div style="font-size:11px;color:var(--text-muted);">Post mod actions to global chat</div>
+    <!-- Alert Global Toggle -->
+    <div class="admin-section-collapsible" id="apAlertGlobalSection">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">📣 Global Alert Log</span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text);">
+          <div>
+            <span style="font-weight:600;">Alert Global Chat</span>
+            <div style="font-size:11px;color:var(--text-muted);">Post mod actions to global chat</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="alertGlobalToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="alertGlobalToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
       </div>
     </div>
 
     <!-- Announcement -->
-    <div class="admin-section">
-      <div class="admin-section-title">📢 Broadcast Announcement</div>
-      <div class="announce-target-row">
-        <select class="announce-target-select" id="announceTarget"><option value="all">→ Everyone</option></select>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">📢 Broadcast Announcement</span>
+        <span class="admin-section-toggle-arrow">▼</span>
       </div>
-      <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
-      <button class="announce-send-btn" id="announceSendBtn">📢 Send</button>
+      <div class="admin-section-body">
+        <div class="announce-target-row">
+          <select class="announce-target-select" id="announceTarget"><option value="all">→ Everyone</option></select>
+        </div>
+        <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
+        <button class="announce-send-btn" id="announceSendBtn">📢 Send</button>
+      </div>
     </div>
 
-    <!-- Impersonate (head admin only) -->
-    <div class="admin-section" id="apImpersonateSection">
-      <div class="admin-section-title">🎭 Send As User</div>
-      <select class="impersonate-target-select" id="impersonateDest">
-        <option value="global">→ Global Chat</option>
-      </select>
-      <div class="impersonate-row">
-        <select class="impersonate-select" id="impersonateUser"><option value="">Pick user...</option></select>
-        <input class="impersonate-input" id="impersonateText" type="text" placeholder="Message text...">
+    <!-- Impersonate -->
+    <div class="admin-section-collapsible" id="apImpersonateSection">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">🎭 Send As User</span>
+        <span class="admin-section-toggle-arrow">▼</span>
       </div>
-      <button class="admin-action-btn" id="impersonateSendBtn">🎭 Send</button>
+      <div class="admin-section-body">
+        <select class="impersonate-target-select" id="impersonateDest">
+          <option value="global">→ Global Chat</option>
+        </select>
+        <div class="impersonate-row">
+          <select class="impersonate-select" id="impersonateUser"><option value="">Pick user...</option></select>
+          <input class="impersonate-input" id="impersonateText" type="text" placeholder="Message text...">
+        </div>
+        <button class="admin-action-btn" id="impersonateSendBtn">🎭 Send</button>
+      </div>
     </div>
 
     <!-- All Users -->
-    <div class="admin-section">
-      <div class="admin-section-title" style="margin-bottom:8px;">👥 All Users <span id="apUserCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
-      <div class="admin-user-list" id="adminUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">👥 All Users <span id="apUserCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body" style="padding:10px 16px;">
+        <div class="admin-user-list" id="adminUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
+      </div>
     </div>
 
-    <!-- Muted Users (quick unmute) -->
-    <div class="admin-section">
-      <div class="admin-section-title" style="margin-bottom:8px;">🔕 Muted Users <span id="apMutedCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
-      <div class="admin-user-list" id="mutedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">None muted.</div></div>
+    <!-- Muted Users -->
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">🔕 Muted Users <span id="apMutedCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body" style="padding:10px 16px;">
+        <div class="admin-user-list" id="mutedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">None muted.</div></div>
+      </div>
     </div>
 
     <!-- Blocked Devices -->
-    <div class="admin-section">
-      <div class="admin-section-title" style="margin-bottom:8px;">⛔ Blocked Devices <span id="apBlockedCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
-      <div class="admin-user-list" id="blockedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">⛔ Blocked Devices <span id="apBlockedCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body" style="padding:10px 16px;">
+        <div class="admin-user-list" id="blockedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
+      </div>
     </div>
 
     <!-- Reports -->
-    <div class="admin-section">
-      <div class="admin-section-title" style="margin-bottom:8px;">🚨 Reports <span id="apReportCount" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
-      <div id="reportsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No reports.</div></div>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">🚨 Reports <span id="apReportCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body" style="padding:10px 16px;">
+        <div id="reportsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No reports.</div></div>
+      </div>
     </div>
 
     <!-- Banned Words -->
-    <div class="admin-section">
-      <div class="admin-section-title">🚫 Banned Words</div>
-      <div class="word-chips-wrap" id="wordChipsWrap"></div>
-      <div class="word-add-row">
-        <input class="word-add-input" id="wordAddInput" type="text" placeholder="Add word...">
-        <button class="word-add-btn" id="wordAddBtn">Add</button>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">🚫 Banned Words</span>
+        <span class="admin-section-toggle-arrow">▼</span>
+      </div>
+      <div class="admin-section-body">
+        <div class="word-chips-wrap" id="wordChipsWrap"></div>
+        <div class="word-add-row">
+          <input class="word-add-input" id="wordAddInput" type="text" placeholder="Add word...">
+          <button class="word-add-btn" id="wordAddBtn">Add</button>
+        </div>
       </div>
     </div>
 
     <!-- DM Viewer -->
-    <div class="admin-section">
-      <div class="admin-section-title">🔐 View Private Messages</div>
-      <div class="admin-split">
-        <div>
-          <div class="admin-subsection-title">1) Pick User</div>
-          <div class="admin-mini-list" id="dmViewerUsers"></div>
-        </div>
-        <div>
-          <div class="admin-subsection-title">2) Pick Conversation</div>
-          <div class="admin-mini-list" id="dmViewerPartners"></div>
-        </div>
+    <div class="admin-section-collapsible">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">🔐 View Private Messages</span>
+        <span class="admin-section-toggle-arrow">▼</span>
       </div>
-      <div class="admin-dm-transcript" id="dmViewerTranscript"><div style="font-size:12px;color:var(--text-muted);">Select a user and conversation to view DMs.</div></div>
+      <div class="admin-section-body">
+        <div class="admin-split">
+          <div>
+            <div class="admin-subsection-title">1) Pick User</div>
+            <div class="admin-mini-list" id="dmViewerUsers"></div>
+          </div>
+          <div>
+            <div class="admin-subsection-title">2) Pick Conversation</div>
+            <div class="admin-mini-list" id="dmViewerPartners"></div>
+          </div>
+        </div>
+        <div class="admin-dm-transcript" id="dmViewerTranscript"><div style="font-size:12px;color:var(--text-muted);">Select a user and conversation to view DMs.</div></div>
+      </div>
     </div>
 
     <!-- Adjustable Settings -->
-    <div class="admin-section" id="apAdjustableSection">
-      <div class="admin-collapse-header" id="apSettingsToggle">
-        <div class="admin-collapse-title">⚙️ Adjustable Settings</div>
-        <span class="admin-collapse-arrow" id="apSettingsArrow">▼</span>
+    <div class="admin-section-collapsible" id="apAdjustableSection">
+      <div class="admin-section-toggle-header">
+        <span class="admin-section-title">⚙️ Adjustable Settings</span>
+        <span class="admin-section-toggle-arrow">▼</span>
       </div>
-      <div class="admin-collapse-body" id="apSettingsBody">
+      <div class="admin-section-body">
         <div class="admin-settings-row">
           <div><div class="admin-settings-label">Edit Window (minutes)</div><div class="admin-settings-sub">How long users can edit their messages</div></div>
           <input class="admin-settings-input" id="settingEditWindow" type="number" min="0" value="2">
@@ -2137,11 +2198,11 @@ document.getElementById('adminPanelBtn').addEventListener('click', () => {
 document.getElementById('adminPanelClose').addEventListener('click', () => document.getElementById('adminPanelOverlay').classList.remove('open'));
 document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open'); });
 
-// Collapsible settings
-document.getElementById('apSettingsToggle').addEventListener('click', () => {
-  const body = document.getElementById('apSettingsBody');
-  const arrow = document.getElementById('apSettingsArrow');
-  body.classList.toggle('open'); arrow.classList.toggle('open');
+// Collapsible admin sections
+document.querySelectorAll('.admin-section-toggle-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.closest('.admin-section-collapsible').classList.toggle('expanded');
+  });
 });
 
 // Save settings
