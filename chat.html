@@ -630,6 +630,45 @@ body:not(.dark-mode){
   </div>
 </div>
 
+<!-- GROUP MODAL -->
+<div class="group-modal-overlay" id="groupModal">
+  <div class="group-modal" id="groupModalInner">
+    <div class="group-modal-title" id="groupModalTitle">➕ Create Group</div>
+
+    <div class="group-avatar-picker">
+      <div class="group-avatar-display" id="groupAvatarDisplay" title="Click to set image"></div>
+      <div style="flex:1;">
+        <input class="modal-input" id="groupNameInput" type="text" placeholder="Group name..." maxlength="40" style="margin-bottom:6px;">
+        <div style="font-size:11px;color:var(--text-muted);">Click the circle to set a group image</div>
+      </div>
+    </div>
+    <input class="modal-input" id="groupAvatarUrl" type="text" placeholder="Group image URL (optional)..." style="margin-bottom:4px;font-size:12px;padding:8px 10px;">
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <label style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-secondary);text-align:center;transition:all 0.15s;">
+        📁 Upload Image
+        <input type="file" id="groupAvatarFile" accept="image/*" style="display:none;">
+      </label>
+      <button class="ban-cancel-btn" id="groupAvatarClearBtn" style="flex:1;margin:0;font-size:12px;padding:7px 10px;">✕ Clear Image</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;" id="groupMembersLabel">Select Members</div>
+    <div class="group-member-pick-list" id="groupMemberPickList"></div>
+
+    <button class="modal-btn" id="groupModalSaveBtn">Create Group →</button>
+    <button class="ban-cancel-btn" id="groupModalCancelBtn" style="margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<!-- GROUP SETTINGS MODAL -->
+<div class="group-modal-overlay" id="groupSettingsModal">
+  <div class="group-modal">
+    <div class="group-modal-title">⚙️ Group Settings</div>
+    <div id="groupSettingsBody"></div>
+    <button class="ban-cancel-btn" id="groupSettingsCancelBtn" style="margin-top:8px;">Close</button>
+  </div>
+</div>
+
+
 <!-- BANNED OVERLAY -->
 <div class="banned-overlay" id="bannedOverlay">
   <div class="banned-card" id="bannedCard">
@@ -937,74 +976,6 @@ body:not(.dark-mode){
 </div>
   </div>
 </div>
-
-// ── RECENT MESSAGES ───────────────────────────
-document.getElementById('loadRecentMsgsBtn').addEventListener('click', loadRecentMessages);
-async function loadRecentMessages() {
-  const el = document.getElementById('recentMsgsList');
-  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">Loading...</div>';
-  try {
-    const [global, dms, groups] = await Promise.all([
-      sbGet('/rest/v1/messages?order=id.desc&limit=30&select=*'),
-      sbGet('/rest/v1/dms?order=id.desc&limit=30&select=*'),
-      sbGet('/rest/v1/group_messages?order=id.desc&limit=30&select=*')
-    ]);
-    const groupNames = {};
-    try { const grps = await sbGet('/rest/v1/group_chats?select=id,name'); (grps||[]).forEach(g => groupNames[g.id]=g.name); } catch(e){}
-    const all = [
-      ...(global||[]).map(m=>({...m,_src:'🌐 Global',_time:m.created_at})),
-      ...(dms||[]).map(m=>({...m,_src:'💬 DM → '+nameForDev(m.recipient_device_id,m.recipient_device_id||'?'),_sender:m.sender_username||nameForDev(m.sender_device_id,'?'),_time:m.created_at})),
-      ...(groups||[]).map(m=>({...m,_src:'👥 '+(groupNames[m.group_id]||'Group'),_time:m.created_at}))
-    ].sort((a,b)=>new Date(b._time)-new Date(a._time)).slice(0,60);
-    el.innerHTML = '';
-    all.forEach(m => {
-      const row = document.createElement('div'); row.style.cssText='padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px;';
-      const sender = m._sender || m.username || m.sender_username || '?';
-      const text = m.type==='image' ? '[image]' : (m.text||'').slice(0,80);
-      row.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-weight:700;color:var(--text);">'+esc(sender)+'</span><span style="font-size:10px;color:var(--text-muted);">'+esc(m._src)+'</span></div>'
-        +'<div style="color:var(--text-muted);">'+esc(text)+(m.text&&m.text.length>80?'…':'')+'</div>'
-        +'<div style="font-size:10px;color:var(--text-light);margin-top:2px;">'+fmtTime(m._time)+'</div>';
-      el.appendChild(row);
-    });
-    if (!all.length) el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">No messages</div>';
-  } catch(e) { el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:8px;">Failed to load</div>'; }
-}
-
-// ── ADMIN GROUP VIEWER ────────────────────────
-async function loadAdminGroupList() {
-  const el = document.getElementById('adminGroupList'); el.innerHTML = 'Loading...';
-  try {
-    const groups = await sbGet('/rest/v1/group_chats?order=id.desc&select=*');
-    el.innerHTML = '';
-    if (!groups||!groups.length) { el.innerHTML='<div class="admin-mini-row">No groups</div>'; return; }
-    groups.forEach(g => {
-      const r = document.createElement('div'); r.className='admin-mini-row'; r.textContent=g.name;
-      r.onclick = () => loadAdminGroupTranscript(g);
-      el.appendChild(r);
-    });
-  } catch(e) { el.innerHTML='<div class="admin-mini-row">Failed</div>'; }
-}
-async function loadAdminGroupTranscript(group) {
-  const t = document.getElementById('adminGroupTranscript'); t.innerHTML='Loading...';
-  try {
-    const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+group.id+'&order=id.asc&limit=300&select=*');
-    t.innerHTML='';
-    if (!msgs||!msgs.length) { t.innerHTML='<div style="font-size:12px;color:var(--text-muted);">No messages</div>'; return; }
-    msgs.forEach(m => {
-      const line=document.createElement('div'); line.className='admin-dm-line';
-      const textSpan=document.createElement('span'); textSpan.textContent=m.type==='image'?'[image]':m.text;
-      line.innerHTML='<strong>'+esc(m.username||'?')+'</strong>: '; line.appendChild(textSpan);
-      const tDiv=document.createElement('div'); tDiv.className='t'; tDiv.textContent=fmtTime(m.created_at); line.appendChild(tDiv);
-      const acts=document.createElement('div'); acts.className='admin-dm-actions';
-      const editBtn=document.createElement('button'); editBtn.className='admin-dm-act-btn'; editBtn.textContent='✎ Edit';
-      editBtn.onclick=async()=>{const nt=prompt('Edit:',m.text);if(!nt||nt===m.text)return;try{await sbPatch('/rest/v1/group_messages?id=eq.'+m.id,{text:nt});m.text=nt;textSpan.textContent=nt;showBanner('✅ Edited','green');}catch(e){showBanner('⚠ Failed','red');}};
-      const delBtn=document.createElement('button'); delBtn.className='admin-dm-act-btn del'; delBtn.textContent='✕ Delete';
-      delBtn.onclick=async()=>{if(!confirm('Delete?'))return;try{await sbDelete('/rest/v1/group_messages?id=eq.'+m.id);line.remove();showBanner('✅ Deleted','green');}catch(e){showBanner('⚠ Failed','red');}};
-      acts.appendChild(editBtn); acts.appendChild(delBtn); line.appendChild(acts); t.appendChild(line);
-    });
-    t.scrollTop=t.scrollHeight;
-  } catch(e) { t.innerHTML='<div style="font-size:12px;color:#ef4444;">Failed</div>'; }
-}
 
 <!-- BODY -->
 <div class="body-wrap">
@@ -1693,6 +1664,74 @@ function subscribeAdminChannel() {
 async function broadcastAdminCmd(payload) {
   if (!adminChannel) return;
   await adminChannel.send({ type:'broadcast', event:'command', payload });
+}
+
+// ── RECENT MESSAGES ───────────────────────────
+document.getElementById('loadRecentMsgsBtn').addEventListener('click', loadRecentMessages);
+async function loadRecentMessages() {
+  const el = document.getElementById('recentMsgsList');
+  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">Loading...</div>';
+  try {
+    const [global, dms, groups] = await Promise.all([
+      sbGet('/rest/v1/messages?order=id.desc&limit=30&select=*'),
+      sbGet('/rest/v1/dms?order=id.desc&limit=30&select=*'),
+      sbGet('/rest/v1/group_messages?order=id.desc&limit=30&select=*')
+    ]);
+    const groupNames = {};
+    try { const grps = await sbGet('/rest/v1/group_chats?select=id,name'); (grps||[]).forEach(g => groupNames[g.id]=g.name); } catch(e){}
+    const all = [
+      ...(global||[]).map(m=>({...m,_src:'🌐 Global',_time:m.created_at})),
+      ...(dms||[]).map(m=>({...m,_src:'💬 DM → '+nameForDev(m.recipient_device_id,m.recipient_device_id||'?'),_sender:m.sender_username||nameForDev(m.sender_device_id,'?'),_time:m.created_at})),
+      ...(groups||[]).map(m=>({...m,_src:'👥 '+(groupNames[m.group_id]||'Group'),_time:m.created_at}))
+    ].sort((a,b)=>new Date(b._time)-new Date(a._time)).slice(0,60);
+    el.innerHTML = '';
+    all.forEach(m => {
+      const row = document.createElement('div'); row.style.cssText='padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px;';
+      const sender = m._sender || m.username || m.sender_username || '?';
+      const text = m.type==='image' ? '[image]' : (m.text||'').slice(0,80);
+      row.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-weight:700;color:var(--text);">'+esc(sender)+'</span><span style="font-size:10px;color:var(--text-muted);">'+esc(m._src)+'</span></div>'
+        +'<div style="color:var(--text-muted);">'+esc(text)+(m.text&&m.text.length>80?'…':'')+'</div>'
+        +'<div style="font-size:10px;color:var(--text-light);margin-top:2px;">'+fmtTime(m._time)+'</div>';
+      el.appendChild(row);
+    });
+    if (!all.length) el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">No messages</div>';
+  } catch(e) { el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:8px;">Failed to load</div>'; }
+}
+
+// ── ADMIN GROUP VIEWER ────────────────────────
+async function loadAdminGroupList() {
+  const el = document.getElementById('adminGroupList'); el.innerHTML = 'Loading...';
+  try {
+    const groups = await sbGet('/rest/v1/group_chats?order=id.desc&select=*');
+    el.innerHTML = '';
+    if (!groups||!groups.length) { el.innerHTML='<div class="admin-mini-row">No groups</div>'; return; }
+    groups.forEach(g => {
+      const r = document.createElement('div'); r.className='admin-mini-row'; r.textContent=g.name;
+      r.onclick = () => loadAdminGroupTranscript(g);
+      el.appendChild(r);
+    });
+  } catch(e) { el.innerHTML='<div class="admin-mini-row">Failed</div>'; }
+}
+async function loadAdminGroupTranscript(group) {
+  const t = document.getElementById('adminGroupTranscript'); t.innerHTML='Loading...';
+  try {
+    const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+group.id+'&order=id.asc&limit=300&select=*');
+    t.innerHTML='';
+    if (!msgs||!msgs.length) { t.innerHTML='<div style="font-size:12px;color:var(--text-muted);">No messages</div>'; return; }
+    msgs.forEach(m => {
+      const line=document.createElement('div'); line.className='admin-dm-line';
+      const textSpan=document.createElement('span'); textSpan.textContent=m.type==='image'?'[image]':m.text;
+      line.innerHTML='<strong>'+esc(m.username||'?')+'</strong>: '; line.appendChild(textSpan);
+      const tDiv=document.createElement('div'); tDiv.className='t'; tDiv.textContent=fmtTime(m.created_at); line.appendChild(tDiv);
+      const acts=document.createElement('div'); acts.className='admin-dm-actions';
+      const editBtn=document.createElement('button'); editBtn.className='admin-dm-act-btn'; editBtn.textContent='✎ Edit';
+      editBtn.onclick=async()=>{const nt=prompt('Edit:',m.text);if(!nt||nt===m.text)return;try{await sbPatch('/rest/v1/group_messages?id=eq.'+m.id,{text:nt});m.text=nt;textSpan.textContent=nt;showBanner('✅ Edited','green');}catch(e){showBanner('⚠ Failed','red');}};
+      const delBtn=document.createElement('button'); delBtn.className='admin-dm-act-btn del'; delBtn.textContent='✕ Delete';
+      delBtn.onclick=async()=>{if(!confirm('Delete?'))return;try{await sbDelete('/rest/v1/group_messages?id=eq.'+m.id);line.remove();showBanner('✅ Deleted','green');}catch(e){showBanner('⚠ Failed','red');}};
+      acts.appendChild(editBtn); acts.appendChild(delBtn); line.appendChild(acts); t.appendChild(line);
+    });
+    t.scrollTop=t.scrollHeight;
+  } catch(e) { t.innerHTML='<div style="font-size:12px;color:#ef4444;">Failed</div>'; }
 }
 
 // ════════════════════════════════════════════════
@@ -2478,44 +2517,6 @@ async function loadPollCard(card, pollId) {
   } catch(e) { card.innerHTML = '<div class="poll-question">\u26A0 Could not load poll</div>'; }
   if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
 }
-
-<!-- GROUP MODAL -->
-<div class="group-modal-overlay" id="groupModal">
-  <div class="group-modal" id="groupModalInner">
-    <div class="group-modal-title" id="groupModalTitle">➕ Create Group</div>
-
-    <div class="group-avatar-picker">
-      <div class="group-avatar-display" id="groupAvatarDisplay" title="Click to set image"></div>
-      <div style="flex:1;">
-        <input class="modal-input" id="groupNameInput" type="text" placeholder="Group name..." maxlength="40" style="margin-bottom:6px;">
-        <div style="font-size:11px;color:var(--text-muted);">Click the circle to set a group image</div>
-      </div>
-    </div>
-    <input class="modal-input" id="groupAvatarUrl" type="text" placeholder="Group image URL (optional)..." style="margin-bottom:4px;font-size:12px;padding:8px 10px;">
-    <div style="display:flex;gap:6px;margin-bottom:14px;">
-      <label style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-secondary);text-align:center;transition:all 0.15s;">
-        📁 Upload Image
-        <input type="file" id="groupAvatarFile" accept="image/*" style="display:none;">
-      </label>
-      <button class="ban-cancel-btn" id="groupAvatarClearBtn" style="flex:1;margin:0;font-size:12px;padding:7px 10px;">✕ Clear Image</button>
-    </div>
-
-    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;" id="groupMembersLabel">Select Members</div>
-    <div class="group-member-pick-list" id="groupMemberPickList"></div>
-
-    <button class="modal-btn" id="groupModalSaveBtn">Create Group →</button>
-    <button class="ban-cancel-btn" id="groupModalCancelBtn" style="margin-top:8px;">Cancel</button>
-  </div>
-</div>
-
-<!-- GROUP SETTINGS MODAL -->
-<div class="group-modal-overlay" id="groupSettingsModal">
-  <div class="group-modal">
-    <div class="group-modal-title">⚙️ Group Settings</div>
-    <div id="groupSettingsBody"></div>
-    <button class="ban-cancel-btn" id="groupSettingsCancelBtn" style="margin-top:8px;">Close</button>
-  </div>
-</div>
 
 // ════════════════════════════════════════════════
 // EDIT MESSAGE
