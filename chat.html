@@ -1900,6 +1900,7 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
     img.src = msg.text;
     img.style.cssText = 'max-width:260px;max-height:260px;border-radius:8px;display:block;cursor:pointer;';
     img.onclick = () => { window.open(msg.text, '_blank'); };
+    img.onload = () => { if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999; };
     img.onerror = () => { bubble.textContent = '[Image failed to load]'; };
     bubble.style.padding = '4px';
     bubble.appendChild(img);
@@ -2235,6 +2236,7 @@ async function loadPollCard(card, pollId) {
     const totDiv = document.createElement('div'); totDiv.className = 'poll-total'; totDiv.textContent = total+' vote'+(total!==1?'s':'');
     card.appendChild(totDiv);
   } catch(e) { card.innerHTML = '<div class="poll-question">\u26A0 Could not load poll</div>'; }
+  if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
 }
 
 // ════════════════════════════════════════════════
