@@ -454,6 +454,33 @@ body:not(.dark-mode){
 .drop-overlay{position:absolute;inset:0;background:var(--primary-light);border:2px dashed var(--primary);border-radius:var(--radius);display:none;align-items:center;justify-content:center;z-index:100;pointer-events:none;font-size:13px;font-weight:700;color:var(--primary);}
 .drop-overlay.show{display:flex;}
 .input-area{position:relative;}
+
+/* ── PLUS MENU ── */
+.plus-menu{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:6px 0;min-width:160px;display:none;z-index:200;}
+.plus-menu.open{display:block;animation:pop-in 0.15s cubic-bezier(0.4,0,0.2,1);}
+.plus-menu-item{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;transition:background 0.15s;}
+.plus-menu-item:hover{background:var(--surface-hover);color:var(--primary);}
+
+/* ── IMAGE MODAL ── */
+.img-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:1rem;}
+.img-modal-overlay.open{display:flex;}
+.img-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:440px;box-shadow:var(--shadow-xl);animation:pop-in 0.2s cubic-bezier(0.4,0,0.2,1);}
+.img-modal-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;}
+.img-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:24px 14px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:10px;position:relative;background:var(--bg-secondary);}
+.img-drop-zone:hover,.img-drop-zone.dragover{border-color:var(--primary);background:var(--primary-lighter);}
+.img-drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-drop-text{font-size:13px;color:var(--text-muted);pointer-events:none;}
+.img-drop-text strong{color:var(--primary);}
+.img-preview{max-width:100%;max-height:180px;border-radius:var(--radius-sm);display:none;margin-bottom:8px;}
+.img-url-row{display:flex;gap:8px;margin-bottom:10px;}
+.img-url-input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+.img-url-input:focus{border-color:var(--primary);}
+.img-url-btn{padding:9px 14px;border:none;border-radius:var(--radius-sm);background:var(--primary);color:white;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.img-send-btn{width:100%;padding:11px;border:none;border-radius:var(--radius);background:var(--gradient-primary);color:white;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:6px;}
+.img-send-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.img-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.img-cancel-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;}
+.img-cancel-btn:hover{background:var(--surface-hover);color:var(--text);}
 </style>
 </head>
 <body class="dark-mode">
@@ -549,6 +576,25 @@ body:not(.dark-mode){
     <button class="poll-add-option-btn" id="pollAddOption">+ Add option</button>
     <button class="modal-btn" id="pollSendBtn">📊 Post Poll</button>
     <button class="ban-cancel-btn" id="pollCancelBtn" style="margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<!-- IMAGE SEND MODAL -->
+<div class="img-modal-overlay" id="imgModal">
+  <div class="img-modal">
+    <div class="img-modal-title">📎 Send Image</div>
+    <img class="img-preview" id="imgPreview">
+    <div class="img-drop-zone" id="imgDropZone">
+      <input type="file" id="imgFileInput" accept="image/*">
+      <div class="img-drop-text">📁 <strong>Click to upload</strong> or drag &amp; drop</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Or paste a URL</div>
+    <div class="img-url-row">
+      <input class="img-url-input" id="imgUrlInput" type="text" placeholder="https://example.com/image.jpg">
+      <button class="img-url-btn" id="imgUrlBtn">Preview</button>
+    </div>
+    <button class="img-send-btn" id="imgSendBtn" disabled>📤 Send Image</button>
+    <button class="img-cancel-btn" id="imgCancelBtn">Cancel</button>
   </div>
 </div>
 
@@ -855,7 +901,13 @@ body:not(.dark-mode){
     <div class="input-area" id="inputAreaDrop">
       <div class="drop-overlay" id="dropOverlay">📎 Drop image to send</div>
       <div class="input-inner">
-        <button class="plus-btn" id="plusBtn" disabled title="Create poll">＋</button>
+        <div style="position:relative;">
+          <button class="plus-btn" id="plusBtn" disabled title="Options">＋</button>
+          <div class="plus-menu" id="plusMenu">
+            <div class="plus-menu-item" id="plusMenuImage">📎 Send Image</div>
+            <div class="plus-menu-item" id="plusMenuPoll">📊 Create Poll</div>
+          </div>
+        </div>
         <textarea class="input-box" id="msgInput" placeholder="Set a username to start chatting..." rows="1" maxlength="500" disabled></textarea>
         <button class="send-btn" id="sendBtn" disabled>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -864,7 +916,6 @@ body:not(.dark-mode){
         </button>
       </div>
       <div class="cooldown-bar-wrap" id="cooldownWrap"><div class="cooldown-bar" id="cooldownBar" style="width:0%"></div></div>
-      <div class="cooldown-bar-wrap" ...>...</div>
     </div>
   </div>
 </div>
@@ -1152,7 +1203,8 @@ function updateAdminVisibility() {
   }
   // plusBtn only for admins (if input is enabled)
   if (!document.getElementById('msgInput').disabled) {
-    document.getElementById('plusBtn').disabled = !isAdmin();
+    document.getElementById('plusBtn').disabled = false;
+    document.getElementById('plusMenuPoll').style.display = isAdmin() ? '' : 'none';
   }
 }
 
@@ -1264,7 +1316,12 @@ async function submitUsername() {
 uBtn.addEventListener('click', submitUsername);
 uInput.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); submitUsername(); } });
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
-function enableInput() { document.getElementById('msgInput').disabled = false; document.getElementById('sendBtn').disabled = false; document.getElementById('plusBtn').disabled = !isAdmin(); }
+function enableInput() {
+  document.getElementById('msgInput').disabled = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('plusBtn').disabled = false;
+  document.getElementById('plusMenuPoll').style.display = isAdmin() ? '' : 'none';
+}
 function disableInput() { document.getElementById('msgInput').disabled = true; document.getElementById('sendBtn').disabled = true; document.getElementById('plusBtn').disabled = true; }
 
 // ════════════════════════════════════════════════
@@ -1342,7 +1399,7 @@ async function boot() {
     if (saved) { username = saved; document.getElementById('headerUsername').textContent = username; enableInput(); document.getElementById('msgInput').placeholder = 'Type a message...'; updateAdminVisibility(); }
     else openUsernameModal(false);
   }
-  await loadHistory(); startPolling(); loadAllUsers();
+  await loadAllUsers(); await loadHistory(); startPolling();
   if (username) joinPresence();
   subscribeAdminChannel();
   subscribeRealtimeChanges();
@@ -1615,7 +1672,9 @@ function joinPresence() {
       : '<em style="color:#64748b">No one online</em>';
     updateAnnounceTargetDropdown();
   }).subscribe(async status => {
-    if (status === 'SUBSCRIBED') await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
+    if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR') {
+      await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
+    }
   });
 }
 window.addEventListener('beforeunload', () => { if (presenceChannel) presenceChannel.untrack(); });
@@ -2002,10 +2061,75 @@ function renderReactions(rows, container, msgId, isDm) {
 // ════════════════════════════════════════════════
 // POLLS
 // ════════════════════════════════════════════════
-document.getElementById('plusBtn').addEventListener('click', () => {
-  if (!isAdmin()) return;
-  if (dmMode) return; // polls only in global
+// ── PLUS MENU ─────────────────────────────────
+const plusMenu = document.getElementById('plusMenu');
+document.getElementById('plusBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  plusMenu.classList.toggle('open');
+});
+document.addEventListener('mousedown', e => {
+  if (!plusMenu.contains(e.target) && e.target !== document.getElementById('plusBtn')) plusMenu.classList.remove('open');
+});
+document.getElementById('plusMenuPoll').addEventListener('click', () => {
+  plusMenu.classList.remove('open');
+  if (dmMode) { showBanner('Polls only in global chat', 'red'); return; }
   openPollModal();
+});
+document.getElementById('plusMenuImage').addEventListener('click', () => {
+  plusMenu.classList.remove('open');
+  openImageModal();
+});
+
+// ── IMAGE MODAL ────────────────────────────────
+let pendingImageData = '';
+function openImageModal() {
+  pendingImageData = '';
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgPreview').src = '';
+  document.getElementById('imgUrlInput').value = '';
+  document.getElementById('imgFileInput').value = '';
+  document.getElementById('imgSendBtn').disabled = true;
+  document.getElementById('imgModal').classList.add('open');
+}
+function setImgPreview(src) {
+  const prev = document.getElementById('imgPreview');
+  prev.src = src;
+  prev.style.display = 'block';
+  prev.onerror = () => { prev.style.display = 'none'; pendingImageData = ''; document.getElementById('imgSendBtn').disabled = true; showBanner('⚠ Could not load that image', 'red'); };
+  prev.onload = () => { pendingImageData = src; document.getElementById('imgSendBtn').disabled = false; };
+}
+document.getElementById('imgCancelBtn').addEventListener('click', () => document.getElementById('imgModal').classList.remove('open'));
+document.getElementById('imgModal').addEventListener('mousedown', e => { if (e.target === document.getElementById('imgModal')) document.getElementById('imgModal').classList.remove('open'); });
+document.getElementById('imgUrlBtn').addEventListener('click', () => { const u = document.getElementById('imgUrlInput').value.trim(); if (u) setImgPreview(u); });
+document.getElementById('imgUrlInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('imgUrlBtn').click(); });
+document.getElementById('imgFileInput').addEventListener('change', async () => {
+  const f = document.getElementById('imgFileInput').files[0]; if (!f) return;
+  if (f.size > 4 * 1024 * 1024) { showBanner('⚠ Image too large (max 4MB)', 'red'); return; }
+  const url = await fileToDataUrl(f); setImgPreview(url);
+});
+const imgDz = document.getElementById('imgDropZone');
+imgDz.addEventListener('dragover', e => { e.preventDefault(); imgDz.classList.add('dragover'); });
+imgDz.addEventListener('dragleave', () => imgDz.classList.remove('dragover'));
+imgDz.addEventListener('drop', async e => {
+  e.preventDefault(); imgDz.classList.remove('dragover');
+  const f = e.dataTransfer.files[0]; if (!f || !f.type.startsWith('image/')) return;
+  if (f.size > 4 * 1024 * 1024) { showBanner('⚠ Image too large (max 4MB)', 'red'); return; }
+  setImgPreview(await fileToDataUrl(f));
+});
+document.getElementById('imgSendBtn').addEventListener('click', async () => {
+  if (!pendingImageData) return;
+  if (!username) { showBanner('Set a username first', 'red'); return; }
+  if (isMuted) { showBanner('🔕 You are muted.', 'red'); return; }
+  document.getElementById('imgModal').classList.remove('open');
+  try {
+    if (dmMode && dmPartner) {
+      const inserted = await sbPost('/rest/v1/dms', { sender_device_id:deviceId, recipient_device_id:dmPartner.device_id, sender_username:username, text:pendingImageData, type:'image' });
+      if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
+    } else {
+      const inserted = await sbPost('/rest/v1/messages', { username, device_id:deviceId, text:pendingImageData, type:'image' });
+      if (inserted && inserted.length) { renderMessage(inserted[0], false); lastRenderedId = inserted[0].id; }
+    }
+  } catch(err) { showBanner('⚠ Failed to send image', 'red'); }
 });
 function openPollModal() {
   document.getElementById('pollQuestion').value = '';
