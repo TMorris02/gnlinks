@@ -7,37 +7,19 @@
     <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+<style>
+  iframe {
+    display: block; /* iframes are inline by default */
+    background: #000; /* Optional: background color while loading */
+    border: none; /* Remove default border */
+    height: 100vh; /* Viewport-relative height */
+    width: 100vw; /* Viewport-relative width */
+}
+</style>
 <body>
-  <header>
-    <h1>smashkarts</h1>
-    <div class="buttons">
-  <button onclick="goHome()"><i class="fas fa-house"></i></button>
-  <button onclick="goFullscreen()"><i class="fas fa-expand"></i></button>
-</div>
-
-  </header>
-
   <main>
     <iframe id="gameFrame" src="https://smashkarts.io"></iframe>
   </main>
-
-  <script>
-    function goHome() {
-  window.location.href = "../index.html";
-}
-
-    function goFullscreen() {
-      let iframe = document.getElementById("gameFrame");
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      } else if (iframe.mozRequestFullScreen) { 
-        iframe.mozRequestFullScreen();
-      } else if (iframe.webkitRequestFullscreen) { 
-        iframe.webkitRequestFullscreen();
-      } else if (iframe.msRequestFullscreen) { 
-        iframe.msRequestFullscreen();
-      }
-    }
-  </script>
 </body>
 </html>
+
