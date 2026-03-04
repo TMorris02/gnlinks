@@ -2894,6 +2894,16 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
     if (editingGroupId) {
       // Edit existing
       await sbPatch('/rest/v1/group_chats?id=eq.'+editingGroupId, { name, avatar });
+      const existingMembers = await sbGet('/rest/v1/group_members?group_id=eq.'+editingGroupId+'&select=device_id');
+      const existingIds = (existingMembers||[]).map(x => x.device_id);
+
+      for (const m of memberDevIds) {
+        if (m.device_id === deviceId) continue;
+        if (!existingIds.includes(m.device_id)) {
+          await sbPost('/rest/v1/group_messages', { group_id: editingGroupId, device_id: deviceId, username: '🔔 System', text: m.username + ' was added to the group.', type: 'system' });
+          await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
+        }
+      }
       // Sync members: remove all then re-add
       await sbDelete('/rest/v1/group_members?group_id=eq.'+editingGroupId+'&device_id=neq.'+encodeURIComponent(deviceId));
       for (const m of memberDevIds) {
@@ -2906,7 +2916,9 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
       }
       showBanner('✅ Group updated', 'green');
       await loadGroups();
-      await broadcastAdminCmd({ action: 'force_refresh' });
+      for (const m of memberDevIds) {
+        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
+      }
       if (activeGroup && activeGroup.id===editingGroupId) { activeGroup.name=name; activeGroup.avatar=avatar; document.getElementById('groupHeaderName').textContent=name; }
     } else {
       // Create new
@@ -2920,7 +2932,9 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
       }
       showBanner('✅ Group created', 'green');
       await loadGroups();
-      await broadcastAdminCmd({ action: 'force_refresh' });
+      for (const m of memberDevIds) {
+        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
+      }
     }
     document.getElementById('groupModal').classList.remove('open');
   } catch(e) { showBanner('⚠ Failed: '+e.message, 'red'); }
@@ -2957,6 +2971,8 @@ async function openGroupSettings(group) {
         removeBtn.onclick = async () => {
           if (!confirm('Remove '+m.username+' from group?')) return;
           try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(m.device_id)); row.remove(); showBanner('✅ Removed '+m.username,'green'); await loadGroups(); } catch(e){showBanner('⚠ Failed','red');}
+          await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: m.username + ' was removed from the group.', type: 'system' });
+          await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
           const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
           if (!remaining || remaining.length <= 1) {
             await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
