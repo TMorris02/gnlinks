@@ -450,6 +450,10 @@ body:not(.dark-mode){
 .admin-section-toggle-arrow { font-size: 11px; color: var(--text-muted); transition: transform 0.2s; }
 .admin-section-collapsible.expanded .admin-section-toggle-arrow { transform: rotate(180deg); }
 .admin-section-collapsible > .admin-section-body { padding: 14px 16px; }
+
+.drop-overlay{position:absolute;inset:0;background:var(--primary-light);border:2px dashed var(--primary);border-radius:var(--radius);display:none;align-items:center;justify-content:center;z-index:100;pointer-events:none;font-size:13px;font-weight:700;color:var(--primary);}
+.drop-overlay.show{display:flex;}
+.input-area{position:relative;}
 </style>
 </head>
 <body class="dark-mode">
@@ -848,7 +852,8 @@ body:not(.dark-mode){
       <span class="reply-bar-text" id="replyBarText"></span>
       <button class="reply-cancel" id="replyCancelBtn" title="Cancel reply">✕</button>
     </div>
-    <div class="input-area">
+    <div class="input-area" id="inputAreaDrop">
+      <div class="drop-overlay" id="dropOverlay">📎 Drop image to send</div>
       <div class="input-inner">
         <button class="plus-btn" id="plusBtn" disabled title="Create poll">＋</button>
         <textarea class="input-box" id="msgInput" placeholder="Set a username to start chatting..." rows="1" maxlength="500" disabled></textarea>
@@ -859,6 +864,7 @@ body:not(.dark-mode){
         </button>
       </div>
       <div class="cooldown-bar-wrap" id="cooldownWrap"><div class="cooldown-bar" id="cooldownBar" style="width:0%"></div></div>
+      <div class="cooldown-bar-wrap" ...>...</div>
     </div>
   </div>
 </div>
@@ -1810,8 +1816,19 @@ function renderMessage(msg, isDm) {
     rp.innerHTML = '<strong>'+esc(msg.reply_to_username)+'</strong> '+esc(msg.reply_to_text.slice(0,80));
     bWrap.appendChild(rp);
   }
-  const bubble = document.createElement('div'); bubble.className = 'msg-bubble'; bubble.textContent = msg.text; bWrap.appendChild(bubble);
-
+  const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
+  if (msg.type === 'image') {
+    const img = document.createElement('img');
+    img.src = msg.text;
+    img.style.cssText = 'max-width:260px;max-height:260px;border-radius:8px;display:block;cursor:pointer;';
+    img.onclick = () => { window.open(msg.text, '_blank'); };
+    img.onerror = () => { bubble.textContent = '[Image failed to load]'; };
+    bubble.style.padding = '4px';
+    bubble.appendChild(img);
+  } else {
+    bubble.textContent = msg.text;
+  }
+  bWrap.appendChild(bubble);
   // Reply btn (global + DM)
   const rBtn = document.createElement('button'); rBtn.className = 'msg-reply msg-reply-btn'; rBtn.title = 'Reply';
   rBtn.dataset.id = msg.id; rBtn.dataset.sender = senderName; rBtn.dataset.text = msg.text; rBtn.textContent = '\u21A9';
@@ -2164,6 +2181,63 @@ async function sendMessage() {
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 document.getElementById('msgInput').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+
+// ════════════════════════════════════════════════
+// IMAGE DRAG & DROP
+// ════════════════════════════════════════════════
+(function() {
+  const inputArea = document.getElementById('inputAreaDrop');
+  const overlay   = document.getElementById('dropOverlay');
+  let dragCounter = 0;
+
+  // Only activate when a drag enters the input area itself
+  inputArea.addEventListener('dragenter', e => {
+    if (!e.dataTransfer.types.includes('Files')) return;
+    dragCounter++;
+    overlay.classList.add('show');
+  });
+  inputArea.addEventListener('dragleave', e => {
+    dragCounter--;
+    if (dragCounter <= 0) { dragCounter = 0; overlay.classList.remove('show'); }
+  });
+  inputArea.addEventListener('dragover', e => {
+    if (!e.dataTransfer.types.includes('Files')) return;
+    e.preventDefault();
+  });
+  inputArea.addEventListener('drop', async e => {
+    e.preventDefault();
+    dragCounter = 0; overlay.classList.remove('show');
+    if (!username) { showBanner('Set a username first', 'red'); return; }
+    if (isMuted)   { showBanner('🔕 You are muted.', 'red'); return; }
+    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'));
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { showBanner('⚠ Image too large (max 4MB)', 'red'); return; }
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      const dataUrl = ev.target.result;
+      try {
+        if (dmMode && dmPartner) {
+          const inserted = await sbPost('/rest/v1/dms', {
+            sender_device_id: deviceId,
+            recipient_device_id: dmPartner.device_id,
+            sender_username: username,
+            text: dataUrl,
+            type: 'image'
+          });
+          if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
+        } else {
+          const inserted = await sbPost('/rest/v1/messages', {
+            username, device_id: deviceId,
+            text: dataUrl,
+            type: 'image'
+          });
+          if (inserted && inserted.length) { renderMessage(inserted[0], false); lastRenderedId = inserted[0].id; }
+        }
+      } catch(err) { showBanner('⚠ Failed to send image', 'red'); }
+    };
+    reader.readAsDataURL(file);
+  });
+})();
 
 // ════════════════════════════════════════════════
 // COOLDOWN
