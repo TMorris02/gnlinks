@@ -1814,13 +1814,12 @@ function renderAnnouncement(text) {
 async function fullRefresh() {
   lastRenderedUser = null;
   if (groupMode && activeGroup) {
-    // add this block first:
     const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastGroupMsgId = 0;
     try {
       const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+activeGroup.id+'&order=id.asc&limit=200&select=*');
       if (msgs && msgs.length) { msgs.forEach(m => renderGroupMessage(m)); lastGroupMsgId = msgs[msgs.length-1].id; }
     } catch(e) {}
-    return; // <-- this is the key line that was missing
+    loadAllUsers(); return;
   }{
     document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">\uD83D\uDDE8\uFE0F</div><p>Loading...</p></div>';
     lastRenderedId = 0; await loadHistory();
@@ -2971,6 +2970,14 @@ async function openGroupSettings(group) {
         removeBtn.onclick = async () => {
           if (!confirm('Remove '+m.username+' from group?')) return;
           try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(m.device_id)); row.remove(); showBanner('✅ Removed '+m.username,'green'); await loadGroups(); } catch(e){showBanner('⚠ Failed','red');}
+          const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
+          if (!remaining || remaining.length <= 1) {
+            const lastMember = remaining && remaining.length === 1 ? remaining[0].device_id : null;
+            await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
+            if (lastMember) await broadcastAdminCmd({ action: 'force_refresh_target', device_id: lastMember });
+            document.getElementById('groupSettingsModal').classList.remove('open');
+            closeGroup(); await loadGroups();
+          }
           await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: m.username + ' was removed from the group.', type: 'system' });
           await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
           const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
@@ -3001,6 +3008,14 @@ async function openGroupSettings(group) {
       leaveBtn.onclick = async () => {
         if (!confirm('Leave this group?')) return;
         try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(deviceId));await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: username + ' left the group.', type: 'system' }); document.getElementById('groupSettingsModal').classList.remove('open'); closeGroup(); await loadGroups(); showBanner('✅ Left group','green'); } catch(e){showBanner('⚠ Failed','red');}
+        const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
+        if (!remaining || remaining.length <= 1) {
+          const lastMember = remaining && remaining.length === 1 ? remaining[0].device_id : null;
+          await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
+          if (lastMember) await broadcastAdminCmd({ action: 'force_refresh_target', device_id: lastMember });
+          document.getElementById('groupSettingsModal').classList.remove('open');
+          closeGroup(); await loadGroups();
+        }
         const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
         if (!remaining || remaining.length <= 1) {
           await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
