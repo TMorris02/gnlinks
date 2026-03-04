@@ -159,30 +159,7 @@ body:not(.dark-mode){
 .msg-edit{display:none;position:absolute;top:-8px;right:18px;background:#6366f1;border:2px solid var(--bg);color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:10px;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background 0.15s;z-index:10;line-height:1;}
 .msg-bubble-wrap:hover .msg-edit{display:flex;}
 .msg-edit:hover{background:#4f46e5;}
-.msg-react-btn{display:none;position:absolute;top:-8px;right:42px;background:#f59e0b;border:2px solid var(--bg);color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:10px;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background 0.15s;z-index:10;line-height:1;}
-.msg-bubble-wrap:hover .msg-react-btn{display:flex;}
-.msg-react-btn:hover{background:#d97706;}
-
-/* ── REACTIONS ── */
-.msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-width:320px;align-items:center;}
-.reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all 0.15s;position:relative;user-select:none;}
-.reaction-chip:hover{background:var(--surface-hover);border-color:var(--primary);}
-.reaction-chip.mine{background:var(--primary-light);border-color:var(--primary);}
-.reaction-chip .r-count{font-size:11px;font-weight:700;color:var(--text-muted);}
-.reaction-chip.mine .r-count{color:var(--primary);}
-.reaction-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;border-radius:8px;padding:5px 9px;font-size:11px;white-space:nowrap;box-shadow:var(--shadow-lg);display:none;z-index:100;pointer-events:none;border:1px solid rgba(255,255,255,0.1);}
-.reaction-chip:hover .reaction-tooltip{display:block;}
-.reaction-overflow{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text-muted);font-weight:600;position:relative;}
-.reaction-overflow:hover{background:var(--surface-hover);}
-.reaction-overflow-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;border-radius:8px;padding:8px 10px;font-size:12px;white-space:nowrap;box-shadow:var(--shadow-lg);display:none;z-index:100;border:1px solid rgba(255,255,255,0.1);line-height:1.6;}
-.reaction-overflow:hover .reaction-overflow-tooltip{display:block;}
-
-/* ── EMOJI PICKER ── */
-.emoji-picker-popup{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:10px;width:280px;display:none;}
-.emoji-picker-popup.open{display:block;animation:pop-in 0.15s cubic-bezier(0.4,0,0.2,1);}
-.emoji-picker-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
-.emoji-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;transition:background 0.1s;line-height:1;}
-.emoji-btn:hover{background:var(--surface-hover);}
+.msg-bubble-wrap:hover 
 
 /* ── POLLS ── */
 .poll-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:2px;min-width:200px;max-width:300px;}
@@ -687,11 +664,6 @@ body:not(.dark-mode){
 <!-- MOD PROMOTION POPUP -->
 <div id="modPromotionPopup" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;border-radius:12px;padding:14px 24px;font-size:14px;font-weight:700;color:#065f46;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:99998;animation:pop-in 0.25s ease;white-space:nowrap;">⭐ You've been promoted to Moderator!</div>
 
-<!-- EMOJI PICKER -->
-<div class="emoji-picker-popup" id="emojiPickerPopup">
-  <div class="emoji-picker-grid" id="emojiPickerGrid"></div>
-</div>
-
 <!-- SETTINGS PANEL -->
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">
@@ -1082,9 +1054,6 @@ function loadLocalSettings() {
   try { const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); if (s) Object.assign(runtimeSettings, s); } catch(e) {}
 }
 loadLocalSettings();
-
-// ── REACTION EMOJIS ────────────────────────────
-const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','😡','🔥','🎉','👀','💯','🤣','😍','🙏','👏','💪','🤔','😎','🥹','💀','⭐','🫡','🤝','😤','🥲'];
 
 // ── STATE ─────────────────────────────────────
 let deviceId = '', username = '', myAvatar = '', pendingAvatar = '';
@@ -1588,10 +1557,9 @@ async function boot() {
     if (saved) { username = saved; document.getElementById('headerUsername').textContent = username; enableInput(); document.getElementById('msgInput').placeholder = 'Type a message...'; updateAdminVisibility(); }
     else openUsernameModal(false);
   }
-  await loadAllUsers(); await loadHistory(); startPolling(); loadGroups();  if (username) joinPresence();
+  await Promise.all([loadAllUsers(), loadHistory(), loadGroups()]); startPolling();  if (username) joinPresence();
   subscribeAdminChannel();
   subscribeRealtimeChanges();
-  initEmojiPicker();
 }
 boot();
 
@@ -1813,13 +1781,14 @@ function renderAnnouncement(text) {
 // ════════════════════════════════════════════════
 async function fullRefresh() {
   lastRenderedUser = null;
-  if (dmMode && dmPartner) {
-    const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastDmId = 0;
+  if (groupMode && activeGroup) {
+    // add this block first:
+    const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastGroupMsgId = 0;
     try {
-      const msgs = await sbGet('/rest/v1/dms?or=(and(sender_device_id.eq.'+deviceId+',recipient_device_id.eq.'+dmPartner.device_id+'),and(sender_device_id.eq.'+dmPartner.device_id+',recipient_device_id.eq.'+deviceId+'))&order=id.asc&limit=200&select=*');
-      if (msgs && msgs.length) { msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id; }
-      else inner.innerHTML = '<div class="empty-state"><div class="ei">\uD83E\uDD2B</div><p>No messages yet.</p></div>';
+      const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+activeGroup.id+'&order=id.asc&limit=200&select=*');
+      if (msgs && msgs.length) { msgs.forEach(m => renderGroupMessage(m)); lastGroupMsgId = msgs[msgs.length-1].id; }
     } catch(e) {}
+    return; // <-- this is the key line that was missing
   } else {
     document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">\uD83D\uDDE8\uFE0F</div><p>Loading...</p></div>';
     lastRenderedId = 0; await loadHistory();
@@ -2171,11 +2140,6 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
   rBtn.dataset.id = msg.id; rBtn.dataset.sender = senderName; rBtn.dataset.text = msg.text; rBtn.textContent = '\u21A9';
   bWrap.appendChild(rBtn);
 
-  // React button (always)
-  const reactBtn = document.createElement('button'); reactBtn.className = 'msg-react-btn'; reactBtn.title = 'React';
-  reactBtn.textContent = '\uD83D\uDE04'; reactBtn.dataset.msgId = msg.id; reactBtn.dataset.isDm = isDm ? '1' : '0';
-  reactBtn.addEventListener('click', e => { e.stopPropagation(); openEmojiPicker(e, msg.id, isDm); }); bWrap.appendChild(reactBtn);
-
   // Edit & Delete (own messages for non-admin, all for admin)
   const canEditThis = isMe || isHeadAdmin() || (isAdmin() && !isMe && !isMod);
   const withinWindow = !msg.created_at || isHeadAdmin() || (Date.now() - new Date(msg.created_at).getTime()) < runtimeSettings.editWindowMinutes * 60000;
@@ -2205,120 +2169,6 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
 
   // Load reactions async
   loadReactionsForMsg(msg.id, isDm, reactionsRow);
-}
-
-// ════════════════════════════════════════════════
-// REACTIONS
-// ════════════════════════════════════════════════
-function initEmojiPicker() {
-  const grid = document.getElementById('emojiPickerGrid');
-  REACTION_EMOJIS.forEach(emoji => {
-    const btn = document.createElement('button'); btn.className = 'emoji-btn'; btn.textContent = emoji;
-    btn.addEventListener('click', async () => {
-      closeEmojiPicker();
-      if (!emojiPickerTarget) return;
-      await toggleReaction(emojiPickerTarget.msgId, emojiPickerTarget.isDm, emoji);
-    });
-    grid.appendChild(btn);
-  });
-  document.addEventListener('mousedown', e => {
-    const picker = document.getElementById('emojiPickerPopup');
-    if (!picker.contains(e.target) && !e.target.classList.contains('msg-react-btn')) closeEmojiPicker();
-  });
-}
-function openEmojiPicker(e, msgId, isDm) {
-  e.stopPropagation();
-  emojiPickerTarget = { msgId, isDm };
-  const picker = document.getElementById('emojiPickerPopup');
-  picker.style.left = Math.min(e.clientX, window.innerWidth - 300) + 'px';
-  picker.style.top  = Math.min(e.clientY + 10, window.innerHeight - 200) + 'px';
-  picker.classList.add('open');
-}
-function closeEmojiPicker() { document.getElementById('emojiPickerPopup').classList.remove('open'); emojiPickerTarget = null; }
-
-async function toggleReaction(msgId, isDm, emoji) {
-  if (!username) { showBanner('Set a username first', 'red'); return; }
-  const table = isDm ? 'dm_reactions' : 'message_reactions';
-  const col   = isDm ? 'dm_id' : 'message_id';
-  try {
-    const existing = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&device_id=eq.'+encodeURIComponent(deviceId)+'&emoji=eq.'+encodeURIComponent(emoji)+'&select=id');
-    if (existing && existing.length) {
-      await sbDelete('/rest/v1/'+table+'?id=eq.'+existing[0].id);
-    } else {
-      const anyExisting = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&device_id=eq.'+encodeURIComponent(deviceId)+'&select=id');
-      if (anyExisting && anyExisting.length) await sbDelete('/rest/v1/'+table+'?id=eq.'+anyExisting[0].id);
-      const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
-        method: 'POST',
-        headers: { 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
-        body: JSON.stringify({ [col]: msgId, device_id: deviceId, username: username, emoji: emoji })
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        console.error('Reaction insert failed:', res.status, err);
-        if (res.status === 401 || res.status === 403) {
-          showBanner('⚠ Reactions blocked — disable RLS on '+table+' in Supabase dashboard', 'red');
-        } else {
-          showBanner('⚠ Reaction failed ('+res.status+')', 'red');
-        }
-        return;
-      }
-    }
-    const selector = isDm ? '[data-dm-id="'+msgId+'"]' : '[data-msg-id="'+msgId+'"]';
-    const msgEl = document.querySelector(selector);
-    if (msgEl) await refreshReactionsOnEl(msgEl, msgId, isDm);
-  } catch(e) { console.error('reaction error', e); showBanner('⚠ Reaction failed', 'red'); }
-}
-
-async function loadReactionsForMsg(msgId, isDm, container) {
-  try {
-    const table = isDm ? 'dm_reactions' : 'message_reactions';
-    const col   = isDm ? 'dm_id' : 'message_id';
-    const rows = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&select=emoji,device_id,username&order=id.asc');
-    renderReactions(rows || [], container, msgId, isDm);
-  } catch(e) {}
-}
-
-async function refreshReactionsOnEl(msgEl, msgId, isDm) {
-  const row = msgEl.querySelector('.msg-reactions[data-msg-id="'+msgId+'"], .msg-reactions[data-msg-id="'+msgId+'"]');
-  const reactRow = msgEl.querySelector('.msg-reactions');
-  if (!reactRow) return;
-  try {
-    const table = isDm ? 'dm_reactions' : 'message_reactions';
-    const col   = isDm ? 'dm_id' : 'message_id';
-    const rows = await sbGet('/rest/v1/'+table+'?'+col+'=eq.'+msgId+'&select=emoji,device_id,username&order=id.asc');
-    renderReactions(rows || [], reactRow, msgId, isDm);
-  } catch(e) {}
-}
-
-const MAX_VISIBLE_REACTIONS = 5;
-function renderReactions(rows, container, msgId, isDm) {
-  container.innerHTML = '';
-  if (!rows.length) return;
-  // Group by emoji
-  const groups = {};
-  rows.forEach(r => {
-    if (!groups[r.emoji]) groups[r.emoji] = [];
-    groups[r.emoji].push(r.username || r.device_id);
-  });
-  const entries = Object.entries(groups);
-  const visible = entries.slice(0, MAX_VISIBLE_REACTIONS);
-  const overflow = entries.slice(MAX_VISIBLE_REACTIONS);
-  visible.forEach(([emoji, users]) => {
-    const chip = document.createElement('div'); chip.className = 'reaction-chip' + (users.includes(username) ? ' mine' : '');
-    const emojiSpan = document.createElement('span'); emojiSpan.textContent = emoji;
-    const count = document.createElement('span'); count.className = 'r-count'; count.textContent = users.length;
-    const tooltip = document.createElement('div'); tooltip.className = 'reaction-tooltip'; tooltip.textContent = users.slice(0,8).join(', ') + (users.length > 8 ? ' +' + (users.length-8) + ' more' : '');
-    chip.appendChild(emojiSpan); chip.appendChild(count); chip.appendChild(tooltip);
-    chip.addEventListener('click', e => { e.stopPropagation(); toggleReaction(msgId, isDm, emoji); });
-    container.appendChild(chip);
-  });
-  if (overflow.length) {
-    const more = document.createElement('div'); more.className = 'reaction-overflow';
-    more.textContent = '...';
-    const tt = document.createElement('div'); tt.className = 'reaction-overflow-tooltip';
-    tt.innerHTML = overflow.map(([e, u]) => e + ' ' + u.length + ': ' + u.slice(0,4).join(', ')).join('<br>');
-    more.appendChild(tt); container.appendChild(more);
-  }
 }
 
 // ════════════════════════════════════════════════
@@ -2899,8 +2749,13 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
         if (m.device_id===deviceId) continue;
         await fetch(SUPABASE_URL+'/rest/v1/group_members',{method:'POST',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({group_id:editingGroupId,device_id:m.device_id,username:m.username})});
       }
+      for (const m of memberDevIds) {
+      if (m.device_id === deviceId) continue;
+        await sbPost('/rest/v1/group_messages', { group_id: editingGroupId, device_id: deviceId, username: '🔔 System', text: m.username + ' was added to the group.', type: 'system' });
+      }
       showBanner('✅ Group updated', 'green');
       await loadGroups();
+      await broadcastAdminCmd({ action: 'force_refresh' });
       if (activeGroup && activeGroup.id===editingGroupId) { activeGroup.name=name; activeGroup.avatar=avatar; document.getElementById('groupHeaderName').textContent=name; }
     } else {
       // Create new
@@ -2914,6 +2769,7 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
       }
       showBanner('✅ Group created', 'green');
       await loadGroups();
+      await broadcastAdminCmd({ action: 'force_refresh' });
     }
     document.getElementById('groupModal').classList.remove('open');
   } catch(e) { showBanner('⚠ Failed: '+e.message, 'red'); }
@@ -2950,6 +2806,12 @@ async function openGroupSettings(group) {
         removeBtn.onclick = async () => {
           if (!confirm('Remove '+m.username+' from group?')) return;
           try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(m.device_id)); row.remove(); showBanner('✅ Removed '+m.username,'green'); await loadGroups(); } catch(e){showBanner('⚠ Failed','red');}
+          const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
+          if (!remaining || remaining.length <= 1) {
+            await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
+            document.getElementById('groupSettingsModal').classList.remove('open');
+            closeGroup(); await loadGroups(); showBanner('Group deleted (no members left)', 'green');
+          }
         };
         row.appendChild(removeBtn);
       }
@@ -2972,6 +2834,13 @@ async function openGroupSettings(group) {
       leaveBtn.onclick = async () => {
         if (!confirm('Leave this group?')) return;
         try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(deviceId)); document.getElementById('groupSettingsModal').classList.remove('open'); closeGroup(); await loadGroups(); showBanner('✅ Left group','green'); } catch(e){showBanner('⚠ Failed','red');}
+        await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: username + ' left the group.', type: 'system' });
+        const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
+        if (!remaining || remaining.length <= 1) {
+          await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
+          document.getElementById('groupSettingsModal').classList.remove('open');
+          closeGroup(); await loadGroups(); showBanner('Group deleted (no members left)', 'green');
+        }
       };
       body.appendChild(leaveBtn);
     }
@@ -3570,7 +3439,6 @@ document.getElementById('messagesInner').addEventListener('click', e => {
   if (replyBtn) { e.stopPropagation(); setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text); return; }
   if (e.target.closest('.msg-delete')) return;
   if (e.target.closest('.msg-edit')) return;
-  if (e.target.closest('.msg-react-btn')) return;
   if (e.target.closest('.reaction-chip')) return;
   const avatar = e.target.closest('.msg-avatar');
   if (avatar) { const msgEl = avatar.closest('.msg'); if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; } }
