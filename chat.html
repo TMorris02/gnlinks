@@ -911,8 +911,7 @@ const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','😡','🔥','�
 // ── STATE ─────────────────────────────────────
 let deviceId = '', username = '', myAvatar = '', pendingAvatar = '';
 let lastSendTime = 0, cooldownRaf = null, autoScroll = true;
-let lastRenderedUser = null, lastRenderedId = 0, lastDmId = 0;
-let presenceChannel = null, adminChannel = null, sb = null;
+let lastRenderedUser = null, lastRenderedMsgDate = null, lastRenderedId = 0, lastDmId = 0;let presenceChannel = null, adminChannel = null, sb = null;
 let sidebarOpen = true, dmMode = false, dmPartner = null, dmPartnerDevId = null;
 let allUsers = [], dmUnreadMap = {}, onlineDeviceMap = {};
 let isMuted = false, muteUntil = null;
@@ -966,7 +965,21 @@ const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#ef4444','#06
 function colorFor(name) { let h=0; for(let i=0;i<name.length;i++) h=name.charCodeAt(i)+((h<<5)-h); return COLORS[Math.abs(h)%COLORS.length]; }
 function initials(n) { return n.trim().slice(0,2).toUpperCase(); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmtTime(ts) { return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+  const time = d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if (sameDay) return time;
+  const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+  const isYesterday = d.getFullYear()===yesterday.getFullYear() && d.getMonth()===yesterday.getMonth() && d.getDate()===yesterday.getDate();
+  if (isYesterday) return 'Yesterday '+time;
+  const sameYear = d.getFullYear()===now.getFullYear();
+  const date = sameYear
+    ? d.toLocaleDateString([],{month:'short',day:'numeric'})
+    : d.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+  return date+' '+time;
+}
 function isHeadAdmin() { return username && username.toLowerCase() === HEAD_ADMIN; }
 function isAdmin() { return username && (username.toLowerCase() === HEAD_ADMIN || modUsers.has(deviceId)); }
 function canBanKick() { return isHeadAdmin(); }
@@ -1781,7 +1794,13 @@ function renderMessage(msg, isDm) {
   const senderDevId = isDm ? msg.sender_device_id : msg.device_id;
   const senderName  = isDm ? nameForDev(msg.sender_device_id, msg.sender_username||'Unknown') : nameForDev(msg.device_id, msg.username||'Unknown');
   const isMe = isDm ? msg.sender_device_id === deviceId : msg.device_id === deviceId || msg.username === username;
-  const sameSender = lastRenderedUser === (senderDevId || senderName);
+  const lastMsgDate = lastRenderedMsgDate ? new Date(lastRenderedMsgDate) : null;
+const thisMsgDate = msg.created_at ? new Date(msg.created_at) : null;
+const sameDay = lastMsgDate && thisMsgDate &&
+  lastMsgDate.getFullYear()===thisMsgDate.getFullYear() &&
+  lastMsgDate.getMonth()===thisMsgDate.getMonth() &&
+  lastMsgDate.getDate()===thisMsgDate.getDate();
+const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
   const color = colorFor(senderName);
   const senderAvatar = isMe ? myAvatar : getAvatarFor(senderName);
 
@@ -1862,6 +1881,7 @@ function renderMessage(msg, isDm) {
 
   rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
   lastRenderedUser = senderDevId || senderName;
+  lastRenderedMsgDate = msg.created_at || null;
   if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
 
   // Load reactions async
