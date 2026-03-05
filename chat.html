@@ -3353,7 +3353,9 @@ async function openGroup(group) {
       saveGroupLastSeen();
     }
     showPinnedBar(group);
-    else inner.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>No messages yet in '+esc(group.name)+'</p></div>';
+    } else {
+      inner.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>No messages yet in '+esc(group.name)+'</p></div>';
+    }
   } catch(e) {}
 }
 function closeGroup() {
