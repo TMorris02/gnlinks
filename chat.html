@@ -1198,6 +1198,28 @@ function nameForDev(devId, fallback='Unknown') {
   const u = allUsers.find(x => x.device_id === devId);
   return (u && u.username) || fallback;
 }
+function showGroupKickBanner(groupName) {
+  const existing = document.getElementById('groupKickBanner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'groupKickBanner';
+  banner.style.cssText = [
+    'position:fixed;top:70px;left:50%;transform:translateX(-50%);',
+    'background:linear-gradient(135deg,#ef4444,#dc2626);',
+    'color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;',
+    'box-shadow:0 8px 24px rgba(239,68,68,0.4);z-index:99999;',
+    'animation:pop-in 0.25s ease;white-space:nowrap;',
+    'display:flex;align-items:center;gap:10px;'
+  ].join('');
+  banner.innerHTML = '👢 You were removed from <strong style="margin:0 4px;">' + esc(groupName) + '</strong>';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'background:rgba(255,255,255,0.2);border:none;color:white;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;';
+  closeBtn.onclick = () => banner.remove();
+  banner.appendChild(closeBtn);
+  document.body.appendChild(banner);
+  setTimeout(() => { if (banner.parentNode) banner.remove(); }, 6000);
+}
 function showBanner(msg, color) {
   const b = document.getElementById('connBanner');
   b.textContent = msg;
@@ -1745,7 +1767,23 @@ function subscribeAdminChannel() {
         const selector = isDm ? '[data-dm-id="'+msgId+'"]' : '[data-msg-id="'+msgId+'"]';
         const msgEl = document.querySelector(selector);
         if (msgEl) await refreshReactionsOnEl(msgEl, msgId, isDm);
+      } else if (payload.action === 'group_membership_changed') {
+  // Only act if this device is affected
+  if (payload.affected_device_ids && payload.affected_device_ids.includes(deviceId)) {
+    await loadGroups();
+    renderGroupList();
+    // If we were removed/kicked from the active group, close it
+    if (payload.removed_device_ids && payload.removed_device_ids.includes(deviceId)) {
+      if (groupMode && activeGroup && activeGroup.id === payload.group_id) {
+        closeGroup();
       }
+      // Show kick banner if kicked from group (not a voluntary leave)
+      if (payload.kicked && payload.kicked_device_ids && payload.kicked_device_ids.includes(deviceId)) {
+        showGroupKickBanner(payload.group_name || 'a group');
+      }
+    }
+  }
+}
     })();
   }).subscribe();
 }
@@ -2139,22 +2177,28 @@ document.getElementById('sidebarSearch').addEventListener('input', function() { 
 // DM VIEW
 // ════════════════════════════════════════════════
 async function openDm(partner) {
+  // Close group mode if active
+  if (groupMode) {
+    groupMode = false; activeGroup = null; lastGroupMsgId = 0;
+    document.getElementById('groupHeader').style.display = 'none';
+    renderGroupList();
+  }
   dmPartner = partner; dmPartnerDevId = partner.device_id;
   dmMode = true; lastDmId = 0;
   const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastRenderedUser = null;
   document.getElementById('dmHeader').classList.add('show');
   document.getElementById('dmHeaderName').textContent = partner.username;
   const avContainer = document.getElementById('dmHeaderAvatar'); avContainer.innerHTML = '';
-  avContainer.appendChild(makeAvatarEl(partner.avatar||getAvatarForDev(partner.device_id), partner.username, 32));
-  document.getElementById('msgInput').placeholder = 'Message '+partner.username+'...';
+  avContainer.appendChild(makeAvatarEl(partner.avatar || getAvatarForDev(partner.device_id), partner.username, 32));
+  document.getElementById('msgInput').placeholder = 'Message ' + partner.username + '...';
   renderSidebar(document.getElementById('sidebarSearch').value);
   try {
     const msgs = await sbGet('/rest/v1/dms?or=(and(sender_device_id.eq.'+deviceId+',recipient_device_id.eq.'+partner.device_id+'),and(sender_device_id.eq.'+partner.device_id+',recipient_device_id.eq.'+deviceId+'))&order=id.asc&limit=200&select=*');
     if (msgs && msgs.length) {
-      msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id;
+      msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length - 1].id;
       const received = msgs.filter(m => m.sender_device_id === partner.device_id);
-      if (received.length) markDmRead(partner.device_id, received[received.length-1].id);
-    } else inner.innerHTML = '<div class="empty-state"><div class="ei">\uD83E\uDD2B</div><p>No messages yet.<br>Say hi to '+esc(partner.username)+'!</p></div>';
+      if (received.length) markDmRead(partner.device_id, received[received.length - 1].id);
+    } else inner.innerHTML = '<div class="empty-state"><div class="ei">🤫</div><p>No messages yet.<br>Say hi to '+esc(partner.username)+'!</p></div>';
   } catch(e) {}
 }
 function closeDm() {
@@ -2236,7 +2280,7 @@ const sameDay = lastMsgDate && thisMsgDate &&
   lastMsgDate.getDate()===thisMsgDate.getDate();
 const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
   const color = colorFor(senderName);
-  const senderAvatar = isMe ? myAvatar : getAvatarFor(senderName);
+  const senderAvatar = isMe ? myAvatar : (getAvatarForDev(senderDevId) || getAvatarFor(senderName));
 
   const el = document.createElement('div');
   el.className = ['msg', isMe?'mine':'theirs', sameSender?'same-sender':''].filter(Boolean).join(' ');
@@ -2816,15 +2860,40 @@ async function loadGroups() {
 // ── RENDER GROUP LIST ─────────────────────────
 function renderGroupList() {
   const el = document.getElementById('groupList'); el.innerHTML = '';
-  if (!myGroups.length) { el.innerHTML = '<div class="sidebar-empty" style="padding:8px 14px;font-size:11px;">No groups yet</div>'; return; }
+  // Count total unread across all groups for the collapsed badge
+  const totalGroupUnread = Object.values(unreadGroup).reduce((a, b) => a + b, 0);
+  // Update the sidebar section label to show total when collapsed
+  const groupLabel = document.querySelector('.sidebar-section-label');
+  if (groupLabel && groupLabel.textContent.startsWith('💬 Groups')) {
+    groupLabel.innerHTML = '💬 Groups' + (totalGroupUnread > 0 && sidebarOpen === false
+      ? ' <span style="background:var(--primary);color:white;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:4px;">'+totalGroupUnread+'</span>'
+      : '');
+  }
+  if (!myGroups.length) {
+    el.innerHTML = '<div class="sidebar-empty" style="padding:8px 14px;font-size:11px;">No groups yet</div>';
+    return;
+  }
   myGroups.forEach(g => {
+    const unread = unreadGroup[g.name] || 0;
     const row = document.createElement('div');
-    row.className = 'sidebar-user' + (activeGroup && activeGroup.id===g.id ? ' active' : '');
+    row.className = 'sidebar-user' + (activeGroup && activeGroup.id === g.id ? ' active' : '') + (unread > 0 ? ' has-unread' : '');
     row.style.gap = '10px';
     const avWrap = buildGroupAvatarStack(g, 30);
-    const nameSpan = document.createElement('span'); nameSpan.textContent = g.name;
+    const nameSpan = document.createElement('span'); nameSpan.style.flex = '1'; nameSpan.textContent = g.name;
     row.appendChild(avWrap); row.appendChild(nameSpan);
-    row.addEventListener('click', () => openGroup(g));
+    // Unread badge next to group name
+    if (unread > 0) {
+      const badge = document.createElement('div');
+      badge.className = 'sidebar-unread';
+      badge.textContent = unread;
+      row.appendChild(badge);
+    }
+    row.addEventListener('click', () => {
+      // Clear unread for this group when opened
+      unreadGroup[g.name] = 0;
+      renderGroupList();
+      openGroup(g);
+    });
     el.appendChild(row);
   });
 }
@@ -2861,14 +2930,17 @@ async function buildMemberStack(wrap, groupId, size) {
 // ── OPEN GROUP ────────────────────────────────
 async function openGroup(group) {
   // Close DM if open
-  if (dmMode) { dmMode=false; dmPartner=null; document.getElementById('dmHeader').classList.remove('show'); }
+  if (dmMode) {
+    dmMode = false; dmPartner = null; dmPartnerDevId = null;
+    document.getElementById('dmHeader').classList.remove('show');
+  }
   groupMode = true; activeGroup = group; lastGroupMsgId = 0;
   const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastRenderedUser = null;
   document.getElementById('groupHeader').style.display = 'flex';
   document.getElementById('groupHeaderName').textContent = group.name;
   const avContainer = document.getElementById('groupHeaderAvatar'); avContainer.innerHTML = '';
   avContainer.appendChild(buildGroupAvatarStack(group, 32));
-  document.getElementById('msgInput').placeholder = 'Message '+group.name+'...';
+  document.getElementById('msgInput').placeholder = 'Message ' + group.name + '...';
   renderGroupList();
   try {
     const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+group.id+'&order=id.asc&limit=200&select=*');
@@ -2942,7 +3014,7 @@ setInterval(async () => {
   if (!username) return;
   try {
     // 1. Poll the active group for new messages (renders them)
-    if (groupMode && activeGroup) {
+    if (groupMode && activeGroup && !dmMode) {
       const msgs = await sbGet(
         '/rest/v1/group_messages?group_id=eq.' + activeGroup.id +
         '&id=gt.' + lastGroupMsgId + '&order=id.asc&select=*'
@@ -3047,53 +3119,65 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
   const urlInput = document.getElementById('groupAvatarUrl').value.trim();
   const avatar = fileDataUrl || urlInput || pendingGroupAvatar || null;
   const selectedRows = document.querySelectorAll('#groupMemberPickList .group-member-pick-row.selected');
-  const memberDevIds = Array.from(selectedRows).map(r => ({ device_id:r.dataset.devid, username:r.dataset.username }));
+  const memberDevIds = Array.from(selectedRows).map(r => ({ device_id: r.dataset.devid, username: r.dataset.username }));
   document.getElementById('groupModalSaveBtn').disabled = true;
   try {
     if (editingGroupId) {
-      // Edit existing
+      // Get previous members before update
+      let prevMembers = [];
+      try { const pm = await sbGet('/rest/v1/group_members?group_id=eq.'+editingGroupId+'&select=device_id'); prevMembers = (pm||[]).map(x=>x.device_id); } catch(e){}
       await sbPatch('/rest/v1/group_chats?id=eq.'+editingGroupId, { name, avatar });
-      const existingMembers = await sbGet('/rest/v1/group_members?group_id=eq.'+editingGroupId+'&select=device_id');
-      const existingIds = (existingMembers||[]).map(x => x.device_id);
-
-      for (const m of memberDevIds) {
-        if (m.device_id === deviceId) continue;
-        if (!existingIds.includes(m.device_id)) {
-          await sbPost('/rest/v1/group_messages', { group_id: editingGroupId, device_id: deviceId, username: '🔔 System', text: m.username + ' was added to the group.', type: 'system' });
-          await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
-        }
-      }
-      // Sync members: remove all then re-add
+      // Remove non-creator members then re-add selected
       await sbDelete('/rest/v1/group_members?group_id=eq.'+editingGroupId+'&device_id=neq.'+encodeURIComponent(deviceId));
+      const newMemberDevIds = [deviceId];
       for (const m of memberDevIds) {
         if (m.device_id === deviceId) continue;
-        await sbPost('/rest/v1/group_messages', { group_id: editingGroupId, device_id: deviceId, username: '🔔 System', text: m.username + ' was added to the group.', type: 'system' });
-      }
-      for (const m of memberDevIds) {
-        if (m.device_id===deviceId) continue;
+        newMemberDevIds.push(m.device_id);
         await fetch(SUPABASE_URL+'/rest/v1/group_members',{method:'POST',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({group_id:editingGroupId,device_id:m.device_id,username:m.username})});
       }
+      // Figure out who was added vs removed
+      const addedDevIds = newMemberDevIds.filter(id => !prevMembers.includes(id));
+      const removedDevIds = prevMembers.filter(id => !newMemberDevIds.includes(id));
+      const allAffected = [...new Set([...addedDevIds, ...removedDevIds, deviceId])];
+      // Broadcast to everyone affected
+      await broadcastAdminCmd({
+        action: 'group_membership_changed',
+        group_id: editingGroupId,
+        group_name: name,
+        affected_device_ids: allAffected,
+        removed_device_ids: removedDevIds,
+        kicked: true,
+        kicked_device_ids: removedDevIds
+      });
       showBanner('✅ Group updated', 'green');
       await loadGroups();
-      for (const m of memberDevIds) {
-        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
+      if (activeGroup && activeGroup.id === editingGroupId) {
+        activeGroup.name = name; activeGroup.avatar = avatar;
+        document.getElementById('groupHeaderName').textContent = name;
       }
-      if (activeGroup && activeGroup.id===editingGroupId) { activeGroup.name=name; activeGroup.avatar=avatar; document.getElementById('groupHeaderName').textContent=name; }
     } else {
       // Create new
-      const grp = await sbPost('/rest/v1/group_chats', { name, avatar, created_by:username, creator_device_id:deviceId });
+      const grp = await sbPost('/rest/v1/group_chats', { name, avatar, created_by: username, creator_device_id: deviceId });
       const groupId = grp[0].id;
-      // Add creator
       await fetch(SUPABASE_URL+'/rest/v1/group_members',{method:'POST',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({group_id:groupId,device_id:deviceId,username})});
+      const addedDevIds = [deviceId];
       for (const m of memberDevIds) {
-        if (m.device_id===deviceId) continue;
+        if (m.device_id === deviceId) continue;
+        addedDevIds.push(m.device_id);
         await fetch(SUPABASE_URL+'/rest/v1/group_members',{method:'POST',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({group_id:groupId,device_id:m.device_id,username:m.username})});
       }
+      // Notify all added members
+      await broadcastAdminCmd({
+        action: 'group_membership_changed',
+        group_id: groupId,
+        group_name: name,
+        affected_device_ids: addedDevIds,
+        removed_device_ids: [],
+        kicked: false,
+        kicked_device_ids: []
+      });
       showBanner('✅ Group created', 'green');
       await loadGroups();
-      for (const m of memberDevIds) {
-        await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
-      }
     }
     document.getElementById('groupModal').classList.remove('open');
   } catch(e) { showBanner('⚠ Failed: '+e.message, 'red'); }
@@ -3128,17 +3212,23 @@ async function openGroupSettings(group) {
         const removeBtn = document.createElement('button'); removeBtn.style.cssText='background:none;border:1px solid var(--border);color:#ef4444;border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;cursor:pointer;font-family:"Syne",sans-serif;';
         removeBtn.textContent='Remove';
         removeBtn.onclick = async () => {
-          if (!confirm('Remove '+m.username+' from group?')) return;
-          try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(m.device_id)); row.remove(); showBanner('✅ Removed '+m.username,'green'); await loadGroups(); } catch(e){showBanner('⚠ Failed','red');}
-          await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: m.username + ' was removed from the group.', type: 'system' });
-          await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
-          const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
-          if (!remaining || remaining.length <= 1) {
-            await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
-            document.getElementById('groupSettingsModal').classList.remove('open');
-            closeGroup(); await loadGroups(); showBanner('Group deleted (no members left)', 'green');
-          }
-        };
+  if (!confirm('Remove '+m.username+' from group?')) return;
+  try {
+    await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(m.device_id));
+    row.remove();
+    showBanner('✅ Removed '+m.username, 'green');
+    await loadGroups();
+    await broadcastAdminCmd({
+      action: 'group_membership_changed',
+      group_id: group.id,
+      group_name: group.name,
+      affected_device_ids: [m.device_id],
+      removed_device_ids: [m.device_id],
+      kicked: true,
+      kicked_device_ids: [m.device_id]
+    });
+  } catch(e) { showBanner('⚠ Failed', 'red'); }
+};
         row.appendChild(removeBtn);
       }
       memList.appendChild(row);
@@ -3151,22 +3241,49 @@ async function openGroupSettings(group) {
       body.appendChild(editBtn);
       const deleteBtn = document.createElement('button'); deleteBtn.className='ban-cancel-btn'; deleteBtn.textContent='🗑 Delete Group'; deleteBtn.style.cssText='margin-top:0;color:#ef4444;border-color:#ef4444;';
       deleteBtn.onclick = async () => {
-        if (!confirm('Delete this group permanently?')) return;
-        try { await sbDelete('/rest/v1/group_chats?id=eq.'+group.id); document.getElementById('groupSettingsModal').classList.remove('open'); closeGroup(); await loadGroups(); showBanner('✅ Group deleted','green'); } catch(e){showBanner('⚠ Failed','red');}
-      };
+  if (!confirm('Delete this group permanently?')) return;
+  try {
+    // Get all members before deleting so we can notify them
+    let memberIds = [];
+    try { const mm = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id'); memberIds = (mm||[]).map(x=>x.device_id); } catch(e){}
+    await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
+    document.getElementById('groupSettingsModal').classList.remove('open');
+    closeGroup();
+    await loadGroups();
+    showBanner('✅ Group deleted', 'green');
+    await broadcastAdminCmd({
+      action: 'group_membership_changed',
+      group_id: group.id,
+      group_name: group.name,
+      affected_device_ids: memberIds,
+      removed_device_ids: memberIds,
+      kicked: false,
+      kicked_device_ids: []
+    });
+  } catch(e) { showBanner('⚠ Failed', 'red'); }
+};
       body.appendChild(deleteBtn);
     } else {
       const leaveBtn = document.createElement('button'); leaveBtn.className='ban-cancel-btn'; leaveBtn.textContent='🚪 Leave Group'; leaveBtn.style.cssText='margin-top:0;';
       leaveBtn.onclick = async () => {
-        if (!confirm('Leave this group?')) return;
-        try { await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(deviceId));await sbPost('/rest/v1/group_messages', { group_id: group.id, device_id: deviceId, username: '🔔 System', text: username + ' left the group.', type: 'system' }); document.getElementById('groupSettingsModal').classList.remove('open'); closeGroup(); await loadGroups(); showBanner('✅ Left group','green'); } catch(e){showBanner('⚠ Failed','red');}
-        const remaining = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id');
-        if (!remaining || remaining.length <= 1) {
-          await sbDelete('/rest/v1/group_chats?id=eq.'+group.id);
-          document.getElementById('groupSettingsModal').classList.remove('open');
-          closeGroup(); await loadGroups(); showBanner('Group deleted (no members left)', 'green');
-        }
-      };
+  if (!confirm('Leave this group?')) return;
+  try {
+    await sbDelete('/rest/v1/group_members?group_id=eq.'+group.id+'&device_id=eq.'+encodeURIComponent(deviceId));
+    document.getElementById('groupSettingsModal').classList.remove('open');
+    closeGroup();
+    await loadGroups();
+    showBanner('✅ Left group', 'green');
+    await broadcastAdminCmd({
+      action: 'group_membership_changed',
+      group_id: group.id,
+      group_name: group.name,
+      affected_device_ids: [deviceId],
+      removed_device_ids: [deviceId],
+      kicked: false,
+      kicked_device_ids: []
+    });
+  } catch(e) { showBanner('⚠ Failed', 'red'); }
+};
       body.appendChild(leaveBtn);
     }
   } catch(e) { body.innerHTML = '<div style="color:#ef4444;font-size:13px;">Failed to load</div>'; }
