@@ -512,6 +512,39 @@ body:not(.dark-mode){
 .group-info-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-secondary);border-bottom:1px solid var(--border);flex-shrink:0;}
 .group-settings-btn{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;}
 .group-settings-btn:hover{background:var(--surface-hover);color:var(--text);}
+
+.mention-popup{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:4px 0;min-width:180px;max-height:200px;overflow-y:auto;display:none;}
+.mention-popup.open{display:block;animation:pop-in 0.1s cubic-bezier(0.4,0,0.2,1);}
+.mention-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);transition:background 0.1s;}
+.mention-item:hover,.mention-item.active{background:var(--primary-light);color:var(--primary);}
+.mention-highlight{color:var(--primary);font-weight:700;}
+
+.pinned-bar{display:none;align-items:center;gap:10px;padding:7px 16px;background:var(--primary-lighter);border-bottom:2px solid var(--primary-light);font-size:12px;color:var(--text);cursor:pointer;flex-shrink:0;}
+.pinned-bar.show{display:flex;}
+.pinned-bar-icon{font-size:14px;flex-shrink:0;}
+.pinned-bar-text{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:600;}
+.pinned-bar-sub{font-size:10px;color:var(--text-muted);margin-right:6px;white-space:nowrap;}
+.pinned-unpin{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0;}
+.pinned-unpin:hover{color:#ef4444;}
+
+.status-bar{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-secondary);}
+.status-input-row{display:flex;gap:6px;align-items:center;}
+.status-emoji-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:16px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.status-emoji-btn:hover{border-color:var(--primary);}
+.status-text-input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:'Syne',sans-serif;font-size:12px;outline:none;transition:border-color 0.2s;}
+.status-text-input:focus{border-color:var(--primary);}
+.status-duration-row{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.status-dur-btn{padding:3px 8px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.status-dur-btn:hover,.status-dur-btn.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+.status-set-btn{width:100%;margin-top:6px;padding:6px;border:none;border-radius:var(--radius-sm);background:var(--gradient-primary);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.2s;}
+.status-set-btn:hover{opacity:0.85;}
+.status-clear-btn{width:100%;margin-top:4px;padding:5px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;}
+.status-clear-btn:hover{background:var(--surface-hover);color:var(--text);}
+.status-display{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);margin-bottom:6px;min-height:18px;}
+.status-display .s-emoji{font-size:14px;}
+.status-display .s-text{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--text);font-weight:600;}
+.status-display .s-expiry{font-size:10px;color:var(--text-light);white-space:nowrap;}
+.online-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block;}
 </style>
 </head>
 <body class="dark-mode">
@@ -995,6 +1028,26 @@ body:not(.dark-mode){
     <div class="sidebar-section-label" style="padding-top:8px;">👤 Direct Messages</div>
     <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
     <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
+  <div class="status-bar" id="statusBar">
+      <div class="status-display" id="statusDisplay" style="display:none;">
+        <span class="s-emoji" id="statusDisplayEmoji"></span>
+        <span class="s-text" id="statusDisplayText"></span>
+        <span class="s-expiry" id="statusDisplayExpiry"></span>
+      </div>
+      <div class="status-input-row">
+        <button class="status-emoji-btn" id="statusEmojiBtn" title="Pick emoji">😶</button>
+        <input class="status-text-input" id="statusTextInput" type="text" placeholder="Set a status..." maxlength="60">
+      </div>
+      <div class="status-duration-row">
+        <button class="status-dur-btn active" data-mins="30">30m</button>
+        <button class="status-dur-btn" data-mins="60">1h</button>
+        <button class="status-dur-btn" data-mins="120">2h</button>
+        <button class="status-dur-btn" data-mins="240">4h</button>
+        <button class="status-dur-btn" data-mins="480">8h</button>
+      </div>
+      <button class="status-set-btn" id="statusSetBtn">Set Status</button>
+      <button class="status-clear-btn" id="statusClearBtn" style="display:none;">✕ Clear Status</button>
+    </div>
   </div>
   <div class="sidebar-toggle" id="sidebarToggle" title="Toggle DMs">‹</div>
 
@@ -1009,6 +1062,15 @@ body:not(.dark-mode){
       <div class="dm-header-avatar" id="dmHeaderAvatar" title="Click for options"></div>
       <div class="dm-header-name" id="dmHeaderName"></div>
       <button class="dm-back-btn" id="dmBackBtn">← Back to chat</button>
+    </div>
+    <div class="pinned-bar" id="pinnedBar">
+      <span class="pinned-bar-icon">📌</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.4px;">Pinned Message</div>
+        <div class="pinned-bar-text" id="pinnedBarText"></div>
+      </div>
+      <span class="pinned-bar-sub" id="pinnedBarSub"></span>
+      <button class="pinned-unpin" id="pinnedUnpinBtn" title="Unpin" style="display:none;">✕</button>
     </div>
     <div class="muted-banner" id="mutedBanner">🔕 You are currently muted and cannot send messages.</div>
     <div class="messages-wrap" id="messagesWrap" style="position:relative;">
@@ -1026,6 +1088,7 @@ body:not(.dark-mode){
       </div>
     </div>
     <button class="scroll-btn" id="scrollBtn">↓</button>
+    <div id="typingBar" style="display:none;padding:4px 16px;font-size:12px;color:var(--text-muted);font-style:italic;min-height:22px;"></div>
     <div class="reply-bar" id="replyBar">
       <span class="reply-bar-text" id="replyBarText"></span>
       <button class="reply-cancel" id="replyCancelBtn" title="Cancel reply">✕</button>
@@ -1052,6 +1115,9 @@ body:not(.dark-mode){
   </div>
 </div>
 
+<!-- MENTION POPUP -->
+<div class="mention-popup" id="mentionPopup"></div>
+  
 <!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctxMenu">
   <div class="ctx-menu-header" id="ctxMenuName"></div>
@@ -1106,6 +1172,9 @@ let modUsers = new Set(); // device_ids of mods
 let bannedWords = [];
 let isMod = false; // is current user a mod (not head admin)
 let alertGlobalEnabled = true;
+let typingTimeout = null;
+let isTyping = false;
+const typingUsers = {}; // { 'channelKey': { username: timestamp } }
 let emojiPickerTarget = null; // {msgId, isDm}
 let ctxReportTarget = null; // {msgId, isDm, msgText, authorName}
 
@@ -1168,6 +1237,226 @@ function triggerNotif(type, senderName, groupName) {
   }
 }
 
+let mentionSelectedIndex = 0;
+let mentionResults = [];
+let mentionAtIndex = -1;
+
+function getMentionableUsers() {
+  if (groupMode && activeGroup) {
+    // Show group members
+    return allUsers.filter(u => u.username !== username);
+  } else if (dmMode && dmPartner) {
+    return [dmPartner];
+  }
+  return allUsers.filter(u => u.username !== username);
+}
+
+function showMentionPopup(inputEl, query, atIdx) {
+  mentionAtIndex = atIdx;
+  const all = getMentionableUsers();
+  // Sort: starts with query first, then includes
+  const starts = all.filter(u => u.username.toLowerCase().startsWith(query));
+  const rest = all.filter(u => !u.username.toLowerCase().startsWith(query) && u.username.toLowerCase().includes(query));
+  mentionResults = [...starts, ...rest].slice(0, 8);
+  if (!mentionResults.length) { closeMentionPopup(); return; }
+  const popup = document.getElementById('mentionPopup');
+  popup.innerHTML = '';
+  mentionResults.forEach((u, i) => {
+    const item = document.createElement('div');
+    item.className = 'mention-item' + (i === mentionSelectedIndex ? ' active' : '');
+    const av = makeAvatarEl(u.avatar||'', u.username, 22); av.style.flexShrink='0';
+    const nameSpan = document.createElement('span');
+    const q = query.toLowerCase();
+    if (q && u.username.toLowerCase().startsWith(q)) {
+      nameSpan.innerHTML = '<span class="mention-highlight">'+esc(u.username.slice(0,q.length))+'</span>'+esc(u.username.slice(q.length));
+    } else {
+      nameSpan.textContent = u.username;
+    }
+    item.appendChild(av); item.appendChild(nameSpan);
+    item.addEventListener('mousedown', e => { e.preventDefault(); insertMention(u.username); });
+    popup.appendChild(item);
+  });
+  // Position popup above input
+  const rect = inputEl.getBoundingClientRect();
+  popup.style.left = rect.left + 'px';
+  popup.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+  popup.style.top = 'auto';
+  popup.classList.add('open');
+}
+
+// ════════════════════════════════════════════════
+// USER STATUS
+// ════════════════════════════════════════════════
+let myStatus = null; // { emoji, text, expiresAt }
+let selectedStatusDurMins = 30;
+let statusEmojiPickerOpen = false;
+
+const STATUS_KEY = 'gnChatStatus';
+
+function loadMyStatus() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STATUS_KEY) || 'null');
+    if (s && new Date(s.expiresAt) > new Date()) { myStatus = s; renderStatusBar(); }
+    else { myStatus = null; localStorage.removeItem(STATUS_KEY); }
+  } catch(e) {}
+}
+
+function renderStatusBar() {
+  const display = document.getElementById('statusDisplay');
+  const clearBtn = document.getElementById('statusClearBtn');
+  if (myStatus && new Date(myStatus.expiresAt) > new Date()) {
+    document.getElementById('statusDisplayEmoji').textContent = myStatus.emoji || '💬';
+    document.getElementById('statusDisplayText').textContent = myStatus.text;
+    const mins = Math.round((new Date(myStatus.expiresAt) - new Date()) / 60000);
+    document.getElementById('statusDisplayExpiry').textContent = mins > 60 ? Math.round(mins/60)+'h left' : mins+'m left';
+    display.style.display = 'flex';
+    clearBtn.style.display = '';
+    document.getElementById('statusEmojiBtn').textContent = myStatus.emoji || '😶';
+    document.getElementById('statusTextInput').value = myStatus.text;
+  } else {
+    display.style.display = 'none';
+    clearBtn.style.display = 'none';
+  }
+}
+
+// Duration picker
+document.querySelectorAll('.status-dur-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.status-dur-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedStatusDurMins = parseInt(btn.dataset.mins);
+  });
+});
+
+// Emoji picker for status — reuse a simple inline picker
+document.getElementById('statusEmojiBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  let picker = document.getElementById('statusEmojiPickerInline');
+  if (picker) { picker.remove(); return; }
+  picker = document.createElement('div');
+  picker.id = 'statusEmojiPickerInline';
+  picker.style.cssText = 'position:absolute;bottom:calc(100% + 4px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:8px;display:grid;grid-template-columns:repeat(8,1fr);gap:3px;width:240px;z-index:9999;';
+  const statusEmojis = ['😀','😎','🤔','😴','🎮','🎵','📚','💪','🔥','❤️','🌟','✨','🎉','🚀','💼','☕','🍕','🎯','🏆','💡','🌈','🦋','🌸','🎨','🤝','👋','💬','🔔','⚡','🌙','☀️','❄️'];
+  statusEmojis.forEach(em => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:18px;padding:3px;border-radius:4px;transition:background 0.1s;';
+    btn.textContent = em;
+    btn.onmouseenter = () => btn.style.background = 'var(--surface-hover)';
+    btn.onmouseleave = () => btn.style.background = 'none';
+    btn.addEventListener('click', () => {
+      document.getElementById('statusEmojiBtn').textContent = em;
+      picker.remove();
+    });
+    picker.appendChild(btn);
+  });
+  const statusBar = document.getElementById('statusBar');
+  statusBar.style.position = 'relative';
+  statusBar.appendChild(picker);
+});
+
+document.addEventListener('mousedown', e => {
+  const picker = document.getElementById('statusEmojiPickerInline');
+  if (picker && !picker.contains(e.target) && e.target !== document.getElementById('statusEmojiBtn')) picker.remove();
+});
+
+document.getElementById('statusSetBtn').addEventListener('click', async () => {
+  const text = document.getElementById('statusTextInput').value.trim();
+  if (!text) { showBanner('Enter a status message', 'red'); return; }
+  const emoji = document.getElementById('statusEmojiBtn').textContent === '😶' ? '💬' : document.getElementById('statusEmojiBtn').textContent;
+  const expiresAt = new Date(Date.now() + selectedStatusDurMins * 60000).toISOString();
+  myStatus = { emoji, text, expiresAt };
+  localStorage.setItem(STATUS_KEY, JSON.stringify(myStatus));
+  renderStatusBar();
+  // Broadcast to others so they see it in online tooltip
+  await broadcastAdminCmd({ action:'status_updated', device_id:deviceId, username, emoji, text, expiresAt });
+  showBanner('✅ Status set for ' + (selectedStatusDurMins >= 60 ? (selectedStatusDurMins/60)+'h' : selectedStatusDurMins+'m'), 'green');
+});
+
+document.getElementById('statusClearBtn').addEventListener('click', async () => {
+  myStatus = null; localStorage.removeItem(STATUS_KEY);
+  document.getElementById('statusEmojiBtn').textContent = '😶';
+  document.getElementById('statusTextInput').value = '';
+  renderStatusBar();
+  await broadcastAdminCmd({ action:'status_updated', device_id:deviceId, username, emoji:null, text:null, expiresAt:null });
+});
+
+// Auto-expire status
+setInterval(() => {
+  if (myStatus && new Date(myStatus.expiresAt) <= new Date()) {
+    myStatus = null; localStorage.removeItem(STATUS_KEY);
+    renderStatusBar();
+    broadcastAdminCmd({ action:'status_updated', device_id:deviceId, username, emoji:null, text:null, expiresAt:null });
+  }
+  if (myStatus) renderStatusBar(); // refresh expiry countdown
+}, 30000);
+  
+function closeMentionPopup() {
+  document.getElementById('mentionPopup').classList.remove('open');
+  mentionResults = []; mentionSelectedIndex = 0; mentionAtIndex = -1;
+}
+
+function insertMention(uname) {
+  const input = document.getElementById('msgInput');
+  const val = input.value;
+  const caret = input.selectionStart;
+  const before = val.slice(0, mentionAtIndex);
+  const after = val.slice(caret);
+  input.value = before + '@' + uname + ' ' + after;
+  const newCaret = before.length + uname.length + 2;
+  input.setSelectionRange(newCaret, newCaret);
+  closeMentionPopup();
+  input.focus();
+}
+
+function showPinnedBar(group) {
+  const bar = document.getElementById('pinnedBar');
+  const textEl = document.getElementById('pinnedBarText');
+  const subEl = document.getElementById('pinnedBarSub');
+  const unpinBtn = document.getElementById('pinnedUnpinBtn');
+  if (!group || !group.pinned_message_text) { bar.classList.remove('show'); return; }
+  textEl.textContent = group.pinned_message_text;
+  subEl.textContent = group.pinned_by ? 'pinned by ' + group.pinned_by : '';
+  const canUnpin = isAdmin() || group.creator_device_id === deviceId;
+  unpinBtn.style.display = canUnpin ? '' : 'none';
+  bar.classList.add('show');
+  // Click to scroll to message
+  bar.onclick = (e) => {
+    if (e.target === unpinBtn) return;
+    const msgEl = document.querySelector('[data-group-msg-id="'+group.pinned_message_id+'"]');
+    if (msgEl) { msgEl.scrollIntoView({ behavior:'smooth', block:'center' }); msgEl.style.outline = '2px solid var(--primary)'; setTimeout(() => msgEl.style.outline = '', 1500); }
+  };
+  unpinBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (!activeGroup) return;
+    try {
+      await sbPatch('/rest/v1/group_chats?id=eq.'+activeGroup.id, { pinned_message_id: null, pinned_message_text: null, pinned_by: null });
+      activeGroup.pinned_message_id = null; activeGroup.pinned_message_text = null;
+      bar.classList.remove('show');
+      await broadcastAdminCmd({ action:'group_pin_updated', group_id:activeGroup.id, msg_id:null, msg_text:null, pinned_by:null });
+      showBanner('📌 Unpinned', 'green');
+    } catch(err) { showBanner('⚠ Failed', 'red'); }
+  };
+}
+  
+function renderTypingBar(currentChannel) {
+  const bar = document.getElementById('typingBar');
+  if (!bar) return;
+  const users = typingUsers[currentChannel] || {};
+  const now = Date.now();
+  const active = Object.keys(users).filter(u => now - users[u] < 7000);
+  if (!active.length) { bar.style.display = 'none'; bar.textContent = ''; return; }
+  bar.style.display = 'block';
+  if (active.length === 1) bar.textContent = active[0] + ' is typing...';
+  else if (active.length === 2) bar.textContent = active[0] + ' and ' + active[1] + ' are typing...';
+  else bar.textContent = active.slice(0,-1).join(', ') + ' and ' + active[active.length-1] + ' are typing...';
+}
+
+// Refresh typing bar every second to auto-clear stale indicators
+setInterval(() => {
+  const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+  renderTypingBar(myChannel);
+}, 1000);
+  
 function updateGlobalBadge() {
   const badge = document.getElementById('globalUnreadBadge');
   if (!badge) return;
@@ -1698,6 +1987,7 @@ async function boot() {
   subscribeAdminChannel();
   subscribeRealtimeChanges();
   initEmojiPicker();
+  loadMyStatus();
 
   // Scroll to bottom after everything loads
   setTimeout(() => {
@@ -1785,6 +2075,54 @@ function subscribeAdminChannel() {
           setTimeout(() => {
             document.getElementById('messagesWrap').scrollTop = document.getElementById('messagesWrap').scrollHeight;
           }, 50);
+        }
+        } else if (payload.action === 'typing_start' || payload.action === 'typing_stop') {
+        if (payload.device_id === deviceId) return;
+        const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+        const ch = payload.channel;
+        if (!typingUsers[ch]) typingUsers[ch] = {};
+        if (payload.action === 'typing_start') {
+          typingUsers[ch][payload.username] = Date.now();
+        } else {
+          delete typingUsers[ch][payload.username];
+        }
+        // Clean stale (>7s)
+        const now = Date.now();
+        Object.keys(typingUsers[ch] || {}).forEach(u => { if (now - typingUsers[ch][u] > 7000) delete typingUsers[ch][u]; });
+        // Render typing bar for current channel
+        renderTypingBar(myChannel);
+        // DM tab notification if not focused on that DM
+        if (payload.action === 'typing_start') {
+          const isDmChannel = ch.startsWith('dm:') && ch.includes(deviceId);
+          if (isDmChannel && (!dmMode || !dmPartner || dmPartner.device_id !== payload.device_id)) {
+            if (!tabFocused) document.title = '✏️ ' + payload.username + ' is typing...';
+          }
+        }
+        } else if (payload.action === 'group_pin_updated') {
+        if (groupMode && activeGroup && activeGroup.id === payload.group_id) {
+          activeGroup.pinned_message_id = payload.msg_id;
+          activeGroup.pinned_message_text = payload.msg_text;
+          activeGroup.pinned_by = payload.pinned_by;
+          showPinnedBar(activeGroup);
+        }
+      } else if (payload.action === 'typing_start' || payload.action === 'typing_stop') {
+        if (payload.device_id === deviceId) return;
+        const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+        const ch = payload.channel;
+        if (!typingUsers[ch]) typingUsers[ch] = {};
+        if (payload.action === 'typing_start') {
+          typingUsers[ch][payload.username] = Date.now();
+        } else {
+          delete typingUsers[ch][payload.username];
+        }
+        const now = Date.now();
+        Object.keys(typingUsers[ch] || {}).forEach(u => { if (now - typingUsers[ch][u] > 7000) delete typingUsers[ch][u]; });
+        renderTypingBar(myChannel);
+        if (payload.action === 'typing_start') {
+          const isDmChannel = ch.startsWith('dm:') && ch.includes(deviceId);
+          if (isDmChannel && (!dmMode || !dmPartner || dmPartner.device_id !== payload.device_id)) {
+            if (!tabFocused) document.title = '✏️ ' + payload.username + ' is typing...';
+          }
         }
       } else if (payload.action === 'group_membership_changed') {
   // Only act if this device is affected
@@ -2102,13 +2440,20 @@ function joinPresence() {
       if (p.device_id) onlineDeviceMap[p.device_id] = p.username;
     }));
     document.getElementById('onlineCount').textContent = users.length;
+    const userStatuses = {};
+    Object.values(state).forEach(ps => ps.forEach(p => { if (p.username && p.status) userStatuses[p.username] = p.status; }));
     document.getElementById('onlineList').innerHTML = users.length
-      ? users.map(u => '<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:'+colorFor(u)+';font-weight:600">'+esc(u)+'</span>'+(u===username?'<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>':'')+'</div>').join('')
+      ? users.map(u => {
+          const st = userStatuses[u];
+          const statusHtml = st ? ' <span style="font-size:11px;color:#94a3b8;">'+esc(st.emoji||'')+'&nbsp;'+esc(st.text)+'</span>' : '';
+          return '<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:'+colorFor(u)+';font-weight:600">'+esc(u)+'</span>'+(u===username?'<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>':'')+statusHtml+'</div>';
+        }).join('')
       : '<em style="color:#64748b">No one online</em>';
     updateAnnounceTargetDropdown();
   }).subscribe(async status => {
     if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR') {
-      await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now() });
+      const statusPayload = myStatus && new Date(myStatus.expiresAt) > new Date() ? { emoji: myStatus.emoji, text: myStatus.text } : null;
+      await presenceChannel.track({ username, device_id: deviceId, joined_at: Date.now(), status: statusPayload });
     }
   });
 }
@@ -2353,7 +2698,15 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
     bubble.style.padding = '4px';
     bubble.appendChild(img);
   } else {
-    bubble.textContent = msg.text;
+    if (msg.text && msg.text.includes('@')) {
+      bubble.innerHTML = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/@(\w+)/g, (match, name) => {
+          const isMe = name.toLowerCase() === username.toLowerCase();
+          return '<span style="color:var(--primary);font-weight:700;'+(isMe?'background:var(--primary-light);border-radius:4px;padding:0 2px;':'')+'">'+match+'</span>';
+        });
+    } else {
+      bubble.textContent = msg.text;
+    }
   }
   bWrap.appendChild(bubble);
   // Reply btn (global + DM)
@@ -2776,6 +3129,9 @@ async function sendMessage() {
   if (containsBannedWord(rawText)) { showBanner('\uD83D\uDEAB That message contains a banned word.', 'red'); return; }
   if (rawText.length > runtimeSettings.maxMsgLen) { showBanner('\uD83D\uDEAB Message too long.', 'red'); return; }
   input.value = ''; input.style.height = 'auto';
+  isTyping = false; clearTimeout(typingTimeout);
+  const typingChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+  broadcastAdminCmd({ action:'typing_stop', username, device_id:deviceId, channel: typingChannel });
   lastSendTime = Date.now(); startCooldown();
   try {
     if (groupMode && activeGroup) {
@@ -2800,9 +3156,41 @@ async function sendMessage() {
   } catch(e) { showBanner('\u26A0 Failed to send', 'red'); }
 }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-document.getElementById('msgInput').addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
-
+document.getElementById('msgInput').addEventListener('keydown', e => {
+  const popup = document.getElementById('mentionPopup');
+  if (popup.classList.contains('open')) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); mentionSelectedIndex = Math.min(mentionSelectedIndex+1, mentionResults.length-1); showMentionPopup(e.target, document.getElementById('msgInput').value.slice(0, e.target.selectionStart).match(/@(\w*)$/)?.[1]||'', mentionAtIndex); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); mentionSelectedIndex = Math.max(mentionSelectedIndex-1, 0); showMentionPopup(e.target, document.getElementById('msgInput').value.slice(0, e.target.selectionStart).match(/@(\w*)$/)?.[1]||'', mentionAtIndex); return; }
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); if (mentionResults[mentionSelectedIndex]) insertMention(mentionResults[mentionSelectedIndex].username); return; }
+    if (e.key === 'Escape' || e.key === ' ') { closeMentionPopup(); return; }
+  }
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});document.getElementById('msgInput').addEventListener('input', function() {
+  this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  if (!username) return;
+  // Typing indicator
+  const channel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+  if (!isTyping) {
+    isTyping = true;
+    broadcastAdminCmd({ action:'typing_start', username, device_id:deviceId, channel });
+  }
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    isTyping = false;
+    broadcastAdminCmd({ action:'typing_stop', username, device_id:deviceId, channel });
+  }, 7000);
+  // @ mention
+  const val = this.value;
+  const caret = this.selectionStart;
+  const textUpToCaret = val.slice(0, caret);
+  const atMatch = textUpToCaret.match(/@(\w*)$/);
+  if (atMatch) {
+    const query = atMatch[1].toLowerCase();
+    showMentionPopup(this, query, atMatch.index);
+  } else {
+    closeMentionPopup();
+  }
+});
 // ════════════════════════════════════════════════
 // IMAGE DRAG & DROP
 // ════════════════════════════════════════════════
@@ -2983,12 +3371,14 @@ async function openGroup(group) {
       groupLastSeenIds[group.id] = lastGroupMsgId;
       saveGroupLastSeen();
     }
+    showPinnedBar(group);
     else inner.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>No messages yet in '+esc(group.name)+'</p></div>';
   } catch(e) {}
 }
 function closeGroup() {
   groupMode = false; activeGroup = null; lastGroupMsgId = 0;
   document.getElementById('groupHeader').style.display = 'none';
+  document.getElementById('pinnedBar').classList.remove('show');
   document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
   document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
   lastRenderedId = 0; loadHistory(); renderGroupList();
@@ -3025,7 +3415,15 @@ function renderGroupMessage(msg) {
     const img=document.createElement('img'); img.src=msg.text; img.style.cssText='max-width:260px;max-height:260px;border-radius:8px;display:block;cursor:pointer;';
     img.onclick=()=>showProfileImageModal(msg.text,''); img.onload=()=>{if(autoScroll)document.getElementById('messagesWrap').scrollTop=999999;}; img.onerror=()=>{bubble.textContent='[Image failed to load]';};
     bubble.style.padding='4px'; bubble.appendChild(img);
-  } else { bubble.textContent=msg.text; }
+  } else {
+    if (msg.text && msg.text.includes('@')) {
+      bubble.innerHTML = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/@(\w+)/g, (match, name) => {
+          const isMe = name.toLowerCase() === username.toLowerCase();
+          return '<span style="color:var(--primary);font-weight:700;'+(isMe?'background:var(--primary-light);border-radius:4px;padding:0 2px;':'')+'">'+match+'</span>';
+        });
+    } else { bubble.textContent = msg.text; }
+  }
   bWrap.appendChild(bubble);
   const rBtn=document.createElement('button'); rBtn.className='msg-reply msg-reply-btn'; rBtn.title='Reply'; rBtn.dataset.id=msg.id; rBtn.dataset.sender=senderName; rBtn.dataset.text=msg.text; rBtn.textContent='↩'; bWrap.appendChild(rBtn);
   const canDeleteThis = isMe || isAdmin();
@@ -3067,6 +3465,23 @@ function renderGroupMessage(msg) {
       } catch(err) { showBanner('⚠ Edit failed', 'red'); }
     });
     bWrap.appendChild(eBtn);
+  }
+  if (isAdmin() || activeGroup?.creator_device_id === deviceId) {
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'msg-edit'; pinBtn.title = 'Pin message';
+    pinBtn.textContent = '📌'; pinBtn.style.right = '42px';
+    pinBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (!activeGroup) return;
+      try {
+        await sbPatch('/rest/v1/group_chats?id=eq.'+activeGroup.id, { pinned_message_id: msg.id, pinned_message_text: msg.text, pinned_by: username });
+        activeGroup.pinned_message_id = msg.id; activeGroup.pinned_message_text = msg.text; activeGroup.pinned_by = username;
+        showPinnedBar(activeGroup);
+        await broadcastAdminCmd({ action:'group_pin_updated', group_id:activeGroup.id, msg_id:msg.id, msg_text:msg.text, pinned_by:username });
+        showBanner('📌 Message pinned', 'green');
+      } catch(err) { showBanner('⚠ Pin failed', 'red'); }
+    });
+    bWrap.appendChild(pinBtn);
   }
   rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
   lastRenderedUser = msg.device_id; lastRenderedMsgDate = msg.created_at||null;
