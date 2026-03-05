@@ -1198,28 +1198,6 @@ function nameForDev(devId, fallback='Unknown') {
   const u = allUsers.find(x => x.device_id === devId);
   return (u && u.username) || fallback;
 }
-function showGroupKickBanner(groupName) {
-  const existing = document.getElementById('groupKickBanner');
-  if (existing) existing.remove();
-  const banner = document.createElement('div');
-  banner.id = 'groupKickBanner';
-  banner.style.cssText = [
-    'position:fixed;top:70px;left:50%;transform:translateX(-50%);',
-    'background:linear-gradient(135deg,#ef4444,#dc2626);',
-    'color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;',
-    'box-shadow:0 8px 24px rgba(239,68,68,0.4);z-index:99999;',
-    'animation:pop-in 0.25s ease;white-space:nowrap;',
-    'display:flex;align-items:center;gap:10px;'
-  ].join('');
-  banner.innerHTML = '👢 You were removed from <strong style="margin:0 4px;">' + esc(groupName) + '</strong>';
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '✕';
-  closeBtn.style.cssText = 'background:rgba(255,255,255,0.2);border:none;color:white;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;';
-  closeBtn.onclick = () => banner.remove();
-  banner.appendChild(closeBtn);
-  document.body.appendChild(banner);
-  setTimeout(() => { if (banner.parentNode) banner.remove(); }, 6000);
-}
 function showBanner(msg, color) {
   const b = document.getElementById('connBanner');
   b.textContent = msg;
@@ -1690,7 +1668,8 @@ async function boot() {
     else openUsernameModal(false);
   }
 
-  await Promise.all([loadAllUsers(), loadHistory(), loadGroups()]);
+  await loadAllUsers();
+  await Promise.all([loadHistory(), loadGroups()]);
   startPolling();
   if (username) joinPresence();
   subscribeAdminChannel();
@@ -1779,7 +1758,7 @@ function subscribeAdminChannel() {
       }
       // Show kick banner if kicked from group (not a voluntary leave)
       if (payload.kicked && payload.kicked_device_ids && payload.kicked_device_ids.includes(deviceId)) {
-        showGroupKickBanner(payload.group_name || 'a group');
+        showBanner('👢 You were removed from ' + (payload.group_name || 'a group'), 'red');
       }
     }
   }
@@ -2863,11 +2842,16 @@ function renderGroupList() {
   // Count total unread across all groups for the collapsed badge
   const totalGroupUnread = Object.values(unreadGroup).reduce((a, b) => a + b, 0);
   // Update the sidebar section label to show total when collapsed
-  const groupLabel = document.querySelector('.sidebar-section-label');
-  if (groupLabel && groupLabel.textContent.startsWith('💬 Groups')) {
-    groupLabel.innerHTML = '💬 Groups' + (totalGroupUnread > 0 && sidebarOpen === false
+  const groupLabel = document.getElementById('groupsSectionLabel');
+  if (groupLabel) {
+    const arrow = document.getElementById('groupsSectionArrow');
+    const arrowHtml = arrow ? arrow.outerHTML : '';
+    const badge = totalGroupUnread > 0
       ? ' <span style="background:var(--primary);color:white;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:4px;">'+totalGroupUnread+'</span>'
-      : '');
+      : '';
+    groupLabel.innerHTML = '<span>💬 Groups'+badge+'</span>' + arrowHtml;
+    // Re-attach click since innerHTML replaced it
+    groupLabel.onclick = toggleGroupsSection;
   }
   if (!myGroups.length) {
     el.innerHTML = '<div class="sidebar-empty" style="padding:8px 14px;font-size:11px;">No groups yet</div>';
@@ -3078,6 +3062,19 @@ function openGroupModal(group) {
     if (group) {
       try { const m = await sbGet('/rest/v1/group_members?group_id=eq.'+group.id+'&select=device_id'); currentMembers = (m||[]).map(x=>x.device_id); } catch(e){}
     }
+    // Add search box above member list
+    const searchBox = document.createElement('input');
+    searchBox.type = 'text';
+    searchBox.placeholder = 'Search members...';
+    searchBox.style.cssText = 'width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text);font-family:"Syne",sans-serif;font-size:13px;outline:none;margin-bottom:6px;box-sizing:border-box;';
+    searchBox.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      list.querySelectorAll('.group-member-pick-row').forEach(row => {
+        row.style.display = row.dataset.username.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+    list.before(searchBox);
+    setTimeout(() => searchBox.focus(), 50);
     allUsers.forEach(u => {
       const row = document.createElement('div');
       const sel = currentMembers.includes(u.device_id);
