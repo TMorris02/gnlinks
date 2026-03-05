@@ -2105,25 +2105,6 @@ function subscribeAdminChannel() {
           activeGroup.pinned_by = payload.pinned_by;
           showPinnedBar(activeGroup);
         }
-      } else if (payload.action === 'typing_start' || payload.action === 'typing_stop') {
-        if (payload.device_id === deviceId) return;
-        const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
-        const ch = payload.channel;
-        if (!typingUsers[ch]) typingUsers[ch] = {};
-        if (payload.action === 'typing_start') {
-          typingUsers[ch][payload.username] = Date.now();
-        } else {
-          delete typingUsers[ch][payload.username];
-        }
-        const now = Date.now();
-        Object.keys(typingUsers[ch] || {}).forEach(u => { if (now - typingUsers[ch][u] > 7000) delete typingUsers[ch][u]; });
-        renderTypingBar(myChannel);
-        if (payload.action === 'typing_start') {
-          const isDmChannel = ch.startsWith('dm:') && ch.includes(deviceId);
-          if (isDmChannel && (!dmMode || !dmPartner || dmPartner.device_id !== payload.device_id)) {
-            if (!tabFocused) document.title = '✏️ ' + payload.username + ' is typing...';
-          }
-        }
       } else if (payload.action === 'group_membership_changed') {
   // Only act if this device is affected
   if (payload.affected_device_ids && payload.affected_device_ids.includes(deviceId)) {
