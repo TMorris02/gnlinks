@@ -1114,24 +1114,45 @@ let ctxReportTarget = null; // {msgId, isDm, msgText, authorName}
 let notifPref = localStorage.getItem(NOTIF_KEY) || 'both';
 let originalTitle = 'GN Chat';
 let titleBlinkInterval = null;
-let unreadGlobal = 0, unreadDm = {};
+let unreadGlobal = 0, unreadDm = {}, unreadGroup = {};
 let tabFocused = true;
 document.addEventListener('visibilitychange', () => {
   tabFocused = !document.hidden;
-  if (tabFocused) { stopTitleBlink(); unreadGlobal = 0; Object.keys(unreadDm).forEach(k => { unreadDm[k] = 0; }); }
+  if (tabFocused) {
+    stopTitleBlink();
+    unreadGlobal = 0;
+    Object.keys(unreadDm).forEach(k => { unreadDm[k] = 0; });
+    Object.keys(unreadGroup).forEach(k => { unreadGroup[k] = 0; });
+  }
 });
 
-function triggerNotif(type, senderName) {
+function triggerNotif(type, senderName, groupName) {
   if (tabFocused) return;
   if (notifPref === 'none') return;
   if (type === 'global' && notifPref === 'dm') return;
   if (type === 'dm' && notifPref === 'global') return;
-  if (type === 'global') unreadGlobal++;
-  else if (type === 'dm') { unreadDm[senderName] = (unreadDm[senderName] || 0) + 1; }
-  // Persistent title — no blink, stays until tab is focused
-  const totalUnread = unreadGlobal + Object.values(unreadDm).reduce((a,b)=>a+b, 0);
+
+  if (type === 'global') {
+    unreadGlobal++;
+  } else if (type === 'dm') {
+    unreadDm[senderName] = (unreadDm[senderName] || 0) + 1;
+  } else if (type === 'group') {
+    unreadGroup[groupName] = (unreadGroup[groupName] || 0) + 1;
+  }
+
+  const totalUnread = unreadGlobal
+    + Object.values(unreadDm).reduce((a, b) => a + b, 0)
+    + Object.values(unreadGroup).reduce((a, b) => a + b, 0);
+
   if (totalUnread > 0) {
-    const label = type === 'dm' ? `💬 (${totalUnread}) ${senderName}` : `🌐 (${totalUnread}) GN Chat`;
+    let label;
+    if (type === 'dm') {
+      label = `💬 (${totalUnread}) ${senderName}`;
+    } else if (type === 'group') {
+      label = `👥 (${totalUnread}) ${groupName}`;
+    } else {
+      label = `🌐 (${totalUnread}) GN Chat`;
+    }
     document.title = label;
   }
 }
@@ -2914,12 +2935,53 @@ function renderGroupMessage(msg) {
 // (wired into the existing sendMessage function — see modification below)
 
 // ── POLL GROUP MESSAGES ───────────────────────
+// Track last-seen message ID per group for background notification polling
+const groupLastSeenIds = {};
+
 setInterval(async () => {
-  if (!groupMode || !activeGroup || !username) return;
+  if (!username) return;
   try {
-    const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+activeGroup.id+'&id=gt.'+lastGroupMsgId+'&order=id.asc&select=*');
-    if (msgs && msgs.length) {
-      msgs.forEach(m => { if (m.id > lastGroupMsgId) { renderGroupMessage(m); lastGroupMsgId=m.id; if (m.device_id!==deviceId) triggerNotif('global', m.username||'Someone'); } });
+    // 1. Poll the active group for new messages (renders them)
+    if (groupMode && activeGroup) {
+      const msgs = await sbGet(
+        '/rest/v1/group_messages?group_id=eq.' + activeGroup.id +
+        '&id=gt.' + lastGroupMsgId + '&order=id.asc&select=*'
+      );
+      if (msgs && msgs.length) {
+        msgs.forEach(m => {
+          if (m.id > lastGroupMsgId) {
+            renderGroupMessage(m);
+            lastGroupMsgId = m.id;
+            groupLastSeenIds[activeGroup.id] = m.id;
+            // Only notify if tab is blurred and message is from someone else
+            if (m.device_id !== deviceId) {
+              triggerNotif('group', m.username || 'Someone', activeGroup.name);
+            }
+          }
+        });
+      }
+    }
+
+    // 2. Poll ALL other groups the user is in for unread counts (background)
+    for (const g of myGroups) {
+      if (groupMode && activeGroup && g.id === activeGroup.id) continue; // already handled above
+      const lastSeen = groupLastSeenIds[g.id] || 0;
+      const newMsgs = await sbGet(
+        '/rest/v1/group_messages?group_id=eq.' + g.id +
+        '&id=gt.' + lastSeen + '&order=id.asc&select=id,device_id,username,created_at&limit=20'
+      );
+      if (newMsgs && newMsgs.length) {
+        // Update our last-seen marker
+        groupLastSeenIds[g.id] = newMsgs[newMsgs.length - 1].id;
+        // Notify for each message not sent by us
+        newMsgs.forEach(m => {
+          if (m.device_id !== deviceId) {
+            triggerNotif('group', m.username || 'Someone', g.name);
+          }
+        });
+        // Re-render the group list so the sidebar can show an unread badge if you add one later
+        renderGroupList();
+      }
     }
   } catch(e) {}
 }, POLL_MS);
