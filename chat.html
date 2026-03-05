@@ -1767,6 +1767,22 @@ function subscribeAdminChannel() {
         const selector = isDm ? '[data-dm-id="'+msgId+'"]' : '[data-msg-id="'+msgId+'"]';
         const msgEl = document.querySelector(selector);
         if (msgEl) await refreshReactionsOnEl(msgEl, msgId, isDm);
+      } else if (payload.action === 'group_msg_updated') {
+        // Only refresh if viewing that group
+        if (groupMode && activeGroup && activeGroup.id === payload.group_id) {
+          const inner = document.getElementById('messagesInner');
+          inner.innerHTML = ''; lastGroupMsgId = 0; lastRenderedUser = null;
+          try {
+            const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+activeGroup.id+'&order=id.asc&limit=200&select=*');
+            if (msgs && msgs.length) {
+              msgs.forEach(m => renderGroupMessage(m));
+              lastGroupMsgId = msgs[msgs.length-1].id;
+            }
+          } catch(e) {}
+          setTimeout(() => {
+            document.getElementById('messagesWrap').scrollTop = document.getElementById('messagesWrap').scrollHeight;
+          }, 50);
+        }
       } else if (payload.action === 'group_membership_changed') {
   // Only act if this device is affected
   if (payload.affected_device_ids && payload.affected_device_ids.includes(deviceId)) {
@@ -3008,11 +3024,27 @@ function renderGroupMessage(msg) {
   const rBtn=document.createElement('button'); rBtn.className='msg-reply msg-reply-btn'; rBtn.title='Reply'; rBtn.dataset.id=msg.id; rBtn.dataset.sender=senderName; rBtn.dataset.text=msg.text; rBtn.textContent='↩'; bWrap.appendChild(rBtn);
   if (isMe || isHeadAdmin()) {
     const dBtn=document.createElement('button'); dBtn.className='msg-delete'; dBtn.title='Delete'; dBtn.textContent='✕';
-    dBtn.addEventListener('click', async e => { e.stopPropagation(); const msgEl=dBtn.closest('.msg'); try { await sbDelete('/rest/v1/group_messages?id=eq.'+msg.id); if(msgEl) msgEl.remove(); } catch(e){showBanner('⚠ Delete failed','red');} }); bWrap.appendChild(dBtn);
-    if (isMe) {
+dBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const msgEl = dBtn.closest('.msg');
+      try {
+        await sbDelete('/rest/v1/group_messages?id=eq.'+msg.id);
+        if (msgEl) msgEl.remove();
+        await broadcastAdminCmd({ action:'group_msg_updated', group_id: activeGroup ? activeGroup.id : msg.group_id });
+      } catch(e) { showBanner('⚠ Delete failed','red'); }
+    });    if (isMe) {
       const eBtn=document.createElement('button'); eBtn.className='msg-edit'; eBtn.title='Edit'; eBtn.textContent='✎';
-      eBtn.addEventListener('click', async e => { e.stopPropagation(); const oldText=bubble.textContent; const nt=prompt('Edit:',oldText); if(!nt||nt===oldText) return; try { await sbPatch('/rest/v1/group_messages?id=eq.'+msg.id,{text:nt.trim()}); bubble.textContent=nt.trim(); } catch(e){showBanner('⚠ Edit failed','red');} }); bWrap.appendChild(eBtn);
-    }
+eBtn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const oldText = bubble.textContent;
+        const nt = prompt('Edit:', oldText);
+        if (!nt || nt === oldText) return;
+        try {
+          await sbPatch('/rest/v1/group_messages?id=eq.'+msg.id, { text: nt.trim() });
+          bubble.textContent = nt.trim();
+          await broadcastAdminCmd({ action:'group_msg_updated', group_id: activeGroup ? activeGroup.id : msg.group_id });
+        } catch(e) { showBanner('⚠ Edit failed','red'); }
+      });    }
   }
   rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); container.appendChild(el);
   lastRenderedUser = msg.device_id; lastRenderedMsgDate = msg.created_at||null;
