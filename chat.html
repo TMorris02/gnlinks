@@ -1133,16 +1133,19 @@ function triggerNotif(type, senderName, groupName) {
   if (type === 'global' && notifPref === 'dm') return;
   if (type === 'dm' && notifPref === 'global') return;
 
-  // Always update sidebar badges regardless of tab focus
+  // Don't notify if already viewing that specific chat
+  if (tabFocused) {
+    if (type === 'global' && !dmMode && !groupMode) return;
+    if (type === 'dm' && dmMode && dmPartner && nameForDev(dmPartnerDevId) === senderName) return;
+    if (type === 'group' && groupMode && activeGroup && activeGroup.name === groupName) return;
+  }
+
   if (type === 'group') {
     unreadGroup[groupName] = (unreadGroup[groupName] || 0) + 1;
     renderGroupList();
   } else if (type === 'dm') {
     unreadDm[senderName] = (unreadDm[senderName] || 0) + 1;
-  }
-
-  // Only update tab title when tab is not focused
-  if (type === 'global') {
+  } else if (type === 'global') {
     unreadGlobal++;
     updateGlobalBadge();
   }
