@@ -983,7 +983,6 @@ body:not(.dark-mode){
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header" style="flex-direction:column;align-items:stretch;gap:6px;padding-bottom:10px;">
       <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat <span id="globalUnreadBadge" style="display:none;background:white;color:#f97316;font-size:10px;font-weight:800;border-radius:10px;padding:1px 6px;margin-left:auto;"></span></button>
-      <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding-top:4px;">💬 Direct Messages</span>
     </div>
     <div class="sidebar-section-label" id="groupsSectionLabel" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-right:10px;" onclick="toggleGroupsSection()">
   <span>💬 Groups</span>
@@ -1391,8 +1390,8 @@ function setGroupsExpanded(expanded) {
 // Initialize — collapsed by default for first-timers
 function initGroupsSection() {
   const saved = localStorage.getItem(GROUPS_COLLAPSED_KEY);
-  // null = first time = collapsed. 'false' = user expanded it.
-  const expanded = saved === 'false';
+  // null = first time = expanded. 'true' = user collapsed it.
+  const expanded = saved !== 'true';
   setGroupsExpanded(expanded);
 }
 initGroupsSection();
@@ -3151,6 +3150,9 @@ function openGroupModal(group) {
   updateGroupAvatarDisplay(pendingGroupAvatar);
   // Member list
   const list = document.getElementById('groupMemberPickList'); list.innerHTML = '';
+  // Remove any existing search box from previous open
+  const existingSearch = document.getElementById('groupMemberSearch');
+  if (existingSearch) existingSearch.remove();
   let currentMembers = [];
   (async () => {
     if (group) {
@@ -3158,6 +3160,7 @@ function openGroupModal(group) {
     }
     // Add search box above member list
     const searchBox = document.createElement('input');
+    searchBox.id = 'groupMemberSearch';
     searchBox.type = 'text';
     searchBox.placeholder = 'Search members...';
     searchBox.style.cssText = 'width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text);font-family:"Syne",sans-serif;font-size:13px;outline:none;margin-bottom:6px;box-sizing:border-box;';
