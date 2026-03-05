@@ -3351,10 +3351,10 @@ async function openGroup(group) {
       lastGroupMsgId = msgs[msgs.length-1].id;
       groupLastSeenIds[group.id] = lastGroupMsgId;
       saveGroupLastSeen();
-    }
-    showPinnedBar(group);
+      showPinnedBar(group);
     } else {
       inner.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>No messages yet in '+esc(group.name)+'</p></div>';
+      showPinnedBar(group);
     }
   } catch(e) {}
 }
