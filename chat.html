@@ -1736,7 +1736,8 @@ function subscribeAdminChannel() {
         showBannedScreen(payload.reason || 'No reason provided.', payload.expires_at || null);
       } else if (payload.action === 'messages_cleared') {
         fullRefresh();
-      } else if (payload.action === 'msg_updated') {
+} else if (payload.action === 'msg_updated') {
+        if (!groupMode && !dmMode) fullRefresh();
         if (!dmMode) fullRefresh();
       } else if (payload.action === 'dm_updated') {
         if (dmMode && dmPartner && (payload.partner1 === deviceId || payload.partner2 === deviceId)) {
