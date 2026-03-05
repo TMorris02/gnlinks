@@ -982,7 +982,7 @@ body:not(.dark-mode){
 <div class="body-wrap">
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header" style="flex-direction:column;align-items:stretch;gap:6px;padding-bottom:10px;">
-      <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat</button>
+      <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat <span id="globalUnreadBadge" style="display:none;background:white;color:#f97316;font-size:10px;font-weight:800;border-radius:10px;padding:1px 6px;margin-left:auto;"></span></button>
       <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding-top:4px;">💬 Direct Messages</span>
     </div>
     <div class="sidebar-section-label" id="groupsSectionLabel" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-right:10px;" onclick="toggleGroupsSection()">
@@ -1121,8 +1121,10 @@ document.addEventListener('visibilitychange', () => {
   if (tabFocused) {
     stopTitleBlink();
     unreadGlobal = 0;
+    updateGlobalBadge();
     Object.keys(unreadDm).forEach(k => { unreadDm[k] = 0; });
     Object.keys(unreadGroup).forEach(k => { unreadGroup[k] = 0; });
+    renderGroupList();
   }
 });
 
@@ -1140,11 +1142,12 @@ function triggerNotif(type, senderName, groupName) {
   }
 
   // Only update tab title when tab is not focused
-  if (tabFocused) return;
-
   if (type === 'global') {
     unreadGlobal++;
+    updateGlobalBadge();
   }
+
+  if (tabFocused) return;
 
   const totalUnread = unreadGlobal
     + Object.values(unreadDm).reduce((a, b) => a + b, 0)
@@ -1162,6 +1165,18 @@ function triggerNotif(type, senderName, groupName) {
     document.title = label;
   }
 }
+
+function updateGlobalBadge() {
+  const badge = document.getElementById('globalUnreadBadge');
+  if (!badge) return;
+  if (unreadGlobal > 0) {
+    badge.textContent = unreadGlobal;
+    badge.style.display = 'inline';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+  
 function stopTitleBlink() {
   if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
   document.title = originalTitle;
@@ -2195,7 +2210,12 @@ function closeDm() {
   renderSidebar(document.getElementById('sidebarSearch').value);
 }
 document.getElementById('dmBackBtn').addEventListener('click', closeDm);
-document.getElementById('globalChatBtn').addEventListener('click', () => { if (dmMode) closeDm(); });
+document.getElementById('globalChatBtn').addEventListener('click', () => {
+  if (dmMode) closeDm();
+  if (groupMode) closeGroup();
+  unreadGlobal = 0;
+  updateGlobalBadge();
+});
 document.getElementById('dmHeaderAvatar').addEventListener('click', e => { if (dmPartner) showCtxMenu(e, dmPartner.username, dmPartner.device_id); });
 
 // ════════════════════════════════════════════════
@@ -2879,12 +2899,13 @@ function renderGroupList() {
       row.appendChild(badge);
     }
     row.addEventListener('click', () => {
-      // Clear unread for this group when opened
       unreadGroup[g.name] = 0;
+      groupLastSeenIds[g.id] = groupLastSeenIds[g.id] || 0;
+      // Mark all current messages as seen by setting lastSeen to a high value on next poll
+      // We do this by opening the group which sets lastGroupMsgId
       renderGroupList();
       openGroup(g);
-    });
-    el.appendChild(row);
+    });    el.appendChild(row);
   });
 }
 
@@ -2934,7 +2955,12 @@ async function openGroup(group) {
   renderGroupList();
   try {
     const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+group.id+'&order=id.asc&limit=200&select=*');
-    if (msgs && msgs.length) { msgs.forEach(m => renderGroupMessage(m)); lastGroupMsgId = msgs[msgs.length-1].id; }
+    if (msgs && msgs.length) {
+      msgs.forEach(m => renderGroupMessage(m));
+      lastGroupMsgId = msgs[msgs.length-1].id;
+      groupLastSeenIds[group.id] = lastGroupMsgId;
+      saveGroupLastSeen();
+    }
     else inner.innerHTML = '<div class="empty-state"><div class="ei">💬</div><p>No messages yet in '+esc(group.name)+'</p></div>';
   } catch(e) {}
 }
@@ -2998,7 +3024,12 @@ function renderGroupMessage(msg) {
 
 // ── POLL GROUP MESSAGES ───────────────────────
 // Track last-seen message ID per group for background notification polling
-const groupLastSeenIds = {};
+const groupLastSeenIds = (() => {
+  try { return JSON.parse(localStorage.getItem('gnChatGroupLastSeen') || '{}'); } catch(e) { return {}; }
+})();
+function saveGroupLastSeen() {
+  try { localStorage.setItem('gnChatGroupLastSeen', JSON.stringify(groupLastSeenIds)); } catch(e) {}
+}
 
 setInterval(async () => {
   if (!username) return;
@@ -3015,6 +3046,7 @@ setInterval(async () => {
             renderGroupMessage(m);
             lastGroupMsgId = m.id;
             groupLastSeenIds[activeGroup.id] = m.id;
+            saveGroupLastSeen();
             // Only notify if tab is blurred and message is from someone else
             if (m.device_id !== deviceId) {
               triggerNotif('group', m.username || 'Someone', activeGroup.name);
@@ -3035,6 +3067,7 @@ setInterval(async () => {
       if (newMsgs && newMsgs.length) {
         // Update our last-seen marker
         groupLastSeenIds[g.id] = newMsgs[newMsgs.length - 1].id;
+        saveGroupLastSeen();
         // Notify for each message not sent by us
         newMsgs.forEach(m => {
           if (m.device_id !== deviceId) {
