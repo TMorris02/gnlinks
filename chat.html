@@ -2023,14 +2023,17 @@ async function loadHistory() {
 }
 function startPolling() {
   setInterval(async () => {
-    if (dmMode) return;
+    if (dmMode || groupMode) return;
     try {
       const url = lastRenderedId > 0 ? '/rest/v1/messages?id=gt.'+lastRenderedId+'&order=id.asc&select=*' : '/rest/v1/messages?order=id.asc&limit=1&select=*';
       const msgs = await sbGet(url);
       if (msgs && msgs.length) msgs.forEach(m => {
         if (m.id > lastRenderedId) {
-          renderMessage(m, false); lastRenderedId = m.id;
-          if (m.device_id !== deviceId && m.type !== 'system') triggerNotif('global', m.username || 'Someone');
+          lastRenderedId = m.id;
+          if (!groupMode && !dmMode) {
+            renderMessage(m, false);
+            if (m.device_id !== deviceId && m.type !== 'system') triggerNotif('global', m.username || 'Someone');
+          }
         }
       });
     } catch(e) {}
