@@ -787,6 +787,7 @@ body:not(.dark-mode){
       <div class="admin-section-body">
         <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users (Chat)</button>
         <button class="admin-action-btn" id="apSuperRefreshAll">🔃 Super Refresh — Reload Everyone's Tab</button>
+        <button class="admin-action-btn" id="apPushVersionUpdate">🆕 Push Version Update (Force Reload All)</button>
         <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
       </div>
     </div>
@@ -984,9 +985,14 @@ body:not(.dark-mode){
       <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat</button>
       <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;padding-top:4px;">💬 Direct Messages</span>
     </div>
-    <div class="sidebar-section-label">💬 Groups</div>
-    <button class="group-create-btn" id="groupCreateBtn">＋ New Group</button>
-    <div id="groupList" style="padding:0 0 4px;"></div>
+    <div class="sidebar-section-label" id="groupsSectionLabel" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-right:10px;" onclick="toggleGroupsSection()">
+  <span>💬 Groups</span>
+  <span id="groupsSectionArrow" style="font-size:10px;transition:transform 0.2s;">▶</span>
+</div>
+<div id="groupsSection" style="display:none;">
+  <button class="group-create-btn" id="groupCreateBtn">＋ New Group</button>
+  <div id="groupList" style="padding:0 0 4px;"></div>
+</div>
     <div class="sidebar-section-label" style="padding-top:8px;">👤 Direct Messages</div>
     <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
     <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
@@ -1070,6 +1076,7 @@ const AVATAR_KEY    = 'gnChatAvatar';
 const STARS_KEY     = 'gnChatStarred';
 const NOTIF_KEY     = 'gnChatNotifPref';
 const SETTINGS_KEY  = 'gnChatSettings';
+const CODE_VERSION_KEY = 'gnChatCodeVersion';
 
 // ── RUNTIME SETTINGS (overridden by DB) ──────────
 let runtimeSettings = {
@@ -1313,6 +1320,38 @@ document.getElementById('sidebarToggle').addEventListener('click', () => {
   document.getElementById('sidebarToggle').textContent = sidebarOpen ? '‹' : '›';
 });
 
+// ── GROUPS DROPDOWN ───────────────────────────
+const GROUPS_COLLAPSED_KEY = 'gnChatGroupsCollapsed';
+
+function toggleGroupsSection() {
+  const isCollapsed = localStorage.getItem(GROUPS_COLLAPSED_KEY) !== 'false';
+  // currently collapsed = true by default; clicking expands it
+  setGroupsExpanded(isCollapsed);
+}
+
+function setGroupsExpanded(expanded) {
+  const section = document.getElementById('groupsSection');
+  const arrow = document.getElementById('groupsSectionArrow');
+  if (expanded) {
+    section.style.display = 'block';
+    arrow.style.transform = 'rotate(90deg)';
+    localStorage.setItem(GROUPS_COLLAPSED_KEY, 'false');
+  } else {
+    section.style.display = 'none';
+    arrow.style.transform = 'rotate(0deg)';
+    localStorage.setItem(GROUPS_COLLAPSED_KEY, 'true');
+  }
+}
+
+// Initialize — collapsed by default for first-timers
+function initGroupsSection() {
+  const saved = localStorage.getItem(GROUPS_COLLAPSED_KEY);
+  // null = first time = collapsed. 'false' = user expanded it.
+  const expanded = saved === 'false';
+  setGroupsExpanded(expanded);
+}
+initGroupsSection();
+
 // ── SUPABASE HELPERS ──────────────────────────
 async function sbGet(path) {
   const r = await fetch(SUPABASE_URL + path, { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }});
@@ -1390,6 +1429,22 @@ function updateAdminVisibility() {
     document.getElementById('plusBtn').disabled = false;
     document.getElementById('plusMenuPoll').style.display = isAdmin() ? '' : 'none';
   }
+}
+
+// ── CODE VERSION CHECK ────────────────────────
+async function checkCodeVersion() {
+  try {
+    const rows = await sbGet('/rest/v1/app_version?id=eq.1&select=version');
+    if (!rows || !rows.length) return;
+    const serverVersion = rows[0].version;
+    const stored = localStorage.getItem(CODE_VERSION_KEY);
+    if (stored && stored !== serverVersion) {
+      localStorage.setItem(CODE_VERSION_KEY, serverVersion);
+      window.location.reload(true);
+      return;
+    }
+    localStorage.setItem(CODE_VERSION_KEY, serverVersion);
+  } catch(e) {}
 }
 
 // ════════════════════════════════════════════════
@@ -1560,7 +1615,7 @@ setInterval(() => {
 async function boot() {
   initAvatarPicker();
   try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON); }
-  catch(e) { showBanner('\u26A0 Supabase failed to init', 'red'); return; }
+  catch(e) { showBanner('⚠ Supabase failed to init', 'red'); return; }
 
   const blocked = await isDeviceBlocked(deviceId);
   if (blocked) { showBannedScreen(blocked.reason || 'No reason provided.', blocked.expires_at); subscribeAdminChannel(); return; }
@@ -1568,6 +1623,9 @@ async function boot() {
   await loadMods();
   await loadBannedWords();
   await loadServerSettings();
+
+  // Version check — force reload if code is outdated
+  checkCodeVersion();
 
   try {
     const rows = await sbGet('/rest/v1/users?device_id=eq.'+deviceId+'&select=username,avatar,muted_until,name_locked');
@@ -1588,10 +1646,19 @@ async function boot() {
     if (saved) { username = saved; document.getElementById('headerUsername').textContent = username; enableInput(); document.getElementById('msgInput').placeholder = 'Type a message...'; updateAdminVisibility(); }
     else openUsernameModal(false);
   }
-  await Promise.all([loadAllUsers(), loadHistory(), loadGroups()]); startPolling();  if (username) joinPresence();
+
+  await Promise.all([loadAllUsers(), loadHistory(), loadGroups()]);
+  startPolling();
+  if (username) joinPresence();
   subscribeAdminChannel();
   subscribeRealtimeChanges();
   initEmojiPicker();
+
+  // Scroll to bottom after everything loads
+  setTimeout(() => {
+    const wrap = document.getElementById('messagesWrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  }, 100);
 }
 boot();
 
@@ -1697,6 +1764,16 @@ async function loadRecentMessages() {
     if (!all.length) el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px;">No messages</div>';
   } catch(e) { el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:8px;">Failed to load</div>'; }
 }
+
+document.getElementById('apPushVersionUpdate').addEventListener('click', async () => {
+  if (!confirm('Force everyone to hard-reload? Continue?')) return;
+  try {
+    const newVersion = Date.now().toString();
+    await sbPatch('/rest/v1/app_version?id=eq.1', { version: newVersion, updated_at: new Date().toISOString() });
+    await broadcastAdminCmd({ action: 'super_refresh' });
+    showBanner('✅ Version bumped — all clients reloading', 'green');
+  } catch(e) { showBanner('⚠ Failed to push version', 'red'); }
+});
 
 // ── ADMIN GROUP VIEWER ────────────────────────
 async function loadAdminGroupList() {
@@ -1814,17 +1891,37 @@ function renderAnnouncement(text) {
 async function fullRefresh() {
   lastRenderedUser = null;
   if (groupMode && activeGroup) {
-    // add this block first:
-    const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastGroupMsgId = 0;
+    const inner = document.getElementById('messagesInner');
+    inner.innerHTML = ''; lastGroupMsgId = 0;
     try {
       const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.'+activeGroup.id+'&order=id.asc&limit=200&select=*');
-      if (msgs && msgs.length) { msgs.forEach(m => renderGroupMessage(m)); lastGroupMsgId = msgs[msgs.length-1].id; }
+      if (msgs && msgs.length) {
+        msgs.forEach(m => renderGroupMessage(m));
+        lastGroupMsgId = msgs[msgs.length-1].id;
+      }
     } catch(e) {}
-    return; // <-- this is the key line that was missing
-  }{
-    document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">\uD83D\uDDE8\uFE0F</div><p>Loading...</p></div>';
+    setTimeout(() => {
+      const wrap = document.getElementById('messagesWrap');
+      wrap.scrollTop = wrap.scrollHeight;
+    }, 50);
+    loadAllUsers();
+    return;
+  }
+  if (dmMode && dmPartner) {
+    const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastDmId = 0;
+    try {
+      const msgs = await sbGet('/rest/v1/dms?or=(and(sender_device_id.eq.'+deviceId+',recipient_device_id.eq.'+dmPartner.device_id+'),and(sender_device_id.eq.'+dmPartner.device_id+',recipient_device_id.eq.'+deviceId+'))&order=id.asc&limit=200&select=*');
+      if (msgs && msgs.length) { msgs.forEach(m => renderMessage(m, true)); lastDmId = msgs[msgs.length-1].id; }
+      else inner.innerHTML = '<div class="empty-state"><div class="ei">🤫</div><p>No messages yet.</p></div>';
+    } catch(e) {}
+  } else {
+    document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
     lastRenderedId = 0; await loadHistory();
   }
+  setTimeout(() => {
+    const wrap = document.getElementById('messagesWrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  }, 50);
   loadAllUsers();
 }
 
