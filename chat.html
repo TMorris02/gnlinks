@@ -1120,8 +1120,6 @@ document.addEventListener('visibilitychange', () => {
   tabFocused = !document.hidden;
   if (tabFocused) { stopTitleBlink(); unreadGlobal = 0; Object.keys(unreadDm).forEach(k => { unreadDm[k] = 0; }); }
 });
-let groupLastSeenIds = {}; // tracks last seen group_message id per group
-let myGroups = [];
 
 function triggerNotif(type, senderName) {
   if (tabFocused) return;
@@ -1191,34 +1189,6 @@ function genId() { return 'dev_'+Date.now().toString(36)+'_'+Math.random().toStr
 function containsBannedWord(text) {
   const lower = text.toLowerCase();
   return bannedWords.some(w => lower.includes(w.toLowerCase()));
-}
-
-function startGroupNotifPoller() {
-  setInterval(async () => {
-    if (!myGroups || !myGroups.length) return;
-    for (const g of myGroups) {
-      if (groupMode && activeGroup && activeGroup.id === g.id) {
-        // Currently viewing this group — update tracker but don't notify
-        try {
-          const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.' + g.id + '&order=id.desc&limit=1&select=id');
-          if (msgs && msgs.length) groupLastSeenIds[g.id] = msgs[0].id;
-        } catch(e) {}
-        continue;
-      }
-      try {
-        const msgs = await sbGet('/rest/v1/group_messages?group_id=eq.' + g.id + '&order=id.desc&limit=1&select=id,username');
-        if (!msgs || !msgs.length) continue;
-        const latest = msgs[0];
-        if (groupLastSeenIds[g.id] === undefined) {
-          // First poll — just initialize, don't notify
-          groupLastSeenIds[g.id] = latest.id;
-        } else if (latest.id > groupLastSeenIds[g.id] && latest.username !== username) {
-          groupLastSeenIds[g.id] = latest.id;
-          triggerNotif('dm', g.name); // reuse 'dm' type so it respects DM notif pref
-        }
-      } catch(e) {}
-    }
-  }, POLL_MS * 2);
 }
 
 // ── AVATAR RENDERING ──────────────────────────
@@ -1653,7 +1623,6 @@ async function boot() {
   await loadMods();
   await loadBannedWords();
   await loadServerSettings();
-  startGroupNotifPoller();
 
   // Version check — force reload if code is outdated
   checkCodeVersion();
@@ -1697,69 +1666,67 @@ boot();
 // ADMIN BROADCAST CHANNEL
 // ════════════════════════════════════════════════
 function subscribeAdminChannel() {
-  adminChannel = sb.channel('admin-events').on('broadcast', { event: '*' }, async ({ event, payload }) => {
-  const p = payload || {};
-
-  if (event === 'force_refresh') {
-    await fullRefresh();
-    await loadGroups();
-
-  } else if (event === 'force_refresh_target') {
-    if (p.device_id && p.device_id !== deviceId) return;
-    await fullRefresh();
-    await loadGroups();
-    showBanner(p.success === false ? '⚠ Refresh failed' : '✅ Chat refreshed', p.success === false ? 'red' : 'green');
-
-  } else if (event === 'group_added') {
-    if (p.device_id !== deviceId) return;
-    await loadGroups();
-    showBanner('➕ You were added to "' + (p.group_name || 'a group') + '"', 'green');
-
-  } else if (event === 'group_removed') {
-    if (p.device_id !== deviceId) return;
-    await loadGroups();
-    if (groupMode && activeGroup && activeGroup.id === p.group_id) {
-      closeGroup();
-    }
-    showBanner('🚪 You were removed from "' + (p.group_name || 'a group') + '"', 'yellow');
-
-  } else if (event === 'super_refresh') {
-    location.reload();
-
-  } else if (event === 'kick') {
-    if (p.device_id !== deviceId) return;
-    showKickedScreen(p.reason);
-
-  } else if (event === 'announce') {
-    if (p.target && p.target !== 'all' && p.target !== deviceId) return;
-    showAnnouncement(p.text);
-
-  } else if (event === 'mod_promote') {
-    if (p.device_id !== deviceId) return;
-    isMod = true;
-    document.getElementById('modLabel').classList.add('show');
-    document.getElementById('adminPanelBtn').classList.add('visible');
-    const pop = document.getElementById('modPromotionPopup');
-    pop.style.display = 'block';
-    setTimeout(() => pop.style.display = 'none', 4000);
-
-  } else if (event === 'mod_demote') {
-    if (p.device_id !== deviceId) return;
-    isMod = false;
-    if (username !== HEAD_ADMIN) {
-      document.getElementById('modLabel').classList.remove('show');
-      document.getElementById('adminPanelBtn').classList.remove('visible');
-    }
-
-  } else if (event === 'settings_update') {
-    Object.assign(runtimeSettings, p);
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(runtimeSettings));
-    applyRuntimeSettings();
-
-  } else if (event === 'version_check') {
-    await checkCodeVersion();
-  }
-}).subscribe();
+  adminChannel = sb.channel('gn-admin-commands');
+  adminChannel.on('broadcast', { event:'command' }, ({ payload }) => {
+    if (!payload || !payload.action) return;
+    (async () => {
+      if (payload.action === 'force_refresh') {
+        fullRefresh();
+      } else if (payload.action === 'super_refresh') {
+        window.location.reload();
+      } else if (payload.action === 'force_refresh_target' && payload.device_id === deviceId) {
+        fullRefresh();
+      } else if (payload.action === 'identity_changed') {
+        if (payload.device_id === deviceId && payload.username) {
+          username = payload.username;
+          localStorage.setItem(USERNAME_KEY, payload.username);
+          document.getElementById('headerUsername').textContent = payload.username;
+        }
+        await loadAllUsers();
+        if (!dmMode) { lastRenderedUser = null; document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">\uD83D\uDDE8\uFE0F</div><p>Loading...</p></div>'; lastRenderedId = 0; await loadHistory(); }
+      } else if (payload.action === 'user_kicked' && payload.device_id === deviceId) {
+        showKickedScreen();
+      } else if (payload.action === 'user_banned' && payload.device_id === deviceId) {
+        showBannedScreen(payload.reason || 'No reason provided.', payload.expires_at || null);
+      } else if (payload.action === 'messages_cleared') {
+        fullRefresh();
+      } else if (payload.action === 'msg_updated') {
+        if (!dmMode) fullRefresh();
+      } else if (payload.action === 'dm_updated') {
+        if (dmMode && dmPartner && (payload.partner1 === deviceId || payload.partner2 === deviceId)) {
+          const otherDev = payload.partner1 === deviceId ? payload.partner2 : payload.partner1;
+          if (dmPartner.device_id === otherDev) fullRefresh();
+        }
+      } else if (payload.action === 'user_muted' && payload.device_id === deviceId) {
+        isMuted = true; muteUntil = new Date(payload.until); applyMute();
+      } else if (payload.action === 'user_unmuted' && payload.device_id === deviceId) {
+        removeMute();
+      } else if (payload.action === 'announcement') {
+        if (!payload.target_device_id || payload.target_device_id === deviceId) renderAnnouncementOverlay(payload.text);
+      } else if (payload.action === 'mods_updated') {
+        const wasAdmin = isAdmin();
+        await loadMods();
+        // Show promotion popup if user was just modded
+        if (!wasAdmin && isAdmin() && !isHeadAdmin()) {
+          const popup = document.getElementById('modPromotionPopup');
+          popup.style.display = 'block';
+          setTimeout(() => { popup.style.display = 'none'; }, 5000);
+        }
+      } else if (payload.action === 'settings_updated') {
+        Object.assign(runtimeSettings, payload.settings);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(runtimeSettings));
+        fullRefresh();
+      } else if (payload.action === 'banned_words_updated') {
+        await loadBannedWords();
+      } else if (payload.action === 'reaction_updated') {
+        // Refresh reaction display on the relevant message
+        const msgId = payload.msg_id; const isDm = payload.is_dm;
+        const selector = isDm ? '[data-dm-id="'+msgId+'"]' : '[data-msg-id="'+msgId+'"]';
+        const msgEl = document.querySelector(selector);
+        if (msgEl) await refreshReactionsOnEl(msgEl, msgId, isDm);
+      }
+    })();
+  }).subscribe();
 }
 async function broadcastAdminCmd(payload) {
   if (!adminChannel) return;
@@ -1922,10 +1889,7 @@ function renderAnnouncement(text) {
 // FULL REFRESH
 // ════════════════════════════════════════════════
 async function fullRefresh() {
-  await loadAllUsers(); // ADD THIS LINE — fixes icons disappearing on tab reset
-  lastRenderedId = 0;
   lastRenderedUser = null;
-  lastRenderedMsgDate = null;
   if (groupMode && activeGroup) {
     const inner = document.getElementById('messagesInner');
     inner.innerHTML = ''; lastGroupMsgId = 0;
@@ -3035,12 +2999,6 @@ document.getElementById('groupModalSaveBtn').addEventListener('click', async () 
         if (!existingIds.includes(m.device_id)) {
           await sbPost('/rest/v1/group_messages', { group_id: editingGroupId, device_id: deviceId, username: '🔔 System', text: m.username + ' was added to the group.', type: 'system' });
           await broadcastAdminCmd({ action: 'force_refresh_target', device_id: m.device_id });
-          // After inserting new members, for each newMemberDevId:
-          await adminChannel.send({
-            type: 'broadcast',
-            event: 'group_added',
-            payload: { device_id: newMemberDevId, group_id: group.id, group_name: groupName }
-          });
         }
       }
       // Sync members: remove all then re-add
@@ -3118,12 +3076,6 @@ async function openGroupSettings(group) {
             document.getElementById('groupSettingsModal').classList.remove('open');
             closeGroup(); await loadGroups(); showBanner('Group deleted (no members left)', 'green');
           }
-          await adminChannel.send({
-            type: 'broadcast',
-            event: 'group_removed',
-            payload: { device_id: removedMemberDevId, group_id: activeGroup.id, group_name: activeGroup.name }
-          });
-          await loadGroups(); // refresh your own sidebar too
         };
         row.appendChild(removeBtn);
       }
