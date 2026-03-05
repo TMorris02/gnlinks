@@ -527,8 +527,12 @@ body:not(.dark-mode){
 .pinned-unpin{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0;}
 .pinned-unpin:hover{color:#ef4444;}
 
-.status-bar{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-secondary);}
-.status-input-row{display:flex;gap:6px;align-items:center;}
+.status-bar{padding:6px 10px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-secondary);}
+.status-bar.has-status{padding:4px 10px;}
+.status-bar.has-status .status-duration-row{display:none;}
+.status-bar.has-status .status-set-btn{display:none;}
+.status-bar.has-status .status-text-input{font-size:11px;padding:4px 8px;}
+.status-bar.has-status .status-emoji-btn{font-size:13px;padding:3px 6px;}.status-input-row{display:flex;gap:6px;align-items:center;}
 .status-emoji-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 8px;font-size:16px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .status-emoji-btn:hover{border-color:var(--primary);}
 .status-text-input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:'Syne',sans-serif;font-size:12px;outline:none;transition:border-color 0.2s;}
@@ -1183,21 +1187,31 @@ let notifPref = localStorage.getItem(NOTIF_KEY) || 'both';
 let originalTitle = 'GN Chat';
 let titleBlinkInterval = null;
 let unreadGlobal = 0, unreadDm = {}, unreadGroup = {}, mentionUnread = {};
+let mentionBlinkInterval = null;
 let tabFocused = true;
 document.addEventListener('visibilitychange', () => {
   tabFocused = !document.hidden;
   if (tabFocused) {
-    stopTitleBlink();
-    unreadGlobal = 0;
-    updateGlobalBadge();
+    // Clear DM unreads
     Object.keys(unreadDm).forEach(k => { unreadDm[k] = 0; });
-    Object.keys(unreadGroup).forEach(k => { unreadGroup[k] = 0; });
-    // Only clear mention unreads for the currently visible chat
+    // Only clear group unread for the active group
+    if (groupMode && activeGroup) {
+      unreadGroup[activeGroup.name] = 0;
+    } else if (!groupMode && !dmMode) {
+      unreadGlobal = 0;
+      updateGlobalBadge();
+    }
+    // Only clear mention blink if currently viewing the mentioned chat
     const currentChatKey = groupMode && activeGroup ? activeGroup.name : dmMode && dmPartner ? dmPartner.username : 'global';
-    Object.keys(mentionUnread).forEach(k => {
-      if (k === currentChatKey || (!groupMode && !dmMode)) mentionUnread[k] = 0;
-    });
-    if (Object.values(mentionUnread).every(v => v === 0)) document.title = originalTitle;
+    if (mentionUnread[currentChatKey]) {
+      mentionUnread[currentChatKey] = 0;
+    }
+    // Only stop mention blink if ALL mentions are cleared
+    if (Object.values(mentionUnread).every(v => v === 0)) {
+      if (mentionBlinkInterval) { clearInterval(mentionBlinkInterval); mentionBlinkInterval = null; }
+      stopTitleBlink();
+      document.title = originalTitle;
+    }
     renderGroupList();
   }
 });
@@ -1312,6 +1326,7 @@ function loadMyStatus() {
 function renderStatusBar() {
   const display = document.getElementById('statusDisplay');
   const clearBtn = document.getElementById('statusClearBtn');
+  const statusBar = document.getElementById('statusBar');
   if (myStatus && new Date(myStatus.expiresAt) > new Date()) {
     document.getElementById('statusDisplayEmoji').textContent = myStatus.emoji || '💬';
     document.getElementById('statusDisplayText').textContent = myStatus.text;
@@ -1321,9 +1336,11 @@ function renderStatusBar() {
     clearBtn.style.display = '';
     document.getElementById('statusEmojiBtn').textContent = myStatus.emoji || '😶';
     document.getElementById('statusTextInput').value = myStatus.text;
+    statusBar.classList.add('has-status');
   } else {
     display.style.display = 'none';
     clearBtn.style.display = 'none';
+    statusBar.classList.remove('has-status');
   }
 }
 
@@ -1416,6 +1433,42 @@ function insertMention(uname) {
   input.focus();
 }
 
+async function loadGlobalPin() {
+  try {
+    const rows = await sbGet('/rest/v1/global_pin?id=eq.1&select=*');
+    if (rows && rows.length && rows[0].message_text) {
+      showGlobalPinnedBar(rows[0]);
+    }
+  } catch(e) {}
+}
+
+function showGlobalPinnedBar(pin) {
+  if (groupMode || dmMode) return;
+  const bar = document.getElementById('pinnedBar');
+  const textEl = document.getElementById('pinnedBarText');
+  const subEl = document.getElementById('pinnedBarSub');
+  const unpinBtn = document.getElementById('pinnedUnpinBtn');
+  if (!pin || !pin.message_text) { bar.classList.remove('show'); return; }
+  textEl.textContent = pin.message_text;
+  subEl.textContent = pin.pinned_by ? 'pinned by ' + pin.pinned_by : '';
+  unpinBtn.style.display = isAdmin() ? '' : 'none';
+  bar.classList.add('show');
+  bar.onclick = (e) => {
+    if (e.target === unpinBtn) return;
+    const msgEl = document.querySelector('[data-msg-id="'+pin.message_id+'"]');
+    if (msgEl) { msgEl.scrollIntoView({ behavior:'smooth', block:'center' }); msgEl.style.outline='2px solid var(--primary)'; setTimeout(()=>msgEl.style.outline='',1500); }
+  };
+  unpinBtn.onclick = async (e) => {
+    e.stopPropagation();
+    try {
+      await sbPatch('/rest/v1/global_pin?id=eq.1', { message_id: null, message_text: null, pinned_by: null });
+      bar.classList.remove('show');
+      await broadcastAdminCmd({ action:'global_pin_updated', msg_id: null, msg_text: null, pinned_by: null });
+      showBanner('📌 Unpinned', 'green');
+    } catch(err) { showBanner('⚠ Failed', 'red'); }
+  };
+}
+
 function showPinnedBar(group) {
   const bar = document.getElementById('pinnedBar');
   const textEl = document.getElementById('pinnedBarText');
@@ -1478,7 +1531,17 @@ function updateGlobalBadge() {
   
 function stopTitleBlink() {
   if (titleBlinkInterval) { clearInterval(titleBlinkInterval); titleBlinkInterval = null; }
+  if (mentionBlinkInterval) { clearInterval(mentionBlinkInterval); mentionBlinkInterval = null; }
   document.title = originalTitle;
+}
+
+function startMentionBlink(chatName) {
+  if (mentionBlinkInterval) return;
+  let toggle = false;
+  mentionBlinkInterval = setInterval(() => {
+    toggle = !toggle;
+    document.title = toggle ? '🔔 @' + username + ' in ' + chatName : originalTitle;
+  }, 800);
 }
 
 // ── STARRED DMs ────────────────────────────────
@@ -1989,7 +2052,7 @@ async function boot() {
   }
 
   await loadAllUsers();
-  await Promise.all([loadHistory(), loadGroups()]);
+  await Promise.all([loadHistory(), loadGroups(), loadGlobalPin()]);
   startPolling();
   if (username) joinPresence();
   subscribeAdminChannel();
@@ -2111,6 +2174,10 @@ function subscribeAdminChannel() {
           activeGroup.pinned_message_text = payload.msg_text;
           activeGroup.pinned_by = payload.pinned_by;
           showPinnedBar(activeGroup);
+        }
+      } else if (payload.action === 'global_pin_updated') {
+        if (!groupMode && !dmMode) {
+          showGlobalPinnedBar({ message_id: payload.msg_id, message_text: payload.msg_text, pinned_by: payload.pinned_by });
         }
       } else if (payload.action === 'status_updated') {
         const u = allUsers.find(x => x.device_id === payload.device_id);
@@ -2554,6 +2621,8 @@ async function openDm(partner) {
   }
   dmPartner = partner; dmPartnerDevId = partner.device_id;
   dmMode = true; lastDmId = 0;
+  document.getElementById('pinnedBar').classList.remove('show');
+  if (mentionUnread[partner.username]) { mentionUnread[partner.username] = 0; if (Object.values(mentionUnread).every(v=>v===0)) { clearInterval(mentionBlinkInterval); mentionBlinkInterval=null; document.title=originalTitle; } }
   const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastRenderedUser = null;
   document.getElementById('dmHeader').classList.add('show');
   const dmPartnerUser = allUsers.find(u => u.device_id === partner.device_id);
@@ -2583,10 +2652,12 @@ async function openDm(partner) {
 }
 function closeDm() {
   dmMode = false; dmPartner = null; dmPartnerDevId = null; lastRenderedUser = null;
+  mentionUnread['global'] = 0; if (Object.values(mentionUnread).every(v=>v===0)) { clearInterval(mentionBlinkInterval); mentionBlinkInterval=null; document.title=originalTitle; }
   document.getElementById('dmHeader').classList.remove('show');
   document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
   document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">\uD83D\uDDE8\uFE0F</div><p>Loading...</p></div>';
   lastRenderedId = 0; loadHistory();
+  loadGlobalPin();
   renderSidebar(document.getElementById('sidebarSearch').value);
 }
 document.getElementById('dmBackBtn').addEventListener('click', closeDm);
@@ -2691,6 +2762,14 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
     const uSpan = document.createElement('span'); uSpan.className = 'msg-username'; uSpan.style.color = color;
     uSpan.dataset.username = senderName; uSpan.textContent = senderName;
     metaDiv.appendChild(uSpan);
+    const senderUser = allUsers.find(u => u.device_id === senderDevId);
+    if (senderUser && senderUser.status && senderUser.status.text && new Date(senderUser.status.expiresAt) > new Date()) {
+      const stPill = document.createElement('span');
+      stPill.style.cssText = 'font-size:10px;color:var(--text-muted);font-weight:400;margin-left:5px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1px 5px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle;';
+      stPill.textContent = (senderUser.status.emoji||'') + ' ' + senderUser.status.text;
+      stPill.title = senderUser.status.text;
+      metaDiv.appendChild(stPill);
+    }
   }
   const tSpan = document.createElement('span'); tSpan.className = 'msg-time'; tSpan.textContent = fmtTime(msg.created_at || Date.now()); metaDiv.appendChild(tSpan);
   if (isDm) { const dm = document.createElement('span'); dm.className = 'dm-indicator'; dm.textContent = 'DM'; metaDiv.appendChild(dm); }
@@ -2728,9 +2807,11 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
       bubble.innerHTML = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/@(\w+)/g, (match, name) => {
           const isMe = name.toLowerCase() === username.toLowerCase();
-          if (isMe && !tabFocused) {
+          if (isMe && msg.device_id !== deviceId) {
             mentionUnread[senderName] = (mentionUnread[senderName]||0) + 1;
-            document.title = '🔔 @' + username + ' — ' + (isDm ? senderName : 'Global Chat');
+            if (!tabFocused) startMentionBlink(isDm ? senderName : 'Global');
+            // Play a sound ping
+            try { const a=new AudioContext(); const o=a.createOscillator(); const g=a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.setValueAtTime(0.3,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4); o.start(); o.stop(a.currentTime+0.4); } catch(e) {}
           }
           return '<span style="color:var(--primary);font-weight:700;'+(isMe?'background:var(--primary-light);border-radius:4px;padding:0 2px;':'')+'">'+match+'</span>';
         });
@@ -2748,6 +2829,20 @@ const sameSender = lastRenderedUser === (senderDevId || senderName) && sameDay;
   const reactBtn = document.createElement('button'); reactBtn.className = 'msg-react-btn'; reactBtn.title = 'React';
   reactBtn.textContent = '\uD83D\uDE04'; reactBtn.dataset.msgId = msg.id; reactBtn.dataset.isDm = isDm ? '1' : '0';
   reactBtn.addEventListener('click', e => { e.stopPropagation(); openEmojiPicker(e, msg.id, isDm); }); bWrap.appendChild(reactBtn);
+  if (isAdmin() && !isDm) {
+    const gPinBtn = document.createElement('button');
+    gPinBtn.className = 'msg-edit'; gPinBtn.title = 'Pin to global';
+    gPinBtn.textContent = '📌'; gPinBtn.style.right = '66px';
+    gPinBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      try {
+        await sbPatch('/rest/v1/global_pin?id=eq.1', { message_id: msg.id, message_text: msg.text, pinned_by: username, pinned_at: new Date().toISOString() });
+        await broadcastAdminCmd({ action:'global_pin_updated', msg_id: msg.id, msg_text: msg.text, pinned_by: username });
+        showBanner('📌 Pinned to global chat', 'green');
+      } catch(err) { showBanner('⚠ Pin failed', 'red'); }
+    });
+    bWrap.appendChild(gPinBtn);
+  }
 
   // Edit & Delete (own messages for non-admin, all for admin)
   const canEditThis = isMe || isHeadAdmin() || (isAdmin() && !isMe && !isMod);
@@ -3386,6 +3481,8 @@ async function openGroup(group) {
     document.getElementById('dmHeader').classList.remove('show');
   }
   groupMode = true; activeGroup = group; lastGroupMsgId = 0;
+  document.getElementById('pinnedBar').classList.remove('show');
+  if (mentionUnread[group.name]) { mentionUnread[group.name] = 0; if (Object.values(mentionUnread).every(v=>v===0)) { clearInterval(mentionBlinkInterval); mentionBlinkInterval=null; document.title=originalTitle; } }
   const inner = document.getElementById('messagesInner'); inner.innerHTML = ''; lastRenderedUser = null;
   document.getElementById('groupHeader').style.display = 'flex';
   document.getElementById('groupHeaderName').textContent = group.name;
@@ -3414,6 +3511,7 @@ function closeGroup() {
   document.getElementById('msgInput').placeholder = 'Type a message... (Enter to send)';
   document.getElementById('messagesInner').innerHTML = '<div class="empty-state" id="emptyState"><div class="ei">🗨️</div><p>Loading...</p></div>';
   lastRenderedId = 0; loadHistory(); renderGroupList();
+  loadGlobalPin();
 }
 document.getElementById('groupBackBtn').addEventListener('click', closeGroup);
 document.getElementById('globalChatBtn').addEventListener('click', () => { if (groupMode) closeGroup(); });
@@ -3436,7 +3534,17 @@ function renderGroupMessage(msg) {
   el.className = ['msg',isMe?'mine':'theirs',sameSender?'same-sender':''].filter(Boolean).join(' ');
   el.dataset.groupMsgId = msg.id; el.dataset.createdAt = msg.created_at||''; el.dataset.senderDev = msg.device_id||'';
   const metaDiv = document.createElement('div'); metaDiv.className='msg-meta';
-  if (!isMe) { const uSpan=document.createElement('span'); uSpan.className='msg-username'; uSpan.style.color=colorFor(senderName); uSpan.textContent=senderName; metaDiv.appendChild(uSpan); }
+  if (!isMe) {
+    const uSpan=document.createElement('span'); uSpan.className='msg-username'; uSpan.style.color=colorFor(senderName); uSpan.textContent=senderName; metaDiv.appendChild(uSpan);
+    const senderUserG = allUsers.find(u => u.device_id === msg.device_id);
+    if (senderUserG && senderUserG.status && senderUserG.status.text && new Date(senderUserG.status.expiresAt) > new Date()) {
+      const stPillG = document.createElement('span');
+      stPillG.style.cssText = 'font-size:10px;color:var(--text-muted);font-weight:400;margin-left:5px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1px 5px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle;';
+      stPillG.textContent = (senderUserG.status.emoji||'') + ' ' + senderUserG.status.text;
+      stPillG.title = senderUserG.status.text;
+      metaDiv.appendChild(stPillG);
+    }
+  }
   const tSpan=document.createElement('span'); tSpan.className='msg-time'; tSpan.textContent=fmtTime(msg.created_at||Date.now()); metaDiv.appendChild(tSpan);
   const rowDiv=document.createElement('div'); rowDiv.className='msg-row';
   if (!isMe) { const avEl=makeAvatarEl(getAvatarForDev(msg.device_id)||'',senderName,28); avEl.className='msg-avatar'; avEl.dataset.username=senderName; avEl.dataset.devid=msg.device_id||''; rowDiv.appendChild(avEl); }
@@ -3452,9 +3560,10 @@ function renderGroupMessage(msg) {
       bubble.innerHTML = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/@(\w+)/g, (match, name) => {
           const isMe2 = name.toLowerCase() === username.toLowerCase();
-          if (isMe2 && !tabFocused) {
+          if (isMe2 && msg.device_id !== deviceId) {
             mentionUnread[senderName] = (mentionUnread[senderName]||0) + 1;
-            document.title = '🔔 @' + username + ' — ' + (activeGroup ? activeGroup.name : 'Chat');
+            if (!tabFocused) startMentionBlink(activeGroup ? activeGroup.name : 'Chat');
+            try { const a=new AudioContext(); const o=a.createOscillator(); const g=a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.setValueAtTime(0.3,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4); o.start(); o.stop(a.currentTime+0.4); } catch(e) {}
           }
           return '<span style="color:var(--primary);font-weight:700;'+(isMe2?'background:var(--primary-light);border-radius:4px;padding:0 2px;':'')+'">'+match+'</span>';
         });
