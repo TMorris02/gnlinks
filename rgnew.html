@@ -1,17 +1,33 @@
 <html>
-<title>RocketGoal | Online Multiplayer Car Soccer Game</title>
-<iframe
-  title="Rocket Goal" 
-  id="iframehtml5" 
-  class="d-block" 
-  width="100%" 
-  height="100%" 
-  target="_parent" 
-  src="https://rocketgoal.io/" 
-  frameborder="0" 
-  border="0" 
-  scrolling="no" 
-  allowfullscreen="" 
-  spellcheck="false">
-</iframe>
+<head>
+  <title>RocketGoal | Online Multiplayer Car Soccer Game</title>
+  <style>
+    /* This removes default gaps and tells the page to be full screen height */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevents double scrollbars */
+    }
+    #iframehtml5 {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block; /* Removes tiny gap at the bottom */
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    title="Rocket Goal" 
+    id="iframehtml5" 
+    class="d-block" 
+    target="_parent" 
+    src="https://rocketgoal.io/" 
+    scrolling="no" 
+    allowfullscreen="true" 
+    spellcheck="false">
+  </iframe>
+</body>
 </html>
