@@ -110,7 +110,7 @@ window.location.href = 'https://classroom.google.com/';
 <a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%;">Minecraft</button></a>
 <br><br>
 <a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%; margin-right: 5%;">Drive Mad</button></a>
-<a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button class="settings-button" style="width: 40%;">RocketGoal.io</button></a>
+<a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%;">Rocketgoal.io</button></a>
 <br><br>
 <a href="https://tmorris01.github.io/gnlinks/monkeymart.html"><button class="settings-button" style="width: 40%; margin-right: 5%;">Monkey Mart</button></a>
 <a><button id="retro" class="settings-button retro-btn" style="width: 40%;">Retro Bowl</button></a>
@@ -469,12 +469,12 @@ const THEMES = {
 //  cardClass → CSS class for popup targeting e.g. 'minecraft-btn'
 // ════════════════════════════════════════════════════════════════
 const DEFAULTS = [
-    { name: 'Math',      url: 'https://tmorris01.github.io/gnlinks/gn.html',        teacher: 'Gn-Math',       letter: 'Gn', theme: 'blue',   cardClass: '' },
-    { name: 'Chemistry', url: '',                                                     teacher: 'Minecraft',     letter: 'M', theme: 'green',  cardClass: 'minecraft-btn' },
+    { name: 'Math',      url: 'https://tmorris01.github.io/gnlinks/gn.html',         teacher: 'Gn-Math',       letter: 'Gn', theme: 'blue',   cardClass: '' },
+    { name: 'Chemistry', url: '',                                                    teacher: 'Minecraft',     letter: 'M', theme: 'green',  cardClass: 'minecraft-btn' },
     { name: 'Biology',   url: 'https://tmorris01.github.io/gnlinks/drive-mad-new',   teacher: 'Drive Mad',     letter: 'D', theme: 'blue',   cardClass: '' },
-    { name: 'History',   url: 'https://tmorris01.github.io/gnlinks/rocketgoal',      teacher: 'Rocketgoal.io', letter: 'R', theme: 'orange', cardClass: '' },
+    { name: 'History',   url: '',                                                    teacher: 'Rocketgoal.io', letter: 'R', theme: 'orange', cardClass: 'rocket-btn' },
     { name: 'English',   url: 'https://tmorris01.github.io/gnlinks/monkeymart.html', teacher: 'Monkey Mart',   letter: 'M', theme: 'red',    cardClass: '' },
-    { name: 'Spanish', url: '',                                                     teacher: 'Retro Bowl',    letter: 'R', theme: 'teal',   cardClass: 'retro-btn' },
+    { name: 'Spanish',   url: '',                                                    teacher: 'Retro Bowl',    letter: 'R', theme: 'teal',   cardClass: 'retro-btn' },
     { name: 'Writing',   url: 'https://tmorris01.github.io/gnlinks/smashkarts.html', teacher: 'Smash Karts',   letter: 'S', theme: 'indigo',    cardClass: '' },
 
 ];
@@ -1064,6 +1064,20 @@ retro.forEach(btn => {
             <h4 style="text-align: center">
                 <a href="https://tmorris01.github.io/gnlinks/rb.html"><button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button></a>
                 <a href="https://tmorris01.github.io/gnlinks/college.html"><button class="settings-button" style="width: 40%;">RB College</button></a>
+            </h4>`;
+        document.getElementById('popupOverlay').style.display = "flex";
+    });
+});
+
+const allRocketBtns = document.querySelectorAll('.rocket-btn');
+allRocketBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        document.getElementById('popupTitle').textContent = "Rocket Goal Versions";
+        document.getElementById('popupBody').innerHTML = `
+            <h4 style="text-align: center">
+                <a href="https://tmorris01.github.io/gnlinks/rocketgoal"><button class="settings-button" style="width: 40%; margin-right: 5%;"<strong>**Rocket Goal UPDATED**</strong></button></a>
+                <a href="https://tmorris01.github.io/gnlinks/rgnew.html"><button class="settings-button" style="width: 40%;">Rocket Goal Old</button></a>
             </h4>`;
         document.getElementById('popupOverlay').style.display = "flex";
     });
