@@ -1146,8 +1146,9 @@ const AVATAR_KEY    = 'gnChatAvatar';
 const STARS_KEY     = 'gnChatStarred';
 const NOTIF_KEY     = 'gnChatNotifPref';
 const SETTINGS_KEY  = 'gnChatSettings';
-// ── ONESIGNAL PUSH NOTIFICATIONS ─────────────
+// ──  PUSH NOTIFICATIONS ─────────────
 const ONESIGNAL_APP_ID = 'f4ab1f64-a7e7-458b-a204-170f725922d1';
+const ONESIGNAL_REST_KEY = 'os_v2_app_6svr6zfh45cyxiqec4hxewjc2fsppptfv6cukz5rt2r33elr25723j2w4qqkerr7zh4x7y36ol2xs4ms4udgo2le7k6wjolmbzlpjki';
 
 async function initOneSignal() {
   if (!window.OneSignalDeferred) return;
@@ -2112,6 +2113,8 @@ async function boot() {
   subscribeAdminChannel();
   subscribeRealtimeChanges();
   initEmojiPicker();
+  await initOneSignal();
+  await promptOneSignalIfNeeded();
   loadMyStatus();
 
   // Scroll to bottom after everything loads
@@ -3109,9 +3112,25 @@ document.getElementById('imgSendBtn').addEventListener('click', async () => {
   try {
     if (groupMode && activeGroup) {
       const inserted = await sbPost('/rest/v1/group_messages', { group_id:activeGroup.id, device_id:deviceId, username, text:pendingImageData, type:'image' });
+      if (activeGroup && activeGroup.members) {
+  activeGroup.members
+    .filter(m => m.device_id !== deviceId)
+    .forEach(m => {
+      sendPushToDevice(
+        m.device_id,
+        '👥 ' + activeGroup.name,
+        username + ': ' + text.slice(0, 80)
+      );
+    });
+}
       if (inserted && inserted.length) { renderGroupMessage(inserted[0]); lastGroupMsgId=inserted[0].id; }
     } else if (dmMode && dmPartner) {
       const inserted = await sbPost('/rest/v1/dms', { sender_device_id:deviceId, recipient_device_id:dmPartner.device_id, sender_username:username, text:pendingImageData, type:'image' });
+      sendPushToDevice(
+  dmPartner.device_id,
+  '💬 ' + username,
+  text.slice(0, 100)
+);
       if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
     } else {
       const inserted = await sbPost('/rest/v1/messages', { username, device_id:deviceId, text:pendingImageData, type:'image' });
@@ -3318,12 +3337,28 @@ async function sendMessage() {
       if (replyTo) { payload.reply_to=replyTo.id; payload.reply_to_username=replyTo.username; payload.reply_to_text=replyTo.text; }
       clearReply();
       const inserted = await sbPost('/rest/v1/group_messages', payload);
+      if (activeGroup && activeGroup.members) {
+  activeGroup.members
+    .filter(m => m.device_id !== deviceId)
+    .forEach(m => {
+      sendPushToDevice(
+        m.device_id,
+        '👥 ' + activeGroup.name,
+        username + ': ' + text.slice(0, 80)
+      );
+    });
+}
       if (inserted && inserted.length) { renderGroupMessage(inserted[0]); lastGroupMsgId=inserted[0].id; }
     } else if (dmMode && dmPartner) {
       const payload = { sender_device_id:deviceId, recipient_device_id:dmPartner.device_id, sender_username:username, text:rawText };
       if (replyTo) { payload.reply_to = replyTo.id; payload.reply_to_username = replyTo.username; payload.reply_to_text = replyTo.text; }
       clearReply();
       const inserted = await sbPost('/rest/v1/dms', payload);
+      sendPushToDevice(
+  dmPartner.device_id,
+  '💬 ' + username,
+  text.slice(0, 100)
+);
       if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
     } else {
       const payload = { username, text:rawText, type:'chat', device_id:deviceId };
@@ -3406,6 +3441,17 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
       try {
         if (groupMode && activeGroup) {
           const inserted = await sbPost('/rest/v1/group_messages', { group_id:activeGroup.id, device_id:deviceId, username, text:dataUrl, type:'image' });
+          if (activeGroup && activeGroup.members) {
+  activeGroup.members
+    .filter(m => m.device_id !== deviceId)
+    .forEach(m => {
+      sendPushToDevice(
+        m.device_id,
+        '👥 ' + activeGroup.name,
+        username + ': ' + text.slice(0, 80)
+      );
+    });
+}
           if (inserted && inserted.length) { renderGroupMessage(inserted[0]); lastGroupMsgId=inserted[0].id; }
         } else if (dmMode && dmPartner) {
           const inserted = await sbPost('/rest/v1/dms', {
@@ -3415,6 +3461,11 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
             text: dataUrl,
             type: 'image'
           });
+          sendPushToDevice(
+  dmPartner.device_id,
+  '💬 ' + username,
+  text.slice(0, 100)
+);
           if (inserted && inserted.length) { renderMessage(inserted[0], true); lastDmId = inserted[0].id; }
         } else {
           const inserted = await sbPost('/rest/v1/messages', {
@@ -4105,6 +4156,11 @@ document.getElementById('impersonateSendBtn').addEventListener('click', async ()
     } else {
       const recipDevId = dest.replace('dm:', '');
       await sbPost('/rest/v1/dms', { sender_device_id: devId||deviceId, recipient_device_id: recipDevId, sender_username: uname, text });
+      sendPushToDevice(
+  dmPartner.device_id,
+  '💬 ' + username,
+  text.slice(0, 100)
+);
       await broadcastAdminCmd({ action:'dm_updated', partner1:devId||deviceId, partner2:recipDevId });
     }
     document.getElementById('impersonateText').value = '';
