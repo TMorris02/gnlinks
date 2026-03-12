@@ -6,6 +6,7 @@
 <title>GN Chat</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1145,6 +1146,59 @@ const AVATAR_KEY    = 'gnChatAvatar';
 const STARS_KEY     = 'gnChatStarred';
 const NOTIF_KEY     = 'gnChatNotifPref';
 const SETTINGS_KEY  = 'gnChatSettings';
+// ── ONESIGNAL PUSH NOTIFICATIONS ─────────────
+const ONESIGNAL_APP_ID = 'f4ab1f64-a7e7-458b-a204-170f725922d1';
+
+async function initOneSignal() {
+  if (!window.OneSignalDeferred) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      safari_web_id: '',
+      notifyButton: { enable: false },  // we handle our own prompt
+      allowLocalhostAsSecureOrigin: false,
+    });
+
+    // Store external user ID as their device ID so we can target them
+    if (deviceId) {
+      await OneSignal.login(deviceId);
+    }
+  });
+}
+
+async function promptOneSignalIfNeeded() {
+  if (!window.OneSignalDeferred) return;
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    const permission = await OneSignal.Notifications.permission;
+    if (!permission) {
+      await OneSignal.Notifications.requestPermission();
+    }
+  });
+}
+
+async function sendPushToDevice(targetDeviceId, title, message) {
+  if (!targetDeviceId) return;
+  try {
+    // We use OneSignal's REST API to target a specific user by their device ID
+    await fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // NOTE: this uses your REST API key — see Step 5 for how to handle this safely
+        'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
+      },
+      body: JSON.stringify({
+        app_id: ONESIGNAL_APP_ID,
+        include_aliases: { external_id: [targetDeviceId] },
+        target_channel: 'push',
+        headings: { en: title },
+        contents: { en: message },
+        web_url: 'https://tmorris01.github.io/gnlinks/chat.html'
+      })
+    });
+  } catch(e) {}
+}
 const CODE_VERSION_KEY = 'gnChatCodeVersion';
 
 // ── RUNTIME SETTINGS (overridden by DB) ──────────
