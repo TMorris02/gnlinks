@@ -549,6 +549,19 @@ body:not(.dark-mode){
 .status-display .s-text{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--text);font-weight:600;}
 .status-display .s-expiry{font-size:10px;color:var(--text-light);white-space:nowrap;}
 .online-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block;}
+
+/* ── RECOVERY MODAL ── */
+.recovery-modal{max-width:460px;}
+.recovery-user-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;}
+.recovery-user-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.15s;font-size:13px;font-weight:600;}
+.recovery-user-row:hover{background:var(--surface-hover);}
+.recovery-user-row.selected{background:var(--primary-light);color:var(--primary);}
+.recovery-notif-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:99999;padding:1rem;}
+.recovery-notif-overlay.open{display:flex;}
+.recovery-notif-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:400px;box-shadow:var(--shadow-xl);animation:pop-in 0.25s cubic-bezier(0.4,0,0.2,1);text-align:center;}
+.recovery-notif-icon{font-size:48px;margin-bottom:12px;}
+.recovery-notif-title{font-size:1.2rem;font-weight:800;margin-bottom:8px;color:var(--text);}
+.recovery-notif-body{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;}
 </style>
 </head>
 <body class="dark-mode">
@@ -562,6 +575,9 @@ body:not(.dark-mode){
     <div class="modal-error" id="usernameError"></div>
     <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
     <div class="modal-note" id="usernameNote">Your username is locked to this browser.</div>
+    <div id="alreadyHaveAccount" style="margin-top:14px;text-align:center;display:none;">
+      <button id="alreadyHaveAccountBtn" style="background:none;border:none;color:var(--primary);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;padding:0;">🔑 Already have an account?</button>
+    </div>
     <button class="ban-cancel-btn" id="usernameCancel" style="display:none;margin-top:8px;">Cancel</button>
     <div id="avatarSection" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
       <div class="avatar-section-label">Profile Picture</div>
@@ -705,6 +721,29 @@ body:not(.dark-mode){
   </div>
 </div>
 
+<!-- RECOVERY REQUEST MODAL -->
+<div class="modal-overlay" id="recoveryModal">
+  <div class="modal recovery-modal">
+    <div class="modal-title" id="recoveryModalTitle">🔑 Recover Account</div>
+    <div class="modal-sub" id="recoveryModalSub">Select the account that belongs to you.</div>
+    <div class="recovery-user-list" id="recoveryUserList"></div>
+    <div id="recoverySelectedInfo" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--primary-lighter);border:1px solid var(--primary-light);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--primary);"></div>
+    <textarea class="ban-reason-input" id="recoveryReason" placeholder="Explain why this account is yours — your real name, what you talked about, anything that proves it's you..." style="min-height:90px;"></textarea>
+    <div class="modal-error" id="recoveryError"></div>
+    <button class="modal-btn" id="recoverySubmitBtn">Submit Recovery Request →</button>
+    <button class="ban-cancel-btn" id="recoveryCancelBtn" style="margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<!-- RECOVERY NOTIFICATION POPUP -->
+<div class="recovery-notif-overlay" id="recoveryNotifOverlay">
+  <div class="recovery-notif-card">
+    <div class="recovery-notif-icon" id="recoveryNotifIcon">🔑</div>
+    <div class="recovery-notif-title" id="recoveryNotifTitle"></div>
+    <div class="recovery-notif-body" id="recoveryNotifBody"></div>
+    <button class="modal-btn" id="recoveryNotifOkBtn">Got it</button>
+  </div>
+</div>
 
 <!-- BANNED OVERLAY -->
 <div class="banned-overlay" id="bannedOverlay">
@@ -1000,6 +1039,17 @@ body:not(.dark-mode){
   </div>
 </div>
 
+<!-- Account Recovery Requests -->
+<div class="admin-section-collapsible">
+  <div class="admin-section-toggle-header">
+    <span class="admin-section-title">🔑 Account Recovery <span id="apRecoveryCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
+    <span class="admin-section-toggle-arrow">▼</span>
+  </div>
+  <div class="admin-section-body" style="padding:10px 16px;">
+    <div id="recoveryRequestsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No pending requests.</div></div>
+  </div>
+</div>
+  
 <!-- Group Viewer -->
 <div class="admin-section-collapsible">
   <div class="admin-section-toggle-header">
@@ -1917,11 +1967,13 @@ function openUsernameModal(isChange=false) {
     document.getElementById('usernameModalTitle').textContent = isChange ? 'Edit Profile' : 'Welcome Back';
     document.getElementById('usernameModalSub').textContent = isChange ? (isNameLocked ? 'Username locked. You can still update your avatar.' : 'Update username or profile picture.') : 'You already have a username set.';
     document.getElementById('usernameNote').style.display = 'none';
+    document.getElementById('alreadyHaveAccount').style.display = 'none';
   } else {
     avatarSec.style.display = 'none';
     document.getElementById('usernameModalTitle').textContent = 'Welcome 👋';
     document.getElementById('usernameModalSub').textContent = 'Choose a username to get started.';
     document.getElementById('usernameNote').style.display = '';
+    document.getElementById('alreadyHaveAccount').style.display = '';
   }
   modal.classList.add('open');
   setTimeout(() => { uInput.focus(); if (username) uInput.select(); }, 30);
@@ -2059,6 +2111,7 @@ async function boot() {
   subscribeRealtimeChanges();
   initEmojiPicker();
   loadMyStatus();
+  checkRecoveryNotification();
 
   // Scroll to bottom after everything loads
   setTimeout(() => {
@@ -2183,6 +2236,23 @@ function subscribeAdminChannel() {
         const u = allUsers.find(x => x.device_id === payload.device_id);
         if (u) u.status = payload.text ? { emoji: payload.emoji, text: payload.text, expiresAt: payload.expiresAt } : null;
         renderSidebar(document.getElementById('sidebarSearch').value);
+        } else if (payload.action === 'recovery_result' && payload.device_id === deviceId) {
+        const overlay = document.getElementById('recoveryNotifOverlay');
+        const icon = document.getElementById('recoveryNotifIcon');
+        const title = document.getElementById('recoveryNotifTitle');
+        const body = document.getElementById('recoveryNotifBody');
+        if (payload.approved) {
+          icon.textContent = '✅';
+          title.textContent = 'Account Recovered!';
+          title.style.color = '#10b981';
+          body.textContent = 'Your recovery for "' + payload.target + '" was approved. Click OK to reload.';
+        } else {
+          icon.textContent = '❌';
+          title.textContent = 'Recovery Denied';
+          title.style.color = '#ef4444';
+          body.textContent = 'Your recovery request for "' + payload.target + '" was denied. You can try again with more detail.';
+        }
+        overlay.classList.add('open');
       } else if (payload.action === 'group_membership_changed') {
   // Only act if this device is affected
   if (payload.affected_device_ids && payload.affected_device_ids.includes(deviceId)) {
@@ -3975,6 +4045,7 @@ document.getElementById('adminPanelBtn').addEventListener('click', () => {
   loadBannedWordsUI();
   loadReportsUI();
   loadAdminGroupList();
+  loadRecoveryRequests();
 });
 document.getElementById('adminPanelClose').addEventListener('click', () => document.getElementById('adminPanelOverlay').classList.remove('open'));
 document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open'); });
@@ -4562,6 +4633,260 @@ document.getElementById('messagesInner').addEventListener('contextmenu', e => {
   ctxMenu.style.left = Math.min(e.clientX, window.innerWidth-220)+'px';
   ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight-200)+'px';
   ctxJustOpened = true; ctxMenu.classList.add('open'); e.stopPropagation();
+});
+
+// ════════════════════════════════════════════════
+// ACCOUNT RECOVERY
+// ════════════════════════════════════════════════
+
+let recoveryTargetUser = null; // the account they want to recover
+
+async function openRecoveryModal(preselectedUser) {
+  recoveryTargetUser = preselectedUser || null;
+  document.getElementById('recoveryReason').value = '';
+  document.getElementById('recoveryError').classList.remove('show');
+  document.getElementById('recoveryError').textContent = '';
+
+  // Load all users into the list
+  const listEl = document.getElementById('recoveryUserList');
+  listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:10px;">Loading users...</div>';
+  document.getElementById('recoveryModal').classList.add('open');
+
+  try {
+    const users = await sbGet('/rest/v1/users?order=username.asc&select=device_id,username,avatar');
+    listEl.innerHTML = '';
+    (users || []).forEach(u => {
+      const row = document.createElement('div');
+      row.className = 'recovery-user-row' + (preselectedUser && preselectedUser.device_id === u.device_id ? ' selected' : '');
+      row.dataset.devid = u.device_id;
+      row.dataset.username = u.username;
+      const av = makeAvatarEl(u.avatar || '', u.username, 26); av.style.flexShrink = '0';
+      const nameSpan = document.createElement('span'); nameSpan.textContent = u.username;
+      row.appendChild(av); row.appendChild(nameSpan);
+      row.addEventListener('click', () => {
+        listEl.querySelectorAll('.recovery-user-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        recoveryTargetUser = { device_id: u.device_id, username: u.username };
+        const info = document.getElementById('recoverySelectedInfo');
+        info.style.display = 'block';
+        info.textContent = '✓ Selected: ' + u.username;
+      });
+      listEl.appendChild(row);
+    });
+
+    if (preselectedUser) {
+      const info = document.getElementById('recoverySelectedInfo');
+      info.style.display = 'block';
+      info.textContent = '✓ Selected: ' + preselectedUser.username;
+    }
+  } catch(e) {
+    listEl.innerHTML = '<div style="font-size:12px;color:#ef4444;padding:10px;">Failed to load users.</div>';
+  }
+}
+
+document.getElementById('recoveryCancelBtn').addEventListener('click', () => {
+  document.getElementById('recoveryModal').classList.remove('open');
+  recoveryTargetUser = null;
+});
+document.getElementById('recoveryModal').addEventListener('mousedown', e => {
+  if (e.target === document.getElementById('recoveryModal')) {
+    document.getElementById('recoveryModal').classList.remove('open');
+    recoveryTargetUser = null;
+  }
+});
+
+document.getElementById('recoverySubmitBtn').addEventListener('click', async () => {
+  const reason = document.getElementById('recoveryReason').value.trim();
+  const errEl = document.getElementById('recoveryError');
+  errEl.classList.remove('show'); errEl.textContent = '';
+
+  if (!recoveryTargetUser) {
+    errEl.textContent = 'Please select the account you want to recover.';
+    errEl.classList.add('show'); return;
+  }
+  if (!reason || reason.length < 10) {
+    errEl.textContent = 'Please explain in more detail why this account is yours.';
+    errEl.classList.add('show'); return;
+  }
+
+  const requesterDevId = deviceId;
+  const requesterName = username || '(no username yet)';
+
+  try {
+    // Store the recovery request as a report with type 'recovery'
+    await sbPost('/rest/v1/reports', {
+      message_id: 0,
+      message_type: 'recovery',
+      reported_by_device_id: requesterDevId,
+      reported_by_username: requesterName,
+      message_text: reason,
+      message_author: recoveryTargetUser.username,
+      message_author_device_id: recoveryTargetUser.device_id
+    }, { 'Prefer': 'return=minimal' });
+
+    document.getElementById('recoveryModal').classList.remove('open');
+    recoveryTargetUser = null;
+    showBanner('✅ Recovery request submitted — an admin will review it soon', 'green');
+  } catch(e) {
+    errEl.textContent = 'Failed to submit. Try again.';
+    errEl.classList.add('show');
+  }
+});
+
+// "Already have an account?" button in username modal
+document.getElementById('alreadyHaveAccountBtn').addEventListener('click', () => {
+  modal.classList.remove('open');
+  openRecoveryModal(null);
+});
+
+// ── LOAD RECOVERY REQUESTS IN ADMIN PANEL ─────
+async function loadRecoveryRequests() {
+  const el = document.getElementById('recoveryRequestsList');
+  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
+  try {
+    const requests = await sbGet('/rest/v1/reports?message_type=eq.recovery&order=created_at.desc&select=*');
+    document.getElementById('apRecoveryCount').textContent = '(' + (requests || []).length + ')';
+    if (!requests || !requests.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No pending requests.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    requests.forEach(r => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);margin-bottom:8px;';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;';
+      const who = document.createElement('div');
+      who.innerHTML = '<span style="font-size:12px;font-weight:700;color:var(--text);">🔑 ' + esc(r.reported_by_username) + '</span>'
+        + '<span style="font-size:11px;color:var(--text-muted);"> wants to recover </span>'
+        + '<span style="font-size:12px;font-weight:700;color:var(--primary);">' + esc(r.message_author) + '</span>';
+      const ts = document.createElement('div');
+      ts.style.cssText = 'font-size:10px;color:var(--text-muted);white-space:nowrap;margin-left:8px;';
+      ts.textContent = fmtTime(r.created_at);
+      header.appendChild(who); header.appendChild(ts);
+
+      const reasonBox = document.createElement('div');
+      reasonBox.style.cssText = 'font-size:12px;color:var(--text-muted);padding:6px 8px;background:var(--surface);border-radius:6px;border-left:3px solid var(--primary);margin-bottom:8px;line-height:1.5;word-break:break-word;';
+      reasonBox.textContent = r.message_text;
+
+      const acts = document.createElement('div');
+      acts.style.cssText = 'display:flex;gap:6px;';
+
+      const approveBtn = document.createElement('button');
+      approveBtn.className = 'report-act-btn ok';
+      approveBtn.textContent = '✅ Approve';
+      approveBtn.onclick = () => approveRecovery(r, item);
+
+      const denyBtn = document.createElement('button');
+      denyBtn.className = 'report-act-btn del';
+      denyBtn.textContent = '✕ Deny';
+      denyBtn.onclick = async () => {
+        if (!confirm('Deny this recovery request from ' + r.reported_by_username + '?')) return;
+        try {
+          // Store denial notification on the requester's account
+          await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(r.reported_by_device_id),
+            { pending_notification: JSON.stringify({ type: 'recovery_denied', target: r.message_author }) });
+          await sbDelete('/rest/v1/reports?id=eq.' + r.id);
+          item.remove();
+          showBanner('✅ Request denied', 'green');
+          // Notify them live if online
+          await broadcastAdminCmd({ action: 'recovery_result', device_id: r.reported_by_device_id, approved: false, target: r.message_author });
+        } catch(e) { showBanner('⚠ Failed', 'red'); }
+      };
+
+      acts.appendChild(approveBtn); acts.appendChild(denyBtn);
+      item.appendChild(header); item.appendChild(reasonBox); item.appendChild(acts);
+      el.appendChild(item);
+    });
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Failed to load.</div>';
+  }
+}
+
+async function approveRecovery(r, itemEl) {
+  const requesterName = r.reported_by_username;
+  const targetName = r.message_author;
+  const requesterDevId = r.reported_by_device_id;
+  const targetDevId = r.message_author_device_id;
+
+  if (!confirm(
+    'APPROVE recovery?\n\n' +
+    '• "' + requesterName + '"\'s account will be DELETED\n' +
+    '• Their messages will stay but show as "[Deleted]"\n' +
+    '• They will be moved to "' + targetName + '"\n\n' +
+    'This cannot be undone. Continue?'
+  )) return;
+
+  try {
+    // 1. Anonymize the requester's messages (global, DMs, group)
+    await sbPatch('/rest/v1/messages?device_id=eq.' + encodeURIComponent(requesterDevId), { username: '[Deleted]' });
+    await sbPatch('/rest/v1/dms?sender_device_id=eq.' + encodeURIComponent(requesterDevId), { sender_username: '[Deleted]' });
+    await sbPatch('/rest/v1/group_messages?device_id=eq.' + encodeURIComponent(requesterDevId), { username: '[Deleted]' });
+
+    // 2. Delete the requester's user record
+    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(requesterDevId));
+
+    // 3. Update the target account's device_id to the requester's device_id
+    //    (this hands ownership of the old account to the requester's browser)
+    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(targetDevId),
+      { device_id: requesterDevId });
+
+    // 4. Store approval notification (they'll see it on next load via the new device_id)
+    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(requesterDevId),
+      { pending_notification: JSON.stringify({ type: 'recovery_approved', target: targetName }) });
+
+    // 5. Delete the request
+    await sbDelete('/rest/v1/reports?id=eq.' + r.id);
+
+    // 6. Notify them live
+    await broadcastAdminCmd({ action: 'recovery_result', device_id: requesterDevId, approved: true, target: targetName });
+
+    itemEl.remove();
+    showBanner('✅ Recovery approved — ' + requesterName + ' is now ' + targetName, 'green');
+    await broadcastAdminCmd({ action: 'force_refresh' });
+  } catch(e) {
+    showBanner('⚠ Approval failed: ' + (e.message || ''), 'red');
+  }
+}
+
+// ── CHECK FOR PENDING NOTIFICATION ON LOAD ────
+async function checkRecoveryNotification() {
+  if (!deviceId) return;
+  try {
+    const rows = await sbGet('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId) + '&select=pending_notification');
+    if (!rows || !rows.length || !rows[0].pending_notification) return;
+    let notif;
+    try { notif = JSON.parse(rows[0].pending_notification); } catch(e) { return; }
+    if (!notif || !notif.type) return;
+
+    // Clear it immediately so it only shows once
+    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId), { pending_notification: null });
+
+    const overlay = document.getElementById('recoveryNotifOverlay');
+    const icon = document.getElementById('recoveryNotifIcon');
+    const title = document.getElementById('recoveryNotifTitle');
+    const body = document.getElementById('recoveryNotifBody');
+
+    if (notif.type === 'recovery_approved') {
+      icon.textContent = '✅';
+      title.textContent = 'Account Recovered!';
+      title.style.color = '#10b981';
+      body.textContent = 'Your recovery request for "' + notif.target + '" was approved. You are now logged in as ' + notif.target + '. Welcome back!';
+    } else if (notif.type === 'recovery_denied') {
+      icon.textContent = '❌';
+      title.textContent = 'Recovery Denied';
+      title.style.color = '#ef4444';
+      body.textContent = 'Your recovery request for "' + notif.target + '" was reviewed and denied by an admin. If you believe this is a mistake, you can submit a new request with more detail.';
+    }
+    overlay.classList.add('open');
+  } catch(e) {}
+}
+
+document.getElementById('recoveryNotifOkBtn').addEventListener('click', () => {
+  document.getElementById('recoveryNotifOverlay').classList.remove('open');
+  // If approved, reload so they get the recovered account loaded fresh
+  window.location.reload();
 });
 
 // Auto-unban check
