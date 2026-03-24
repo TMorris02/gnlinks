@@ -576,57 +576,60 @@ body:not(.dark-mode){
     <div class="modal-title" id="usernameModalTitle">Welcome 👋</div>
     <div class="modal-sub" id="usernameModalSub">Choose a username to get started.</div>
 
-    <!-- Avatar + input row (compact side by side) -->
-    <div id="avatarSection" style="display:none;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <!-- Clickable avatar thumbnail -->
-        <div id="avatarToggleBtn" title="Edit profile picture" style="cursor:pointer;flex-shrink:0;position:relative;">
-          <div class="avatar-preview-img" id="avatarPreviewImg" style="width:52px;height:52px;border:2px solid var(--primary);border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg-secondary);transition:box-shadow 0.2s;">
-            <span id="avatarPreviewFallback" style="font-size:16px;font-weight:700;color:var(--text-muted)">?</span>
-          </div>
-          <div style="position:absolute;bottom:0;right:0;width:16px;height:16px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;border:1.5px solid var(--surface);">✏️</div>
-        </div>
-        <!-- Username input -->
-        <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off" style="margin-bottom:0;flex:1;">
+    <!-- Avatar + input row -->
+    <div id="profileAvatarToggle" style="display:none;align-items:center;gap:12px;margin-bottom:12px;">
+      <div id="avatarClickTarget" title="Click to edit photo" style="width:52px;height:52px;border-radius:50%;border:2px solid var(--primary);overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background:var(--bg-secondary);position:relative;transition:box-shadow 0.2s;">
+        <div id="avatarThumb" style="width:100%;height:100%;"></div>
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;" id="avatarEditOverlay"><span style="font-size:16px;">✏️</span></div>
       </div>
-      <!-- Expandable avatar editor -->
-      <div id="avatarExpandable" style="display:none;margin-top:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-sm);border:1px solid var(--border);">
-        <div class="avatar-section-label" style="margin-bottom:8px;">Edit Profile Picture</div>
-        <div class="avatar-drop-zone" id="avatarDropZone">
-          <input type="file" id="avatarFileInput" accept="image/*">
-          <div class="avatar-drop-text">📁 <strong>Click to upload</strong> or drag &amp; drop</div>
-        </div>
-        <div class="avatar-section-label" style="margin-top:8px;margin-bottom:4px;">Or paste a URL</div>
-        <div class="avatar-url-row">
-          <input class="avatar-url-input" id="avatarUrlInput" type="text" placeholder="https://example.com/pic.jpg">
-          <button class="avatar-url-btn" id="avatarUrlBtn">Use URL</button>
-        </div>
-        <div class="avatar-error" id="avatarError">That URL didn't load — try another.</div>
-        <button class="avatar-clear-btn" id="avatarClearBtn">✕ Remove profile picture</button>
-      </div>
+      <input class="modal-input" id="usernameInput" type="text" placeholder="Your username..." maxlength="24" autocomplete="off" style="margin-bottom:0;flex:1;">
     </div>
 
-    <!-- Username input for non-logged-in state -->
-    <input class="modal-input" id="usernameInputNew" type="text" placeholder="Your username..." maxlength="24" autocomplete="off" style="display:none;">
+    <!-- First-time input (no avatar toggle) -->
+    <input class="modal-input" id="usernameInputFirst" type="text" placeholder="Your username..." maxlength="24" autocomplete="off" style="display:none;">
 
     <div class="modal-error" id="usernameError"></div>
     <button class="modal-btn" id="usernameConfirm">Enter Chat →</button>
     <div class="modal-note" id="usernameNote">Your username is locked to this browser.</div>
+
     <div id="alreadyHaveAccount" style="margin-top:14px;text-align:center;display:none;">
       <button id="alreadyHaveAccountBtn" style="background:none;border:none;color:var(--primary);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;padding:0;">🔑 Already have an account?</button>
     </div>
+
     <button class="ban-cancel-btn" id="usernameCancel" style="display:none;margin-top:8px;">Cancel</button>
 
-    <!-- Account management (leave/delete) — only shown when editing -->
-    <div id="acctMgmtRow" style="display:none;margin-top:12px;display:flex;gap:8px;">
-      <button id="leaveAccountBtn" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;">🚪 Leave Account</button>
-      <button id="deleteAccountBtn" style="flex:1;padding:8px;border:1px solid #ef4444;border-radius:var(--radius-sm);background:none;color:#ef4444;font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;">🗑 Delete Account</button>
+    <!-- Avatar editor (expands when clicking avatar circle) -->
+    <div id="avatarSection" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+      <div class="avatar-section-label">Profile Picture</div>
+      <div class="avatar-preview-wrap">
+        <div class="avatar-preview-img" id="avatarPreviewImg"><span id="avatarPreviewFallback" style="font-size:18px;font-weight:700;color:var(--text-muted)">?</span></div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">Upload, drag in, or paste a URL.</div>
+      </div>
+      <div class="avatar-drop-zone" id="avatarDropZone">
+        <input type="file" id="avatarFileInput" accept="image/*">
+        <div class="avatar-drop-text">📁 <strong>Click to upload</strong> or drag &amp; drop</div>
+      </div>
+      <div class="avatar-section-label" style="margin-top:10px;">Or paste an image URL</div>
+      <div class="avatar-url-row">
+        <input class="avatar-url-input" id="avatarUrlInput" type="text" placeholder="https://example.com/pic.jpg">
+        <button class="avatar-url-btn" id="avatarUrlBtn">Use URL</button>
+      </div>
+      <div class="avatar-error" id="avatarError">That URL didn't load — try another.</div>
+      <button class="avatar-clear-btn" id="avatarClearBtn">✕ Remove profile picture</button>
+      <button class="ban-cancel-btn" id="avatarSectionCloseBtn" style="margin-top:6px;">↑ Close photo editor</button>
     </div>
 
-    <!-- Lamby secret button — invisible, bottom center of modal, hover zone is 30x10px -->
-    <!-- LOCATION: bottom of modal, centered, ~10px tall invisible strip -->
-    <div id="lambySecretZone" style="width:100%;height:14px;margin-top:8px;cursor:default;" title=""></div>
-    <button id="lambySecretBtn" style="display:none;width:100%;padding:8px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;margin-top:4px;">🔐 Link shared account</button>
+    <!-- Leave / Delete account row -->
+    <div id="accountActionsRow" style="display:none;gap:8px;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+      <button id="leaveAccountBtn" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🚪 Leave</button>
+      <button id="deleteAccountBtn" style="flex:1;padding:9px;border:1px solid #ef4444;border-radius:var(--radius);background:none;color:#ef4444;font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🗑 Delete</button>
+    </div>
+
+    <!-- Lamby secret button: invisible, bottom of modal -->
+    <!-- LOCATION: It appears as a tiny dot at the very bottom center of the modal. Completely invisible until hovered, where it shows a faint outline. -->
+    <div style="text-align:center;margin-top:10px;">
+      <button id="lambySecretBtn" style="display:none;background:none;border:none;width:12px;height:12px;border-radius:50%;cursor:pointer;opacity:0;padding:0;" title=""></button>
+    </div>
   </div>
 </div>
 
@@ -1934,6 +1937,28 @@ async function checkCodeVersion() {
 // ════════════════════════════════════════════════
 // AVATAR PICKER
 // ════════════════════════════════════════════════
+function updateAvatarThumb() {
+  const thumb = document.getElementById('avatarThumb');
+  const overlay = document.getElementById('avatarEditOverlay');
+  if (!thumb) return;
+  thumb.innerHTML = '';
+  if (myAvatar) {
+    const img = document.createElement('img');
+    img.src = myAvatar;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;';
+    img.onerror = () => { thumb.innerHTML = '<span style="font-size:16px;font-weight:700;color:white;">'+initials(username||'?')+'</span>'; thumb.style.background = colorFor(username||'?'); };
+    thumb.appendChild(img);
+  } else {
+    thumb.innerHTML = '<span style="font-size:16px;font-weight:700;color:white;">'+initials(username||'?')+'</span>';
+    thumb.style.background = colorFor(username||'?');
+  }
+  // Show edit overlay on hover
+  const target = document.getElementById('avatarClickTarget');
+  if (target) {
+    target.onmouseenter = () => { if (overlay) overlay.style.opacity = '1'; };
+    target.onmouseleave = () => { if (overlay) overlay.style.opacity = '0'; };
+  }
+}
 function updateAvatarPreview(url) {
   pendingAvatar = url || '';
   const wrap = document.getElementById('avatarPreviewImg');
@@ -1974,48 +1999,69 @@ function initAvatarPicker() {
 // USERNAME MODAL
 // ════════════════════════════════════════════════
 const modal  = document.getElementById('usernameModal');
-const uInput = document.getElementById('usernameInput');
 const uError = document.getElementById('usernameError');
 const uBtn   = document.getElementById('usernameConfirm');
+// uInput is dynamic — points to whichever input is active
+let uInput = document.getElementById('usernameInput');
 document.getElementById('usernameCancel').addEventListener('click', () => {
   pendingAvatar = myAvatar;
   modal.classList.remove('open');
 });
+// Avatar circle click — toggle photo editor
+document.getElementById('avatarClickTarget').addEventListener('click', () => {
+  const sec = document.getElementById('avatarSection');
+  const isOpen = sec.style.display !== 'none';
+  sec.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    updateAvatarPreview(myAvatar || '');
+    document.getElementById('avatarUrlInput').value = '';
+  }
+});
+document.getElementById('avatarSectionCloseBtn').addEventListener('click', () => {
+  document.getElementById('avatarSection').style.display = 'none';
+});
 
 function openUsernameModal(isChange=false) {
+  // Wire the right input
+  if (isChange || username) {
+    document.getElementById('profileAvatarToggle').style.display = 'flex';
+    document.getElementById('usernameInputFirst').style.display = 'none';
+    uInput = document.getElementById('usernameInput');
+  } else {
+    document.getElementById('profileAvatarToggle').style.display = 'none';
+    document.getElementById('usernameInputFirst').style.display = '';
+    uInput = document.getElementById('usernameInputFirst');
+  }
+
   pendingAvatar = myAvatar || '';
-  uInput.value = username || ''; uInput.disabled = isNameLocked && isChange;
+  uInput.value = username || '';
+  uInput.disabled = isNameLocked && isChange;
   uError.classList.remove('show'); uBtn.disabled = false;
   uBtn.textContent = isChange ? 'Save Changes →' : 'Enter Chat →';
   document.getElementById('usernameCancel').style.display = isChange ? '' : 'none';
-  const avatarSec = document.getElementById('avatarSection');
-  // Reset avatar section to collapsed state
-  const avatarExpandable = document.getElementById('avatarExpandable');
-  if (avatarExpandable) avatarExpandable.style.display = 'none';
-  const avatarToggleBtn = document.getElementById('avatarToggleBtn');
-  if (avatarToggleBtn) avatarToggleBtn.style.display = isChange || username ? '' : 'none';
+  document.getElementById('avatarSection').style.display = 'none';
+
   if (isChange || username) {
-    avatarSec.style.display = 'flex';
     document.getElementById('avatarUrlInput').value = '';
     document.getElementById('avatarError').classList.remove('show');
     updateAvatarPreview(myAvatar || '');
+    updateAvatarThumb();
     document.getElementById('usernameModalTitle').textContent = isChange ? 'Edit Profile' : 'Welcome Back';
-    document.getElementById('usernameModalSub').textContent = isChange ? (isNameLocked ? 'Username locked. You can still update your avatar.' : 'Update username or profile picture.') : 'You already have a username set.';
+    document.getElementById('usernameModalSub').textContent = isChange
+      ? (isNameLocked ? 'Username locked. You can still update your avatar.' : 'Update username or profile picture.')
+      : 'You already have a username set.';
     document.getElementById('usernameNote').style.display = 'none';
     document.getElementById('alreadyHaveAccount').style.display = 'none';
   } else {
-    avatarSec.style.display = 'none';
     document.getElementById('usernameModalTitle').textContent = 'Welcome 👋';
     document.getElementById('usernameModalSub').textContent = 'Choose a username to get started.';
     document.getElementById('usernameNote').style.display = '';
     document.getElementById('alreadyHaveAccount').style.display = '';
   }
-  // Show/hide account management buttons
-  const acctMgmtRow = document.getElementById('acctMgmtRow');
-  if (acctMgmtRow) acctMgmtRow.style.display = isChange && username ? '' : 'none';
-  // Show/hide lamby secret btn
-  const lambySecretBtn = document.getElementById('lambySecretBtn');
-  if (lambySecretBtn) lambySecretBtn.style.display = 'none'; // always hidden by default, revealed by hover zone
+
+  document.getElementById('accountActionsRow').style.display = isChange && username ? 'flex' : 'none';
+  document.getElementById('lambySecretBtn').style.display = isChange && username ? 'block' : 'none';
+
   modal.classList.add('open');
   setTimeout(() => { uInput.focus(); if (username) uInput.select(); }, 30);
 }
@@ -2066,6 +2112,10 @@ async function triggerLambyPasscode() {
 async function submitUsername() {
   const name = uInput.value.trim().replace(/\s+/g,' ');
   if (!name) { uError.textContent = 'Please enter a username.'; uError.classList.add('show'); return; }
+  if (name.toLowerCase() === 'lamby' && username.toLowerCase() !== 'lamby') {
+    uError.textContent = 'That username requires special access.';
+    uError.classList.add('show'); return;
+  }
   if (isNameLocked && name !== username) { uError.textContent = 'Your username is locked.'; uError.classList.add('show'); return; }
   // Block directly typing lamby — must use the secret passcode flow
   if (name.toLowerCase() === 'lamby' && username.toLowerCase() !== 'lamby') {
@@ -2105,7 +2155,115 @@ async function submitUsername() {
 }
 uBtn.addEventListener('click', submitUsername);
 uInput.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); submitUsername(); } });
+document.getElementById('usernameInputFirst').addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); submitUsername(); } });
 document.getElementById('changeUsernameBtn').addEventListener('click', () => openUsernameModal(true));
+  // ── LEAVE ACCOUNT ─────────────────────────────
+document.getElementById('leaveAccountBtn').addEventListener('click', async () => {
+  if (!confirm(
+    '⚠️ Leave account?\n\n' +
+    'Your username "' + username + '" will become available for anyone to claim.\n' +
+    'Your messages stay but the account is unlinked from this browser.\n\n' +
+    'Continue?'
+  )) return;
+  try {
+    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId));
+    username = ''; myAvatar = '';
+    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
+    modal.classList.remove('open');
+    document.getElementById('headerUsername').textContent = 'Set username';
+    disableInput();
+    document.getElementById('adminPanelBtn').classList.remove('visible');
+    showBanner('✅ You have left your account', 'green');
+    setTimeout(() => openUsernameModal(false), 500);
+  } catch(e) { showBanner('⚠ Failed to leave account', 'red'); }
+});
+
+// ── DELETE ACCOUNT ─────────────────────────────
+document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+  if (!confirm(
+    '🗑 Delete account?\n\n' +
+    'This will permanently delete:\n' +
+    '• Your user account\n' +
+    '• All your public messages\n' +
+    '• All your DMs\n\n' +
+    'Groups you own will remain but be ownerless.\n\n' +
+    'This CANNOT be undone. Continue?'
+  )) return;
+  try {
+    await sbDelete('/rest/v1/messages?device_id=eq.' + encodeURIComponent(deviceId));
+    await sbDelete('/rest/v1/dms?sender_device_id=eq.' + encodeURIComponent(deviceId));
+    await sbDelete('/rest/v1/dms?recipient_device_id=eq.' + encodeURIComponent(deviceId));
+    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId));
+    username = ''; myAvatar = '';
+    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
+    modal.classList.remove('open');
+    document.getElementById('headerUsername').textContent = 'Set username';
+    disableInput();
+    document.getElementById('adminPanelBtn').classList.remove('visible');
+    await broadcastAdminCmd({ action: 'force_refresh' });
+    showBanner('✅ Account deleted', 'green');
+    setTimeout(() => openUsernameModal(false), 500);
+  } catch(e) { showBanner('⚠ Failed to delete account', 'red'); }
+});
+
+// ── LAMBY SECRET BUTTON ────────────────────────
+document.getElementById('lambySecretBtn').addEventListener('click', () => {
+  const code = prompt('Enter admin access code (8 digits):');
+  if (code === null) return;
+  if (code !== '7') {
+    alert('Incorrect code.');
+    return;
+  }
+  // Correct — proceed to claim Lamby
+  claimLambyAccount();
+});
+
+async function claimLambyAccount() {
+  // Warn about deleting current account
+  const currentUser = username;
+  if (currentUser && currentUser.toLowerCase() !== 'lamby') {
+    if (!confirm(
+      '⚠️ Claiming this account will DELETE your current account "' + currentUser + '".\n\n' +
+      'Your messages, DMs, and data attached to "' + currentUser + '" will be removed.\n\n' +
+      'Continue?'
+    )) return;
+    // Delete old account
+    try {
+      await sbDelete('/rest/v1/messages?device_id=eq.' + encodeURIComponent(deviceId));
+      await sbDelete('/rest/v1/dms?sender_device_id=eq.' + encodeURIComponent(deviceId));
+      await sbDelete('/rest/v1/dms?recipient_device_id=eq.' + encodeURIComponent(deviceId));
+      await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId));
+    } catch(e) { showBanner('⚠ Failed to remove old account', 'red'); return; }
+  }
+
+  // Create/upsert Lamby row for this device
+  try {
+    // Get existing Lamby avatar if any
+    let lambyAvatar = '';
+    try {
+      const existing = await sbGet('/rest/v1/users?username=ilike.lamby&select=avatar&limit=1');
+      if (existing && existing.length) lambyAvatar = existing[0].avatar || '';
+    } catch(e) {}
+
+    await fetch(SUPABASE_URL + '/rest/v1/users', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ device_id: deviceId, username: 'lamby', avatar: lambyAvatar || null })
+    });
+
+    username = 'lamby'; myAvatar = lambyAvatar;
+    localStorage.setItem(USERNAME_KEY, 'lamby');
+    localStorage.setItem(AVATAR_KEY, lambyAvatar);
+    modal.classList.remove('open');
+    document.getElementById('headerUsername').textContent = 'lamby';
+    updateAdminVisibility();
+    if (sb) joinPresence();
+    loadAllUsers();
+    await broadcastAdminCmd({ action: 'identity_changed', device_id: deviceId, username: 'lamby' });
+    enableInput();
+    showBanner('✅ Logged in as lamby', 'green');
+  } catch(e) { showBanner('⚠ Failed to claim account: ' + (e.message || ''), 'red'); }
+}
 
 // Avatar toggle click — expands/collapses the avatar editor
 document.getElementById('avatarToggleBtn').addEventListener('click', () => {
