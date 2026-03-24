@@ -2261,64 +2261,6 @@ async function claimLambyAccount() {
   } catch(e) { showBanner('⚠ Failed to claim account: ' + (e.message || ''), 'red'); }
 }
 
-// Avatar toggle click — expands/collapses the avatar editor
-document.getElementById('avatarToggleBtn').addEventListener('click', () => {
-  const exp = document.getElementById('avatarExpandable');
-  exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
-});
-
-// Lamby secret zone — hover to reveal the button
-document.getElementById('lambySecretZone').addEventListener('mouseenter', () => {
-  document.getElementById('lambySecretBtn').style.display = '';
-});
-document.getElementById('lambySecretZone').addEventListener('mouseleave', () => {
-  // Keep visible for 2 seconds then hide again if mouse leaves modal
-});
-document.getElementById('lambySecretBtn').addEventListener('click', () => {
-  triggerLambyPasscode();
-});
-
-// Leave account
-document.getElementById('leaveAccountBtn').addEventListener('click', async () => {
-  if (!confirm('⚠️ Leave this account?\n\nAnyone who enters the username "' + username + '" can access it. Your messages stay but this device will be unlinked.\n\nContinue?')) return;
-  try {
-    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId));
-    username = ''; myAvatar = '';
-    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
-    document.getElementById('headerUsername').textContent = 'Set username';
-    modal.classList.remove('open');
-    disableInput();
-    updateAdminVisibility();
-    showBanner('✅ Left account — you can rejoin with a new username', 'green');
-    openUsernameModal(false);
-  } catch(e) { showBanner('⚠ Failed to leave account', 'red'); }
-});
-
-// Delete account
-document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-  if (!confirm('🗑 DELETE your account?\n\nThis will permanently delete:\n• Your user profile\n• All your private messages (DMs)\n• You will be removed from all groups\n\nThis CANNOT be undone. Continue?')) return;
-  try {
-    // Delete DMs
-    await sbDelete('/rest/v1/dms?sender_device_id=eq.' + encodeURIComponent(deviceId));
-    await sbDelete('/rest/v1/dms?recipient_device_id=eq.' + encodeURIComponent(deviceId));
-    // Remove from groups
-    await sbDelete('/rest/v1/group_members?device_id=eq.' + encodeURIComponent(deviceId));
-    // Delete user record
-    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId));
-    // Anonymize public messages
-    await sbPatch('/rest/v1/messages?device_id=eq.' + encodeURIComponent(deviceId), { username: '[Deleted]' });
-    await sbPatch('/rest/v1/group_messages?device_id=eq.' + encodeURIComponent(deviceId), { username: '[Deleted]' });
-    username = ''; myAvatar = '';
-    localStorage.removeItem(USERNAME_KEY); localStorage.removeItem(AVATAR_KEY);
-    document.getElementById('headerUsername').textContent = 'Set username';
-    modal.classList.remove('open');
-    disableInput();
-    updateAdminVisibility();
-    await broadcastAdminCmd({ action: 'force_refresh' });
-    showBanner('✅ Account deleted', 'green');
-    openUsernameModal(false);
-  } catch(e) { showBanner('⚠ Failed to delete account', 'red'); }
-});
 function enableInput() {
   document.getElementById('msgInput').disabled = false;
   document.getElementById('sendBtn').disabled = false;
