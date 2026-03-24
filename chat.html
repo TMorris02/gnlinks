@@ -1595,11 +1595,7 @@ function renderTypingBar(currentChannel) {
   else bar.textContent = active.slice(0,-1).join(', ') + ' and ' + active[active.length-1] + ' are typing...';
 }
 
-// Refresh typing bar every second to auto-clear stale indicators
-setInterval(() => {
-  const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
-  renderTypingBar(myChannel);
-}, 1000);
+
   
 function updateGlobalBadge() {
   const badge = document.getElementById('globalUnreadBadge');
@@ -3757,6 +3753,11 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
 // GROUP CHAT
 // ════════════════════════════════════════════════
 let groupMode = false, activeGroup = null;
+// Refresh typing bar every second to auto-clear stale indicators
+setInterval(() => {
+  const myChannel = groupMode && activeGroup ? 'group:'+activeGroup.id : dmMode && dmPartner ? 'dm:'+[deviceId,dmPartner.device_id].sort().join(':') : 'global';
+  renderTypingBar(myChannel);
+}, 1000);
 let allGroups = [], myGroups = [];
 let lastGroupMsgId = 0;
 let pendingGroupAvatar = '';
