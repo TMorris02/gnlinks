@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--LINE 3254, REPORT-->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3257,293 +3256,219 @@ async function loadAdminUserList() {
 // REPORTS
 // ════════════════════════════════════════════════
 async function loadReportsUI() {
-  const el = document.getElementById('reportsList');
-  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
-  try {
-    const reports = await sbGet('/rest/v1/reports?order=created_at.desc&select=*&limit=50');
-    document.getElementById('apReportCount').textContent = '('+(reports||[]).length+')';
-    if (!reports || !reports.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No reports.</div>'; return; }
-    el.innerHTML = '';
-    reports.forEach(r => {
-      const item = document.createElement('div'); item.className = 'report-item';
-      const hdr = document.createElement('div'); hdr.className = 'report-item-header';
-      const who = document.createElement('div'); who.className = 'report-item-who';
-      who.textContent = '\uD83D\uDEA8 '+r.reported_by_username+' reported '+r.message_author;
-      const ts = document.createElement('div'); ts.style.cssText = 'font-size:10px;color:var(--text-muted)';
-      ts.textContent = fmtTime(r.created_at);
-      hdr.appendChild(who); hdr.appendChild(ts);
-      const msg = document.createElement('div'); msg.className = 'report-item-msg';
-      msg.textContent = r.message_text || '(no text)';
-      const acts = document.createElement('div'); acts.className = 'report-item-actions';
-      const editBtn = document.createElement('button'); editBtn.className = 'report-act-btn'; editBtn.textContent = '\u270F Edit';
-      editBtn.onclick = async () => {
-        const newText = prompt('Edit message:', r.message_text); if (newText===null||newText===r.message_text) return;
-        try {
-          if (r.message_type==='dm') await sbPatch('/rest/v1/dms?id=eq.'+r.message_id, { text:newText });
-          else await sbPatch('/rest/v1/messages?id=eq.'+r.message_id, { text:newText });
-          msg.textContent = newText; showBanner('\u2705 Edited', 'green');
-          await broadcastAdminCmd({ action: r.message_type==='dm' ? 'dm_updated' : 'msg_updated', partner1:r.reported_by_device_id, partner2:r.message_author_device_id });
-        } catch(e) { showBanner('\u26A0 Edit failed', 'red'); }
-      };
-      const delBtn = document.createElement('button'); delBtn.className = 'report-act-btn del'; delBtn.textContent = '\u2715 Delete';
-      delBtn.onclick = async () => {
-        if (!confirm('Delete this message?')) return;
-        try {
-          if (r.message_type==='dm') await sbDelete('/rest/v1/dms?id=eq.'+r.message_id);
-          else await sbDelete('/rest/v1/messages?id=eq.'+r.message_id);
-          await sbDelete('/rest/v1/reports?id=eq.'+r.id);
-          item.remove(); showBanner('\u2705 Deleted', 'green');
-          await broadcastAdminCmd({ action: r.message_type==='dm' ? 'dm_updated' : 'msg_updated' });
-        } catch(e) { showBanner('\u26A0 Delete failed', 'red'); }
-      };
-      const okBtn = document.createElement('button'); okBtn.className = 'report-act-btn ok'; okBtn.textContent = '\u2705 No Issue';
-      okBtn.onclick = async () => {
-        try { await sbDelete('/rest/v1/reports?id=eq.'+r.id); item.remove(); showBanner('\u2705 Report dismissed', 'green'); } catch(e) {}
-      };
-      acts.appendChild(editBtn); acts.appendChild(delBtn); acts.appendChild(okBtn);
-      item.appendChild(hdr); item.appendChild(msg); item.appendChild(acts);
-      el.appendChild(item);
+  const el=document.getElementById('reportsList');
+  el.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
+  try{
+    const reports=await dbGet('reports');
+    document.getElementById('apReportCount').textContent='('+(Object.keys(reports||{}).length)+')';
+    if(!reports||!Object.keys(reports).length){el.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No reports.</div>';return;}
+    el.innerHTML='';
+    Object.entries(reports).sort((a,b)=>b[1].timestamp-a[1].timestamp).forEach(([key,r])=>{
+      const item=document.createElement('div');item.className='report-item';
+      const hdr=document.createElement('div');hdr.className='report-item-header';
+      const who=document.createElement('div');who.className='report-item-who';who.textContent=`🚨 ${r.reportedByUsername} reported ${r.messageAuthor}`;
+      const ts=document.createElement('div');ts.style.cssText='font-size:10px;color:var(--text-muted)';ts.textContent=fmtTime(r.timestamp);
+      hdr.appendChild(who);hdr.appendChild(ts);
+      const msg=document.createElement('div');msg.className='report-item-msg';msg.textContent=r.messageText||'(no text)';
+      const acts=document.createElement('div');acts.className='report-item-actions';
+      const okBtn=document.createElement('button');okBtn.className='report-act-btn ok';okBtn.textContent='✅ No Issue';
+      okBtn.onclick=async()=>{try{await dbDel(`reports/${key}`);item.remove();showBanner('✅ Report dismissed','green');}catch(e){}};
+      acts.appendChild(okBtn);item.appendChild(hdr);item.appendChild(msg);item.appendChild(acts);el.appendChild(item);
     });
-  } catch(e) { el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Failed to load</div>'; }
+  }catch(e){el.innerHTML='<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Failed to load</div>';}
 }
 
 // ════════════════════════════════════════════════
 // BANNED WORDS UI
 // ════════════════════════════════════════════════
 async function loadBannedWordsUI() {
-  try {
-    const rows = await sbGet('/rest/v1/banned_words?select=word,id&order=word.asc');
-    renderWordChips(rows||[]);
-  } catch(e) {}
+  try{const rows=await dbGet('bannedWords');renderWordChips(Object.entries(rows||{}).map(([k,v])=>({key:k,word:v.word||v})));}catch(e){}
 }
 function renderWordChips(rows) {
-  const wrap = document.getElementById('wordChipsWrap'); wrap.innerHTML = '';
-  rows.forEach(r => {
-    const chip = document.createElement('div'); chip.className = 'word-chip';
-    const span = document.createElement('span'); span.textContent = r.word;
-    const del = document.createElement('button'); del.className = 'word-chip-del'; del.textContent = '\u2715';
-    del.onclick = async () => {
-      try { await sbDelete('/rest/v1/banned_words?id=eq.'+r.id); chip.remove(); bannedWords = bannedWords.filter(w => w!==r.word); await broadcastAdminCmd({ action:'banned_words_updated' }); } catch(e) {}
-    };
-    chip.appendChild(span); chip.appendChild(del); wrap.appendChild(chip);
+  const wrap=document.getElementById('wordChipsWrap');wrap.innerHTML='';
+  rows.forEach(r=>{
+    const chip=document.createElement('div');chip.className='word-chip';
+    const span=document.createElement('span');span.textContent=r.word;
+    const del=document.createElement('button');del.className='word-chip-del';del.textContent='✕';
+    del.onclick=async()=>{try{await dbDel(`bannedWords/${r.key}`);chip.remove();bannedWords=bannedWords.filter(w=>w!==r.word);}catch(e){}};
+    chip.appendChild(span);chip.appendChild(del);wrap.appendChild(chip);
   });
 }
-document.getElementById('wordAddBtn').addEventListener('click', async () => {
-  const word = document.getElementById('wordAddInput').value.trim().toLowerCase();
-  if (!word) return;
-  document.getElementById('wordAddInput').value = '';
-  try {
-    await sbPost('/rest/v1/banned_words', { word, added_by: username }, {'Prefer':'resolution=merge-duplicates,return=minimal'});
+document.getElementById('wordAddBtn').addEventListener('click', async()=>{
+  const word=document.getElementById('wordAddInput').value.trim().toLowerCase();
+  if(!word) return;
+  document.getElementById('wordAddInput').value='';
+  try{
+    await dbPush('bannedWords',{word,addedBy:myUsername(),addedAt:Date.now()});
     bannedWords.push(word);
-    await broadcastAdminCmd({ action:'banned_words_updated' });
     loadBannedWordsUI();
-  } catch(e) { showBanner('\u26A0 Failed to add word', 'red'); }
+  }catch(e){showBanner('⚠ Failed to add word','red');}
 });
-document.getElementById('wordAddInput').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('wordAddBtn').click(); });
-
+document.getElementById('wordAddInput').addEventListener('keydown', e=>{if(e.key==='Enter') document.getElementById('wordAddBtn').click();});
+  
 // ════════════════════════════════════════════════
 // DM VIEWER
 // ════════════════════════════════════════════════
 function renderDmViewerUsers(users) {
-  const el = document.getElementById('dmViewerUsers'); el.innerHTML = '';
-  users.forEach(u => {
-    const r = document.createElement('div'); r.className = 'admin-mini-row'+(selectedDmViewerUser===u.device_id?' active':'');
-    r.textContent = u.username;
-    r.onclick = () => { selectedDmViewerUser = u.device_id; selectedDmViewerPartner = null; renderDmViewerUsers(users); loadDmViewerPartners(); };
+  const el=document.getElementById('dmViewerUsers');el.innerHTML='';
+  users.forEach(u=>{
+    const r=document.createElement('div');r.className='admin-mini-row'+(selectedDmViewerUid===u.uid?' active':'');
+    r.textContent=u.username;
+    r.onclick=()=>{selectedDmViewerUid=u.uid;selectedDmViewerPartner=null;renderDmViewerUsers(users);loadDmViewerPartners();};
     el.appendChild(r);
   });
-  if (!users.length) el.innerHTML = '<div class="admin-mini-row">No users</div>';
+  if(!users.length)el.innerHTML='<div class="admin-mini-row">No users</div>';
 }
 async function loadDmViewerPartners() {
-  const partnersMini = document.getElementById('dmViewerPartners'), transcript = document.getElementById('dmViewerTranscript');
-  if (!selectedDmViewerUser) { partnersMini.innerHTML = '<div class="admin-mini-row">Pick a user first</div>'; return; }
-  partnersMini.innerHTML = '<div class="admin-mini-row">Loading...</div>';
-  transcript.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Pick a conversation.</div>';
-  try {
-    const msgs = await sbGet('/rest/v1/dms?or=(sender_device_id.eq.'+selectedDmViewerUser+',recipient_device_id.eq.'+selectedDmViewerUser+')&order=id.desc&limit=300&select=*');
-    const map = {};
-    (msgs||[]).forEach(m => { const other = m.sender_device_id===selectedDmViewerUser?m.recipient_device_id:m.sender_device_id; if (!map[other]) map[other] = m; });
-    partnersMini.innerHTML = '';
-    const partnerIds = Object.keys(map);
-    if (!partnerIds.length) { partnersMini.innerHTML = '<div class="admin-mini-row">No DM partners</div>'; return; }
-    partnerIds.forEach(pid => {
-      const r = document.createElement('div'); r.className = 'admin-mini-row'+(selectedDmViewerPartner===pid?' active':'');
-      r.textContent = nameForDev(pid, pid);
-      r.onclick = () => { selectedDmViewerPartner = pid; loadDmViewerPartners(); loadDmTranscript(); };
+  const partnersMini=document.getElementById('dmViewerPartners'),transcript=document.getElementById('dmViewerTranscript');
+  if(!selectedDmViewerUid){partnersMini.innerHTML='<div class="admin-mini-row">Pick a user first</div>';return;}
+  partnersMini.innerHTML='<div class="admin-mini-row">Loading...</div>';
+  transcript.innerHTML='<div style="font-size:12px;color:var(--text-muted);">Pick a conversation.</div>';
+  try{
+    const dms=await dbGet('dms');
+    const partners=new Set();
+    Object.keys(dms||{}).forEach(convKey=>{
+      if(convKey.includes(selectedDmViewerUid)){
+        const other=convKey.replace(selectedDmViewerUid,'').replace('_','');
+        if(other) partners.add(other);
+      }
+    });
+    partnersMini.innerHTML='';
+    if(!partners.size){partnersMini.innerHTML='<div class="admin-mini-row">No DM partners</div>';return;}
+    partners.forEach(uid=>{
+      const r=document.createElement('div');r.className='admin-mini-row'+(selectedDmViewerPartner===uid?' active':'');
+      r.textContent=allUsers[uid]?.username||uid;
+      r.onclick=()=>{selectedDmViewerPartner=uid;loadDmViewerPartners();loadDmTranscript();};
       partnersMini.appendChild(r);
     });
-  } catch(e) { partnersMini.innerHTML = '<div class="admin-mini-row">Failed</div>'; }
+  }catch(e){partnersMini.innerHTML='<div class="admin-mini-row">Failed</div>';}
 }
 async function loadDmTranscript() {
-  const transcript = document.getElementById('dmViewerTranscript');
-  if (!selectedDmViewerUser||!selectedDmViewerPartner) return;
-  transcript.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Loading...</div>';
-  try {
-    const msgs = await sbGet('/rest/v1/dms?or=(and(sender_device_id.eq.'+selectedDmViewerUser+',recipient_device_id.eq.'+selectedDmViewerPartner+'),and(sender_device_id.eq.'+selectedDmViewerPartner+',recipient_device_id.eq.'+selectedDmViewerUser+'))&order=id.asc&limit=400&select=*');
-    transcript.innerHTML = '';
-    if (!msgs||!msgs.length) { transcript.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">No messages</div>'; return; }
-    msgs.forEach(m => {
-      const line = document.createElement('div'); line.className = 'admin-dm-line';
-      const sender = nameForDev(m.sender_device_id, m.sender_username||m.sender_device_id);
-      const textSpan = document.createElement('span'); textSpan.textContent = m.text;
-      line.innerHTML = '<strong>'+esc(sender)+'</strong>: '; line.appendChild(textSpan);
-      const tDiv = document.createElement('div'); tDiv.className = 't'; tDiv.textContent = fmtTime(m.created_at); line.appendChild(tDiv);
-      const actRow = document.createElement('div'); actRow.className = 'admin-dm-actions';
-      const editBtn = document.createElement('button'); editBtn.className = 'admin-dm-act-btn'; editBtn.textContent = '\u270F Edit';
-      editBtn.onclick = async () => { const nt = prompt('Edit:', m.text); if (!nt||nt===m.text) return; try { await sbPatch('/rest/v1/dms?id=eq.'+m.id, {text:nt}); m.text=nt; textSpan.textContent=nt; showBanner('\u2705 Edited','green'); } catch(e) { showBanner('\u26A0 Failed','red'); } };
-      const delBtn = document.createElement('button'); delBtn.className = 'admin-dm-act-btn del'; delBtn.textContent = '\u2715 Delete';
-      delBtn.onclick = async () => { if (!confirm('Delete?')) return; try { await sbDelete('/rest/v1/dms?id=eq.'+m.id); line.remove(); showBanner('\u2705 Deleted','green'); } catch(e) { showBanner('\u26A0 Failed','red'); } };
-      actRow.appendChild(editBtn); actRow.appendChild(delBtn); line.appendChild(actRow);
-      transcript.appendChild(line);
+  const transcript=document.getElementById('dmViewerTranscript');
+  if(!selectedDmViewerUid||!selectedDmViewerPartner) return;
+  transcript.innerHTML='<div style="font-size:12px;color:var(--text-muted);">Loading...</div>';
+  try{
+    const convKey=genDmKey(selectedDmViewerUid,selectedDmViewerPartner);
+    const msgs=await dbGet(`dms/${convKey}`);
+    transcript.innerHTML='';
+    if(!msgs||!Object.keys(msgs).length){transcript.innerHTML='<div style="font-size:12px;color:var(--text-muted);">No messages</div>';return;}
+    Object.entries(msgs).sort((a,b)=>a[1].timestamp-b[1].timestamp).forEach(([key,m])=>{
+      const line=document.createElement('div');line.className='admin-dm-line';
+      const sender=allUsers[m.uid]?.username||m.username||m.uid;
+      const textSpan=document.createElement('span');textSpan.textContent=m.text;
+      line.innerHTML='<strong>'+esc(sender)+'</strong>: ';line.appendChild(textSpan);
+      const tDiv=document.createElement('div');tDiv.className='t';tDiv.textContent=fmtTime(m.timestamp);line.appendChild(tDiv);
+      const actRow=document.createElement('div');actRow.className='admin-dm-actions';
+      const delBtn=document.createElement('button');delBtn.className='admin-dm-act-btn del';delBtn.textContent='✕ Delete';
+      delBtn.onclick=async()=>{if(!confirm('Delete?'))return;try{await dbDel(`dms/${convKey}/${key}`);line.remove();showBanner('✅ Deleted','green');}catch(e){showBanner('⚠ Failed','red');}};
+      actRow.appendChild(delBtn);line.appendChild(actRow);transcript.appendChild(line);
     });
-    transcript.scrollTop = transcript.scrollHeight;
-  } catch(e) { transcript.innerHTML = '<div style="font-size:12px;color:#ef4444;">Failed</div>'; }
+    transcript.scrollTop=transcript.scrollHeight;
+  }catch(e){transcript.innerHTML='<div style="font-size:12px;color:#ef4444;">Failed</div>';}
 }
 
 // ════════════════════════════════════════════════
 // ADMIN ACTIONS
 // ════════════════════════════════════════════════
-async function adminEditIdentity(u) {
-  const newName = prompt('New username for '+u.username+':', u.username); if (newName===null) return;
-  const clean = newName.trim().replace(/\s+/g,' '); if (!clean) return;
-  const newAvatar = prompt('Avatar URL (blank to keep):', u.avatar||'');
-  const oldName = u.username;
-  try {
-    const patch = { username:clean };
-    if (newAvatar!==null) patch.avatar = newAvatar.trim()||null;
-    await sbPatch('/rest/v1/users?device_id=eq.'+encodeURIComponent(u.device_id), patch);
-    const localUser = allUsers.find(x => x.device_id===u.device_id);
-    if (localUser) { localUser.username = clean; if (newAvatar!==null) localUser.avatar = newAvatar.trim()||null; }
-    renderSidebar(document.getElementById('sidebarSearch').value);
-    await broadcastAdminCmd({ action:'identity_changed', device_id:u.device_id, username:clean });
-    if (alertGlobalEnabled) await sbPost('/rest/v1/messages', { username:'\uD83D\uDEE1 Admin', text:'\uD83D\uDEE1 '+username+' renamed '+oldName+' to '+clean, type:'system', device_id:deviceId });
-    showBanner('\u2705 Updated '+oldName+' \u2192 '+clean, 'green'); loadAllUsers(); loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Failed to update', 'red'); }
-}
-async function adminToggleNameLock(u, lockState) {
-  try {
-    await sbPatch('/rest/v1/users?device_id=eq.'+encodeURIComponent(u.device_id), { name_locked:lockState });
-    await broadcastAdminCmd({ action:'force_refresh_target', device_id:u.device_id });
-    showBanner('\u2705 '+(lockState?'Locked':'Unlocked')+' '+u.username, 'green'); loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Failed', 'red'); }
-}
 async function adminToggleMod(u, makemod) {
-  if (!canMod()) return;
-  try {
-    if (makemod) { await sbPost('/rest/v1/mod_users', { device_id:u.device_id, username:u.username, granted_by:username }, {'Prefer':'resolution=merge-duplicates,return=minimal'}); }
-    else { await sbDelete('/rest/v1/mod_users?device_id=eq.'+encodeURIComponent(u.device_id)); }
-    await loadMods();
-    await broadcastAdminCmd({ action:'mods_updated' });
-    showBanner('\u2705 '+(makemod?'Modded':'Unmodded')+' '+u.username, 'green'); loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Failed: '+e.message, 'red'); }
+  if(!isHeadAdmin()) return;
+  try{
+    if(makemod) await dbSet(dbRef(`mods/${u.uid}`),{username:u.username,grantedBy:myUsername(),grantedAt:Date.now()});
+    else await dbDel(`mods/${u.uid}`);
+    showBanner('✅ '+(makemod?'Modded':'Unmodded')+' '+u.username,'green');
+    loadAdminUserList();
+  }catch(e){showBanner('⚠ Failed: '+e.message,'red');}
 }
-async function adminUnbanDevice(devId, label) {
-  if (!confirm('Unban '+label+'?')) return;
-  try {
-    await sbDelete('/rest/v1/banned_devices?device_id=eq.'+encodeURIComponent(devId));
-    await broadcastAdminCmd({ action:'force_refresh_target', device_id:devId });
-    showBanner('\u2705 Unbanned '+label, 'green'); loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Failed', 'red'); }
+async function adminUnbanUser(uid, label) {
+  if(!confirm('Unban '+label+'?')) return;
+  try{await dbDel(`bannedUsers/${uid}`);showBanner('✅ Unbanned '+label,'green');loadAdminUserList();}catch(e){showBanner('⚠ Failed','red');}
 }
 async function adminDeleteAllFrom(u) {
-  if (!confirm('Delete all public messages from "'+u.username+'"?')) return;
-  try {
-    await sbDelete('/rest/v1/messages?device_id=eq.'+encodeURIComponent(u.device_id));
-    if (alertGlobalEnabled) await broadcastAdminCmd({ action:'force_refresh' });
-    else fullRefresh();
-    showBanner('\u2705 Deleted from '+u.username, 'green');
-  } catch(e) { showBanner('\u26A0 Failed', 'red'); }
+  if(!confirm('Delete all public messages from "'+u.username+'"?')) return;
+  try{
+    const msgs=await dbGet('messages');const updates={};
+    Object.entries(msgs||{}).forEach(([k,v])=>{if(v.uid===u.uid)updates[`messages/${k}`]=null;});
+    await update(ref(db,'/'),updates);
+    showBanner('✅ Deleted from '+u.username,'green');
+  }catch(e){showBanner('⚠ Failed','red');}
 }
 
-// Alert global toggle
-document.getElementById('alertGlobalToggle').addEventListener('change', function() { alertGlobalEnabled = this.checked; });
-
+document.getElementById('alertGlobalToggle').addEventListener('change', function(){alertGlobalEnabled=this.checked;});
+  
 // ════════════════════════════════════════════════
 // KICK MODAL
 // ════════════════════════════════════════════════
-function openKickModal(u) { kickTarget = u; document.getElementById('kickTargetName').textContent = u.username; document.getElementById('kickReasonInput').value = ''; document.getElementById('kickModal').classList.add('open'); setTimeout(() => document.getElementById('kickReasonInput').focus(), 30); }
-document.getElementById('kickCancelBtn').addEventListener('click', () => { document.getElementById('kickModal').classList.remove('open'); kickTarget = null; });
-document.getElementById('kickConfirmBtn').addEventListener('click', () => adminKickUser(kickTarget));
-async function adminKickUser(u) {
-  if (!u) return;
-  const reason = document.getElementById('kickReasonInput').value.trim() || 'No reason provided.';
+function openKickModal(u){kickTarget=u;document.getElementById('kickTargetName').textContent=u.username;document.getElementById('kickReasonInput').value='';document.getElementById('kickModal').classList.add('open');setTimeout(()=>document.getElementById('kickReasonInput').focus(),30);}
+document.getElementById('kickCancelBtn').addEventListener('click',()=>{document.getElementById('kickModal').classList.remove('open');kickTarget=null;});
+document.getElementById('kickConfirmBtn').addEventListener('click',async()=>{
+  if(!kickTarget) return;
+  const reason=document.getElementById('kickReasonInput').value.trim()||'No reason.';
   document.getElementById('kickModal').classList.remove('open');
-  try {
-    const realUser = allUsers.find(x => x.username===u.username)||u;
-    const devId = realUser.device_id||u.device_id;
-    await sbDelete('/rest/v1/messages?device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/dms?sender_device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/dms?recipient_device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/users?device_id=eq.'+encodeURIComponent(devId));
-    if (alertGlobalEnabled) await sbPost('/rest/v1/messages', { username:'\uD83D\uDEE1 Admin', text:'\uD83D\uDEE1 '+username+' kicked '+u.username+'||reason:'+reason, type:'system', device_id:deviceId });
-    await broadcastAdminCmd({ action:'user_kicked', device_id:devId, reason });
-    await broadcastAdminCmd({ action:'force_refresh' });
-    showBanner('\u2705 Kicked '+u.username, 'green'); fullRefresh(); loadAllUsers(); kickTarget = null;
-  } catch(e) { showBanner('\u26A0 Kick failed: '+(e.message||''), 'red'); }
-}
+  try{
+    const uid=kickTarget.uid;
+    const msgs=await dbGet('messages');const updates={};
+    Object.entries(msgs||{}).forEach(([k,v])=>{if(v.uid===uid)updates[`messages/${k}`]=null;});
+    updates[`users/${uid}`]=null;updates[`presence/${uid}`]=null;
+    await update(ref(db,'/'),updates);
+    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} kicked ${kickTarget.username}||reason:${reason}`,type:'system',timestamp:Date.now()});
+    showBanner('✅ Kicked '+kickTarget.username,'green');kickTarget=null;loadAdminUserList();
+  }catch(e){showBanner('⚠ Kick failed: '+(e.message||''),'red');}
+});
 
 // ════════════════════════════════════════════════
 // BAN MODAL
 // ════════════════════════════════════════════════
-function openBanModal(u) { banTarget = u; document.getElementById('banTargetName').textContent = u.username; document.getElementById('banReasonInput').value = ''; document.getElementById('banDays').value=''; document.getElementById('banHours').value=''; document.getElementById('banMinutes').value=''; document.getElementById('banSeconds').value=''; document.getElementById('banModal').classList.add('open'); setTimeout(() => document.getElementById('banReasonInput').focus(), 30); }
-document.getElementById('banCancelBtn').addEventListener('click', () => { document.getElementById('banModal').classList.remove('open'); banTarget = null; });
-document.getElementById('banConfirmBtn').addEventListener('click', () => adminBanUser(banTarget));
-async function adminBanUser(u) {
-  if (!u) return;
-  const reason = document.getElementById('banReasonInput').value.trim()||'No reason.';
-  const d=parseInt(document.getElementById('banDays').value||'0',10), h=parseInt(document.getElementById('banHours').value||'0',10), m=parseInt(document.getElementById('banMinutes').value||'0',10), s=parseInt(document.getElementById('banSeconds').value||'0',10);
-  const totalSec = d*86400+h*3600+m*60+s;
-  const expiresAt = totalSec>0 ? new Date(Date.now()+totalSec*1000).toISOString() : null;
+function openBanModal(u){banTarget=u;document.getElementById('banTargetName').textContent=u.username;document.getElementById('banReasonInput').value='';document.getElementById('banDays').value='';document.getElementById('banHours').value='';document.getElementById('banMinutes').value='';document.getElementById('banSeconds').value='';document.getElementById('banModal').classList.add('open');setTimeout(()=>document.getElementById('banReasonInput').focus(),30);}
+document.getElementById('banCancelBtn').addEventListener('click',()=>{document.getElementById('banModal').classList.remove('open');banTarget=null;});
+document.getElementById('banConfirmBtn').addEventListener('click',async()=>{
+  if(!banTarget) return;
+  const reason=document.getElementById('banReasonInput').value.trim()||'No reason.';
+  const d=parseInt(document.getElementById('banDays').value||'0',10),h=parseInt(document.getElementById('banHours').value||'0',10),m=parseInt(document.getElementById('banMinutes').value||'0',10),s=parseInt(document.getElementById('banSeconds').value||'0',10);
+  const totalSec=d*86400+h*3600+m*60+s;
+  const expiresAt=totalSec>0?new Date(Date.now()+totalSec*1000).toISOString():null;
   document.getElementById('banModal').classList.remove('open');
-  try {
-    const realUser = allUsers.find(x => x.username===u.username)||u;
-    const devId = realUser.device_id||u.device_id;
-    if (!devId) { showBanner('\u26A0 Cannot resolve device ID', 'red'); return; }
-    await sbPost('/rest/v1/banned_devices', { device_id:devId, reason, banned_by:username, last_username:u.username, ...(expiresAt?{expires_at:expiresAt}:{}) }, {'Prefer':'resolution=merge-duplicates,return=representation'});
-    await sbDelete('/rest/v1/messages?device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/dms?sender_device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/dms?recipient_device_id=eq.'+encodeURIComponent(devId));
-    await sbDelete('/rest/v1/users?device_id=eq.'+encodeURIComponent(devId));
-    if (alertGlobalEnabled) await sbPost('/rest/v1/messages', { username:'\uD83D\uDEE1 Admin', text:'\uD83D\uDEE1 '+username+' banned '+u.username+(expiresAt?' (until '+new Date(expiresAt).toLocaleString()+')':' (permanent)')+'||reason:'+reason, type:'system', device_id:deviceId });
-    await broadcastAdminCmd({ action:'user_banned', device_id:devId, reason, expires_at:expiresAt });
-    await broadcastAdminCmd({ action:'force_refresh' });
-    showBanner('\u2705 Banned '+u.username, 'green'); fullRefresh(); loadAllUsers(); banTarget = null; loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Ban failed: '+(e.message||''), 'red'); }
-}
+  try{
+    const uid=banTarget.uid;
+    await dbSet(dbRef(`bannedUsers/${uid}`),{uid,username:banTarget.username,reason,bannedBy:myUsername(),expiresAt,bannedAt:Date.now()});
+    const msgs=await dbGet('messages');const updates={};
+    Object.entries(msgs||{}).forEach(([k,v])=>{if(v.uid===uid)updates[`messages/${k}`]=null;});
+    updates[`users/${uid}`]=null;updates[`presence/${uid}`]=null;
+    await update(ref(db,'/'),updates);
+    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} banned ${banTarget.username}${expiresAt?' (until '+new Date(expiresAt).toLocaleString()+')':' (permanent)'}||reason:${reason}`,type:'system',timestamp:Date.now()});
+    showBanner('✅ Banned '+banTarget.username,'green');banTarget=null;loadAdminUserList();
+  }catch(e){showBanner('⚠ Ban failed: '+(e.message||''),'red');}
+});
 
 // ════════════════════════════════════════════════
 // MUTE MODAL
 // ════════════════════════════════════════════════
-function openMuteModal(u) { muteTarget = u; document.getElementById('muteTargetName').textContent = u.username; document.getElementById('muteReasonInput').value=''; document.getElementById('muteDays').value=''; document.getElementById('muteHours').value=''; document.getElementById('muteMinutes').value=''; document.getElementById('muteSeconds').value=''; document.getElementById('muteModal').classList.add('open'); }
-document.getElementById('muteCancelBtn').addEventListener('click', () => { document.getElementById('muteModal').classList.remove('open'); muteTarget = null; });
-document.getElementById('muteConfirmBtn').addEventListener('click', () => adminMuteUser(muteTarget));
-async function adminMuteUser(u) {
-  if (!u) return;
+function openMuteModal(u){muteTarget=u;document.getElementById('muteTargetName').textContent=u.username;document.getElementById('muteReasonInput').value='';document.getElementById('muteDays').value='';document.getElementById('muteHours').value='';document.getElementById('muteMinutes').value='';document.getElementById('muteSeconds').value='';document.getElementById('muteModal').classList.add('open');}
+document.getElementById('muteCancelBtn').addEventListener('click',()=>{document.getElementById('muteModal').classList.remove('open');muteTarget=null;});
+document.getElementById('muteConfirmBtn').addEventListener('click',async()=>{
+  if(!muteTarget) return;
   document.getElementById('muteModal').classList.remove('open');
-  const reason = document.getElementById('muteReasonInput').value.trim();
-  const d=parseInt(document.getElementById('muteDays').value||'0',10), h=parseInt(document.getElementById('muteHours').value||'0',10), m=parseInt(document.getElementById('muteMinutes').value||'0',10), s=parseInt(document.getElementById('muteSeconds').value||'0',10);
-  const totalSeconds = Math.max(0, d*86400+h*3600+m*60+s)+1;
-  const until = new Date(Date.now()+totalSeconds*1000).toISOString();
-  try {
-    await sbPatch('/rest/v1/users?device_id=eq.'+encodeURIComponent(u.device_id), { muted_until:until });
-    await broadcastAdminCmd({ action:'user_muted', device_id:u.device_id, until });
-    if (alertGlobalEnabled) {
-      const reasonPart = reason ? '||reason:'+reason : '';
-      await sbPost('/rest/v1/messages', { username:'\uD83D\uDEE1 Admin', text:'\uD83D\uDEE1 '+username+' muted '+u.username+' for '+formatMuteTime(new Date(until))+reasonPart, type:'system', device_id:deviceId });
+  const reason=document.getElementById('muteReasonInput').value.trim();
+  const d=parseInt(document.getElementById('muteDays').value||'0',10),h=parseInt(document.getElementById('muteHours').value||'0',10),m=parseInt(document.getElementById('muteMinutes').value||'0',10),s=parseInt(document.getElementById('muteSeconds').value||'0',10);
+  const totalSeconds=Math.max(0,d*86400+h*3600+m*60+s)+1;
+  const until=new Date(Date.now()+totalSeconds*1000).toISOString();
+  try{
+    await dbUpd(`users/${muteTarget.uid}`,{mutedUntil:until});
+    if(alertGlobalEnabled){
+      const reasonPart=reason?'||reason:'+reason:'';
+      await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} muted ${muteTarget.username} for ${formatMuteTime(new Date(until))}${reasonPart}`,type:'system',timestamp:Date.now()});
     }
-    showBanner('\u2705 Muted '+u.username+' for '+formatMuteTime(new Date(until)), 'green');
-    muteTarget = null; loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Mute failed', 'red'); }
-}
+    showBanner('✅ Muted '+muteTarget.username+' for '+formatMuteTime(new Date(until)),'green');
+    muteTarget=null;loadAdminUserList();
+  }catch(e){showBanner('⚠ Mute failed','red');}
+});
 async function adminUnmuteUser(u) {
-  try {
-    await sbPatch('/rest/v1/users?device_id=eq.'+encodeURIComponent(u.device_id), { muted_until:null });
-    await broadcastAdminCmd({ action:'user_unmuted', device_id:u.device_id });
-    if (alertGlobalEnabled) await sbPost('/rest/v1/messages', { username:'\uD83D\uDEE1 Admin', text:'\uD83D\uDEE1 '+username+' unmuted '+u.username, type:'system', device_id:deviceId });
-    showBanner('\u2705 Unmuted '+u.username, 'green'); loadAdminUserList();
-  } catch(e) { showBanner('\u26A0 Unmute failed', 'red'); }
+  try{
+    await dbUpd(`users/${u.uid}`,{mutedUntil:null});
+    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} unmuted ${u.username}`,type:'system',timestamp:Date.now()});
+    showBanner('✅ Unmuted '+u.username,'green');loadAdminUserList();
+  }catch(e){showBanner('⚠ Unmute failed','red');}
 }
-
+  
 function showProfileImageModal(url, name) {
   let overlay = document.getElementById('profileImgOverlay');
   if (!overlay) {
@@ -3564,372 +3489,187 @@ function showProfileImageModal(url, name) {
 // CONTEXT MENU
 // ════════════════════════════════════════════════
 const ctxMenu = document.getElementById('ctxMenu');
-let ctxTarget = null;
-function showCtxMenu(e, targetUsername, targetDevId) {
-  if (targetUsername === username) return;
-  let user = allUsers.find(u => u.username===targetUsername);
-  if (!user && targetDevId) user = allUsers.find(u => u.device_id===targetDevId);
-  if (!user) user = { username:targetUsername, device_id:targetDevId||'' };
-  ctxTarget = user;
-  document.getElementById('ctxMenuName').textContent = targetUsername;
-
-  // Remove old avatar/admin items
-  ctxMenu.querySelectorAll('.ctx-admin-item,.ctx-avatar-item').forEach(x => x.remove());
-
-  // Avatar header
-  const avatarUrl = user.avatar || getAvatarForDev(user.device_id) || '';
-  const avHeader = document.createElement('div');
-  avHeader.className = 'ctx-avatar-item';
-  avHeader.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;';
-  const avEl = makeAvatarEl(avatarUrl, targetUsername, 36);
-  avEl.style.cursor = avatarUrl ? 'pointer' : 'default';
-  avEl.title = avatarUrl ? 'Click to enlarge' : '';
-  if (avatarUrl) {
-    avEl.addEventListener('click', e => {
-      e.stopPropagation();
-      ctxMenu.classList.remove('open');
-      showProfileImageModal(avatarUrl, targetUsername);
-    });
-  }
-  const nameSpan = document.createElement('span');
-  nameSpan.style.cssText = 'font-size:14px;font-weight:700;color:var(--text);';
-  nameSpan.textContent = targetUsername;
-  avHeader.appendChild(avEl); avHeader.appendChild(nameSpan);
-  // Insert after the ctx-menu-header
-  const menuHeader = document.getElementById('ctxMenuName');
-  menuHeader.after(avHeader);
-
-  if (isAdmin()) {
-    const isMutedUser = user.muted_until && new Date(user.muted_until) > new Date();
-    const addItem = (label, cls, cb) => { const d = document.createElement('div'); d.className = 'ctx-menu-item ctx-admin-item'+(cls?' '+cls:''); d.innerHTML = label; d.onclick = cb; ctxMenu.appendChild(d); };
-    ctxMenu.appendChild(Object.assign(document.createElement('div'), { className:'ctx-menu-divider ctx-admin-item' }));
-    addItem('\uD83D\uDD04 Refresh their chat', '', async () => { ctxMenu.classList.remove('open'); await broadcastAdminCmd({ action:'force_refresh_target', device_id:ctxTarget.device_id }); showBanner('\u2705 Refreshed', 'green'); });
-    addItem(isMutedUser?'\uD83D\uDD0A Unmute':'\uD83D\uDD15 Mute', '', () => { ctxMenu.classList.remove('open'); isMutedUser ? adminUnmuteUser(ctxTarget) : openMuteModal(ctxTarget); });
-    if (canClearAll()) addItem('\uD83D\uDDD1 Clear messages', 'danger', () => { ctxMenu.classList.remove('open'); adminDeleteAllFrom(ctxTarget); });
-    if (canBanKick()) {
-      addItem('\uD83D\uDC62 Kick', 'danger', () => { ctxMenu.classList.remove('open'); openKickModal(ctxTarget); });
-      addItem('\u26D4 Ban', 'danger', () => { ctxMenu.classList.remove('open'); openBanModal(ctxTarget); });
+function showCtxMenu(e, targetUsername, targetUid) {
+  if(targetUid===myUid()) return;
+  const user=allUsers[targetUid]||{username:targetUsername,uid:targetUid};
+  ctxTarget=user;
+  document.getElementById('ctxMenuName').textContent=targetUsername;
+  ctxMenu.querySelectorAll('.ctx-admin-item,.ctx-avatar-item').forEach(x=>x.remove());
+  const avatarUrl=user.avatar||'';
+  const avHeader=document.createElement('div');avHeader.className='ctx-avatar-item';
+  avHeader.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;';
+  const avEl=makeAvatarEl(avatarUrl,targetUsername,36);avEl.style.cursor=avatarUrl?'pointer':'default';
+  if(avatarUrl){avEl.addEventListener('click',e=>{e.stopPropagation();ctxMenu.classList.remove('open');showProfileImageModal(avatarUrl,targetUsername);});}
+  const nameSpan=document.createElement('span');nameSpan.style.cssText='font-size:14px;font-weight:700;color:var(--text);';nameSpan.textContent=targetUsername;
+  avHeader.appendChild(avEl);avHeader.appendChild(nameSpan);
+  document.getElementById('ctxMenuName').after(avHeader);
+  if(isAdmin()){
+    const isMutedUser=user.mutedUntil&&new Date(user.mutedUntil)>new Date();
+    const addItem=(label,cls,cb)=>{const d=document.createElement('div');d.className='ctx-menu-item ctx-admin-item'+(cls?' '+cls:'');d.innerHTML=label;d.onclick=cb;ctxMenu.appendChild(d);};
+    ctxMenu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-menu-divider ctx-admin-item'}));
+    addItem(isMutedUser?'🔊 Unmute':'🔕 Mute','',()=>{ctxMenu.classList.remove('open');isMutedUser?adminUnmuteUser(ctxTarget):openMuteModal(ctxTarget);});
+    if(isHeadAdmin()){
+      addItem('👢 Kick','danger',()=>{ctxMenu.classList.remove('open');openKickModal(ctxTarget);});
+      addItem('⛔ Ban','danger',()=>{ctxMenu.classList.remove('open');openBanModal(ctxTarget);});
     }
   }
-  ctxMenu.style.left = Math.min(e.clientX, window.innerWidth-220)+'px';
-  ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight-300)+'px';
-  ctxJustOpened = true; ctxMenu.classList.add('open'); e.stopPropagation();
+  ctxMenu.style.left=Math.min(e.clientX,window.innerWidth-220)+'px';
+  ctxMenu.style.top=Math.min(e.clientY,window.innerHeight-300)+'px';
+  ctxJustOpened=true;ctxMenu.classList.add('open');e.stopPropagation();
 }
-document.getElementById('ctxDmBtn').addEventListener('click', () => { if (ctxTarget) openDm(ctxTarget); ctxMenu.classList.remove('open'); ctxTarget = null; });
-document.getElementById('ctxReportBtn').addEventListener('click', async () => {
+document.getElementById('ctxDmBtn').addEventListener('click',()=>{
+  if(ctxTarget){const u=allUsers[ctxTarget.uid]||ctxTarget;openDm({...u,uid:ctxTarget.uid});}
+  ctxMenu.classList.remove('open');ctxTarget=null;
+});
+document.getElementById('ctxReportBtn').addEventListener('click', async()=>{
   ctxMenu.classList.remove('open');
-  if (!ctxReportTarget) return;
-  if (!username) { showBanner('Set a username first', 'red'); return; }
-  try {
-    await sbPost('/rest/v1/reports', {
-      message_id: ctxReportTarget.msgId,
-      message_type: ctxReportTarget.isDm ? 'dm' : 'global',
-      reported_by_device_id: deviceId,
-      reported_by_username: username,
-      message_text: ctxReportTarget.msgText,
-      message_author: ctxReportTarget.authorName,
-      message_author_device_id: ctxReportTarget.authorDevId
-    }, {'Prefer':'return=minimal'});
-    showBanner('\uD83D\uDEA8 Report submitted', 'green');
-  } catch(e) { showBanner('\u26A0 Report failed', 'red'); }
-  ctxReportTarget = null;
+  if(!ctxReportTarget) return;
+  if(!myUsername()){showBanner('Set a username first','red');return;}
+  try{
+    await dbPush('reports',{
+      messageKey:ctxReportTarget.msgKey,
+      messageType:ctxReportTarget.isDm?'dm':'global',
+      reportedByUid:myUid(),
+      reportedByUsername:myUsername(),
+      messageText:ctxReportTarget.msgText,
+      messageAuthor:ctxReportTarget.authorName,
+      messageAuthorUid:ctxReportTarget.authorUid,
+      timestamp:Date.now()
+    });
+    showBanner('🚨 Report submitted','green');
+  }catch(e){showBanner('⚠ Report failed','red');}
+  ctxReportTarget=null;
 });
-let ctxJustOpened = false;
-document.addEventListener('mousedown', e => { if (ctxJustOpened) { ctxJustOpened = false; return; } if (!ctxMenu.contains(e.target)) ctxMenu.classList.remove('open'); });
+document.addEventListener('mousedown',e=>{if(ctxJustOpened){ctxJustOpened=false;return;}if(!ctxMenu.contains(e.target))ctxMenu.classList.remove('open');});
 
-document.getElementById('messagesInner').addEventListener('click', e => {
-  const replyBtn = e.target.closest('.msg-reply-btn');
-  if (replyBtn) { e.stopPropagation(); setReply(parseInt(replyBtn.dataset.id), replyBtn.dataset.sender, replyBtn.dataset.text); return; }
-  if (e.target.closest('.msg-delete')) return;
-  if (e.target.closest('.msg-edit')) return;
-  if (e.target.closest('.msg-react-btn')) return;
-  if (e.target.closest('.reaction-chip')) return;
-  const avatar = e.target.closest('.msg-avatar');
-  if (avatar) { const msgEl = avatar.closest('.msg'); if (msgEl && msgEl.classList.contains('theirs')) { showCtxMenu(e, avatar.dataset.username, avatar.dataset.devid); return; } }
-  const usernameSpan = e.target.closest('.msg-username');
-  if (usernameSpan) { showCtxMenu(e, usernameSpan.dataset.username||usernameSpan.textContent, null); return; }
+document.getElementById('messagesInner').addEventListener('click',e=>{
+  const replyBtn=e.target.closest('.msg-reply-btn');
+  if(replyBtn){e.stopPropagation();setReply(replyBtn.dataset.id,replyBtn.dataset.sender,replyBtn.dataset.text);return;}
+  if(e.target.closest('.msg-delete')||e.target.closest('.msg-edit')||e.target.closest('.msg-react-btn')||e.target.closest('.reaction-chip')) return;
+  const avatar=e.target.closest('.msg-avatar');
+  if(avatar){const msgEl=avatar.closest('.msg');if(msgEl&&msgEl.classList.contains('theirs')){showCtxMenu(e,avatar.dataset.username,avatar.dataset.uid);return;}}
+  const usernameSpan=e.target.closest('.msg-username');
+  if(usernameSpan){showCtxMenu(e,usernameSpan.dataset.username,usernameSpan.dataset.uid);return;}
 });
 
-// Right-click on message bubble for report
-document.getElementById('messagesInner').addEventListener('contextmenu', e => {
-  const bubble = e.target.closest('.msg-bubble');
-  if (!bubble) return;
-  const msgEl = bubble.closest('.msg');
-  if (!msgEl) return;
+document.getElementById('messagesInner').addEventListener('contextmenu',e=>{
+  const bubble=e.target.closest('.msg-bubble');if(!bubble) return;
+  const msgEl=bubble.closest('.msg');if(!msgEl) return;
   e.preventDefault();
-  const msgId = msgEl.dataset.msgId ? parseInt(msgEl.dataset.msgId) : (msgEl.dataset.dmId ? parseInt(msgEl.dataset.dmId) : null);
-  if (!msgId) return;
-  const isDm = !!msgEl.dataset.dmId;
-  const senderName = msgEl.dataset.senderDev ? nameForDev(msgEl.dataset.senderDev) : '';
-  ctxReportTarget = { msgId, isDm, msgText: bubble.textContent, authorName: senderName, authorDevId: msgEl.dataset.senderDev||'' };
-  // Show minimal ctx menu with just report
-  const targetUsername = senderName;
-  document.getElementById('ctxMenuName').textContent = senderName || 'Message';
-  ctxMenu.querySelectorAll('.ctx-admin-item').forEach(x => x.remove());
-  ctxMenu.style.left = Math.min(e.clientX, window.innerWidth-220)+'px';
-  ctxMenu.style.top  = Math.min(e.clientY, window.innerHeight-200)+'px';
-  ctxJustOpened = true; ctxMenu.classList.add('open'); e.stopPropagation();
-});
-
-// ════════════════════════════════════════════════
-// ACCOUNT RECOVERY
-// ════════════════════════════════════════════════
-
-let recoveryTargetUser = null; // the account they want to recover
-
-async function openRecoveryModal(preselectedUser) {
-  recoveryTargetUser = preselectedUser || null;
-  document.getElementById('recoveryReason').value = '';
-  document.getElementById('recoveryError').classList.remove('show');
-  document.getElementById('recoveryError').textContent = '';
-
-  // Load all users into the list
-  const listEl = document.getElementById('recoveryUserList');
-  listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:10px;">Loading users...</div>';
-  document.getElementById('recoveryModal').classList.add('open');
-
-  try {
-    const users = await sbGet('/rest/v1/users?order=username.asc&select=device_id,username,avatar');
-    listEl.innerHTML = '';
-    (users || []).forEach(u => {
-      const row = document.createElement('div');
-      row.className = 'recovery-user-row' + (preselectedUser && preselectedUser.device_id === u.device_id ? ' selected' : '');
-      row.dataset.devid = u.device_id;
-      row.dataset.username = u.username;
-      const av = makeAvatarEl(u.avatar || '', u.username, 26); av.style.flexShrink = '0';
-      const nameSpan = document.createElement('span'); nameSpan.textContent = u.username;
-      row.appendChild(av); row.appendChild(nameSpan);
-      row.addEventListener('click', () => {
-        listEl.querySelectorAll('.recovery-user-row').forEach(r => r.classList.remove('selected'));
-        row.classList.add('selected');
-        recoveryTargetUser = { device_id: u.device_id, username: u.username };
-        const info = document.getElementById('recoverySelectedInfo');
-        info.style.display = 'block';
-        info.textContent = '✓ Selected: ' + u.username;
-      });
-      listEl.appendChild(row);
-    });
-
-    if (preselectedUser) {
-      const info = document.getElementById('recoverySelectedInfo');
-      info.style.display = 'block';
-      info.textContent = '✓ Selected: ' + preselectedUser.username;
-    }
-  } catch(e) {
-    listEl.innerHTML = '<div style="font-size:12px;color:#ef4444;padding:10px;">Failed to load users.</div>';
-  }
-}
-
-document.getElementById('recoveryCancelBtn').addEventListener('click', () => {
-  document.getElementById('recoveryModal').classList.remove('open');
-  recoveryTargetUser = null;
-});
-document.getElementById('recoveryModal').addEventListener('mousedown', e => {
-  if (e.target === document.getElementById('recoveryModal')) {
-    document.getElementById('recoveryModal').classList.remove('open');
-    recoveryTargetUser = null;
-  }
-});
-
-document.getElementById('recoverySubmitBtn').addEventListener('click', async () => {
-  const reason = document.getElementById('recoveryReason').value.trim();
-  const errEl = document.getElementById('recoveryError');
-  errEl.classList.remove('show'); errEl.textContent = '';
-
-  if (!recoveryTargetUser) {
-    errEl.textContent = 'Please select the account you want to recover.';
-    errEl.classList.add('show'); return;
-  }
-  if (!reason || reason.length < 10) {
-    errEl.textContent = 'Please explain in more detail why this account is yours.';
-    errEl.classList.add('show'); return;
-  }
-
-  const requesterDevId = deviceId;
-  const requesterName = username || '(no username yet)';
-
-  try {
-    // Store the recovery request as a report with type 'recovery'
-    await sbPost('/rest/v1/reports', {
-      message_id: 0,
-      message_type: 'recovery',
-      reported_by_device_id: requesterDevId,
-      reported_by_username: requesterName,
-      message_text: reason,
-      message_author: recoveryTargetUser.username,
-      message_author_device_id: recoveryTargetUser.device_id
-    }, { 'Prefer': 'return=minimal' });
-
-    document.getElementById('recoveryModal').classList.remove('open');
-    recoveryTargetUser = null;
-    showBanner('✅ Recovery request submitted — an admin will review it soon', 'green');
-  } catch(e) {
-    errEl.textContent = 'Failed to submit. Try again.';
-    errEl.classList.add('show');
-  }
-});
-
-// "Already have an account?" button in username modal
-document.getElementById('alreadyHaveAccountBtn').addEventListener('click', () => {
-  modal.classList.remove('open');
-  openRecoveryModal(null);
-});
-
-// ── LOAD RECOVERY REQUESTS IN ADMIN PANEL ─────
-async function loadRecoveryRequests() {
-  const el = document.getElementById('recoveryRequestsList');
-  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
-  try {
-    const requests = await sbGet('/rest/v1/reports?message_type=eq.recovery&order=created_at.desc&select=*');
-    document.getElementById('apRecoveryCount').textContent = '(' + (requests || []).length + ')';
-    if (!requests || !requests.length) {
-      el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No pending requests.</div>';
-      return;
-    }
-    el.innerHTML = '';
-    requests.forEach(r => {
-      const item = document.createElement('div');
-      item.style.cssText = 'padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);margin-bottom:8px;';
-
-      const header = document.createElement('div');
-      header.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;';
-      const who = document.createElement('div');
-      who.innerHTML = '<span style="font-size:12px;font-weight:700;color:var(--text);">🔑 ' + esc(r.reported_by_username) + '</span>'
-        + '<span style="font-size:11px;color:var(--text-muted);"> wants to recover </span>'
-        + '<span style="font-size:12px;font-weight:700;color:var(--primary);">' + esc(r.message_author) + '</span>';
-      const ts = document.createElement('div');
-      ts.style.cssText = 'font-size:10px;color:var(--text-muted);white-space:nowrap;margin-left:8px;';
-      ts.textContent = fmtTime(r.created_at);
-      header.appendChild(who); header.appendChild(ts);
-
-      const reasonBox = document.createElement('div');
-      reasonBox.style.cssText = 'font-size:12px;color:var(--text-muted);padding:6px 8px;background:var(--surface);border-radius:6px;border-left:3px solid var(--primary);margin-bottom:8px;line-height:1.5;word-break:break-word;';
-      reasonBox.textContent = r.message_text;
-
-      const acts = document.createElement('div');
-      acts.style.cssText = 'display:flex;gap:6px;';
-
-      const approveBtn = document.createElement('button');
-      approveBtn.className = 'report-act-btn ok';
-      approveBtn.textContent = '✅ Approve';
-      approveBtn.onclick = () => approveRecovery(r, item);
-
-      const denyBtn = document.createElement('button');
-      denyBtn.className = 'report-act-btn del';
-      denyBtn.textContent = '✕ Deny';
-      denyBtn.onclick = async () => {
-        if (!confirm('Deny this recovery request from ' + r.reported_by_username + '?')) return;
-        try {
-          // Store denial notification on the requester's account
-          await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(r.reported_by_device_id),
-            { pending_notification: JSON.stringify({ type: 'recovery_denied', target: r.message_author }) });
-          await sbDelete('/rest/v1/reports?id=eq.' + r.id);
-          item.remove();
-          showBanner('✅ Request denied', 'green');
-          // Notify them live if online
-          await broadcastAdminCmd({ action: 'recovery_result', device_id: r.reported_by_device_id, approved: false, target: r.message_author });
-        } catch(e) { showBanner('⚠ Failed', 'red'); }
-      };
-
-      acts.appendChild(approveBtn); acts.appendChild(denyBtn);
-      item.appendChild(header); item.appendChild(reasonBox); item.appendChild(acts);
-      el.appendChild(item);
-    });
-  } catch(e) {
-    el.innerHTML = '<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Failed to load.</div>';
-  }
-}
-
-async function approveRecovery(r, itemEl) {
-  const requesterName = r.reported_by_username;
-  const targetName = r.message_author;
-  const requesterDevId = r.reported_by_device_id;
-  const targetDevId = r.message_author_device_id;
-
-  if (!confirm(
-    'APPROVE recovery?\n\n' +
-    '• "' + requesterName + '"\'s account will be DELETED\n' +
-    '• Their messages will stay but show as "[Deleted]"\n' +
-    '• They will be moved to "' + targetName + '"\n\n' +
-    'This cannot be undone. Continue?'
-  )) return;
-
-  try {
-    // 1. Anonymize the requester's messages (global, DMs, group)
-    await sbPatch('/rest/v1/messages?device_id=eq.' + encodeURIComponent(requesterDevId), { username: '[Deleted]' });
-    await sbPatch('/rest/v1/dms?sender_device_id=eq.' + encodeURIComponent(requesterDevId), { sender_username: '[Deleted]' });
-    await sbPatch('/rest/v1/group_messages?device_id=eq.' + encodeURIComponent(requesterDevId), { username: '[Deleted]' });
-
-    // 2. Delete the requester's user record
-    await sbDelete('/rest/v1/users?device_id=eq.' + encodeURIComponent(requesterDevId));
-
-    // 3. Update the target account's device_id to the requester's device_id
-    //    (this hands ownership of the old account to the requester's browser)
-    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(targetDevId),
-      { device_id: requesterDevId });
-
-    // 4. Store approval notification (they'll see it on next load via the new device_id)
-    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(requesterDevId),
-      { pending_notification: JSON.stringify({ type: 'recovery_approved', target: targetName }) });
-
-    // 5. Delete the request
-    await sbDelete('/rest/v1/reports?id=eq.' + r.id);
-
-    // 6. Notify them live
-    await broadcastAdminCmd({ action: 'recovery_result', device_id: requesterDevId, approved: true, target: targetName });
-
-    itemEl.remove();
-    showBanner('✅ Recovery approved — ' + requesterName + ' is now ' + targetName, 'green');
-    await broadcastAdminCmd({ action: 'force_refresh' });
-  } catch(e) {
-    showBanner('⚠ Approval failed: ' + (e.message || ''), 'red');
-  }
-}
-
-// ── CHECK FOR PENDING NOTIFICATION ON LOAD ────
-async function checkRecoveryNotification() {
-  if (!deviceId) return;
-  try {
-    const rows = await sbGet('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId) + '&select=pending_notification');
-    if (!rows || !rows.length || !rows[0].pending_notification) return;
-    let notif;
-    try { notif = JSON.parse(rows[0].pending_notification); } catch(e) { return; }
-    if (!notif || !notif.type) return;
-
-    // Clear it immediately so it only shows once
-    await sbPatch('/rest/v1/users?device_id=eq.' + encodeURIComponent(deviceId), { pending_notification: null });
-
-    const overlay = document.getElementById('recoveryNotifOverlay');
-    const icon = document.getElementById('recoveryNotifIcon');
-    const title = document.getElementById('recoveryNotifTitle');
-    const body = document.getElementById('recoveryNotifBody');
-
-    if (notif.type === 'recovery_approved') {
-      icon.textContent = '✅';
-      title.textContent = 'Account Recovered!';
-      title.style.color = '#10b981';
-      body.textContent = 'Your recovery request for "' + notif.target + '" was approved. You are now logged in as ' + notif.target + '. Welcome back!';
-    } else if (notif.type === 'recovery_denied') {
-      icon.textContent = '❌';
-      title.textContent = 'Recovery Denied';
-      title.style.color = '#ef4444';
-      body.textContent = 'Your recovery request for "' + notif.target + '" was reviewed and denied by an admin. If you believe this is a mistake, you can submit a new request with more detail.';
-    }
-    overlay.classList.add('open');
-  } catch(e) {}
-}
-
-document.getElementById('recoveryNotifOkBtn').addEventListener('click', () => {
-  document.getElementById('recoveryNotifOverlay').classList.remove('open');
-  // If approved, reload so they get the recovered account loaded fresh
-  window.location.reload();
+  const msgKey=msgEl.dataset.msgKey||msgEl.dataset.dmKey||null;if(!msgKey) return;
+  const isDm=!!msgEl.dataset.dmKey;
+  const senderUid=msgEl.dataset.senderUid||'';
+  const senderName=nameForUid(senderUid);
+  ctxReportTarget={msgKey,isDm,msgText:bubble.textContent,authorName:senderName,authorUid:senderUid};
+  document.getElementById('ctxMenuName').textContent=senderName||'Message';
+  ctxMenu.querySelectorAll('.ctx-admin-item,.ctx-avatar-item').forEach(x=>x.remove());
+  ctxMenu.style.left=Math.min(e.clientX,window.innerWidth-220)+'px';
+  ctxMenu.style.top=Math.min(e.clientY,window.innerHeight-200)+'px';
+  ctxJustOpened=true;ctxMenu.classList.add('open');e.stopPropagation();
 });
 
 // Auto-unban check
-setInterval(async () => {
-  const blocked = await isDeviceBlocked(deviceId);
-  if (!blocked && document.getElementById('bannedOverlay').classList.contains('show')) window.location.reload();
-}, 60000);
+setInterval(async()=>{
+  if(!currentUser) return;
+  const banned=await dbGet(`bannedUsers/${myUid()}`).catch(()=>null);
+  if(!banned&&document.getElementById('bannedOverlay').classList.contains('show')) location.reload();
+},60000);
+
+// ════════════════════════════════════════════════
+// SAVE SETTINGS
+// ════════════════════════════════════════════════
+document.getElementById('apSaveSettings').addEventListener('click', async()=>{
+  const settings={
+    editWindowMinutes:parseInt(document.getElementById('settingEditWindow').value)||2,
+    cooldownMs:(parseInt(document.getElementById('settingCooldown').value)||5)*1000,
+    maxMsgLen:parseInt(document.getElementById('settingMaxLen').value)||500,
+    pollMaxOptions:parseInt(document.getElementById('settingPollMax').value)||8
+  };
+  try{
+    await dbSet('settings',settings);
+    Object.assign(runtimeSettings,settings);
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(runtimeSettings));
+    showBanner('✅ Settings saved','green');
+  }catch(e){showBanner('⚠ Save failed','red');}
+});
+
+// ════════════════════════════════════════════════
+// REPLY
+// ════════════════════════════════════════════════
+function setReply(id,senderName,text){
+  replyTo={id,username:senderName,text};
+  document.getElementById('replyBar').classList.add('show');
+  document.getElementById('replyBarText').innerHTML='Replying to <strong>'+esc(senderName)+'</strong>: '+esc(text.slice(0,60))+(text.length>60?'…':'');
+  document.getElementById('msgInput').focus();
+}
+function clearReply(){replyTo=null;document.getElementById('replyBar').classList.remove('show');}
+document.getElementById('replyCancelBtn').addEventListener('click',clearReply);
+
+// ════════════════════════════════════════════════
+// SCROLL
+// ════════════════════════════════════════════════
+const messagesWrap=document.getElementById('messagesWrap');
+const scrollBtn=document.getElementById('scrollBtn');
+messagesWrap.addEventListener('scroll',()=>{
+  const dist=messagesWrap.scrollHeight-messagesWrap.scrollTop-messagesWrap.clientHeight;
+  autoScroll=dist<60;scrollBtn.classList.toggle('show',dist>120);
+});
+scrollBtn.addEventListener('click',()=>{autoScroll=true;messagesWrap.scrollTop=999999;scrollBtn.classList.remove('show');});
+
+// ════════════════════════════════════════════════
+// COOLDOWN
+// ════════════════════════════════════════════════
+function startCooldown(){
+  const sBtn=document.getElementById('sendBtn'),inp=document.getElementById('msgInput');
+  const bWrap=document.getElementById('cooldownWrap'),bar=document.getElementById('cooldownBar');
+  sBtn.disabled=true;inp.disabled=true;bWrap.classList.add('active');bar.style.width='0%';
+  const start=Date.now();
+  const tick=()=>{
+    const e=Date.now()-start;bar.style.width=Math.min(e/runtimeSettings.cooldownMs*100,100)+'%';
+    if(e<runtimeSettings.cooldownMs){cooldownRaf=requestAnimationFrame(tick);}
+    else{if(!isMuted&&myUsername()){sBtn.disabled=false;inp.disabled=false;}bWrap.classList.remove('active');bar.style.width='0%';inp.focus();}
+  };
+  cooldownRaf=requestAnimationFrame(tick);
+}
+
+// ════════════════════════════════════════════════
+// ANNOUNCEMENT OVERLAY
+// ════════════════════════════════════════════════
+document.getElementById('announceCloseBtn').addEventListener('click',()=>{
+  clearTimeout(window._announceTimer);
+  document.getElementById('announceOverlay').classList.remove('show');
+});
+function renderAnnouncementOverlay(text){
+  document.getElementById('announceOverlayText').textContent=text;
+  document.getElementById('announceOverlay').classList.add('show');
+  clearTimeout(window._announceTimer);
+  window._announceTimer=setTimeout(()=>document.getElementById('announceOverlay').classList.remove('show'),8000);
+}
+
+// ════════════════════════════════════════════════
+// PROFILE IMAGE MODAL
+// ════════════════════════════════════════════════
+function showProfileImageModal(url, name){
+  let overlay=document.getElementById('profileImgOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');overlay.id='profileImgOverlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;';
+    overlay.innerHTML='<img id="profileImgBig" style="max-width:90vw;max-height:80vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);"><div style="color:white;font-size:15px;font-weight:700;"></div>';
+    overlay.addEventListener('click',()=>overlay.style.display='none');
+    document.body.appendChild(overlay);
+  }
+  overlay.querySelector('img').src=url;
+  overlay.querySelector('div').textContent=name;
+  overlay.style.display='flex';
+}
+
+// ════════════════════════════════════════════════
+// COLLAPSIBLE ADMIN SECTIONS
+// ════════════════════════════════════════════════
+document.querySelectorAll('.admin-section-toggle-header').forEach(header=>{
+  header.addEventListener('click',()=>header.closest('.admin-section-collapsible').classList.toggle('expanded'));
+});
+
 </script>
 </body>
 </html>
