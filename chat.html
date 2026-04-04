@@ -1132,7 +1132,7 @@ body:not(.dark-mode){
       <span>👤 Direct Messages</span>
       <span id="dmsSectionArrow" style="font-size:10px;transition:transform 0.2s;">▶</span>
     </div>
-    <div id="dmsSection" style="display:flex;flex-direction:column;">
+    <div id="dmsSection" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
       <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
       <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
     </div>
@@ -1974,7 +1974,13 @@ document.getElementById('avatarClickTarget').addEventListener('click', ()=>{
   if (!isOpen) { updateAvatarPreview(myAvatar()); document.getElementById('avatarUrlInput').value=''; }
 });
 document.getElementById('avatarSectionCloseBtn').addEventListener('click', ()=>{ document.getElementById('avatarSection').style.display='none'; });
-document.getElementById('changeUsernameBtn').addEventListener('click', ()=>openUsernameModal(true));
+document.getElementById('changeUsernameBtn').addEventListener('click', ()=>{
+  if (!currentUser) {
+    document.getElementById('signinModal').classList.add('open');
+  } else {
+    openUsernameModal(true);
+  }
+});
 
 async function submitUsername() {
   if (!currentUser) return;
