@@ -569,6 +569,20 @@ body:not(.dark-mode){
 </head>
 <body class="dark-mode">
 
+<!-- GOOGLE SIGN-IN MODAL -->
+<div class="modal-overlay open" id="signinModal">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:12px;">💬</div>
+    <div class="modal-title" style="text-align:center;">Welcome to GN Chat</div>
+    <div class="modal-sub" style="text-align:center;">Sign in with Google to chat, or view as guest (read-only).</div>
+    <button class="modal-btn" id="googleSignInBtn" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.7 5.5 2.9 13.5l7.8 6C12.5 13.2 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.5c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.6-9.4 6.6-16.1z"/><path fill="#FBBC05" d="M10.7 28.5c-.5-1.5-.8-3.2-.8-4.9s.3-3.4.8-4.9l-7.8-6C1.1 16 0 19.9 0 24s1.1 8 2.9 11.3l7.8-5.8z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7-5.4c-2 1.4-4.6 2.2-8.2 2.2-6.2 0-11.5-3.7-13.3-9l-7.8 5.8C6.7 42.5 14.7 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+    <button class="ban-cancel-btn" id="guestViewBtn" style="margin-top:0;">👁 View as Guest (read-only)</button>
+  </div>
+</div>
+  
 <!-- USERNAME MODAL -->
 <div class="modal-overlay" id="usernameModal">
   <div class="modal" id="usernameModalInner">
@@ -847,6 +861,9 @@ body:not(.dark-mode){
       <button class="modal-btn" id="cloakApplyBtn" style="padding:8px;font-size:13px;">Apply Cloak</button>
       <button class="ban-cancel-btn" id="cloakClearBtn" style="padding:8px;font-size:13px;margin:0;">Clear</button>
     </div>
+  </div>
+  <div class="settings-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px;">
+    <button id="signOutBtn" style="width:100%;padding:9px;border:1px solid #ef4444;border-radius:var(--radius);background:none;color:#ef4444;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">🚪 Sign Out</button>
   </div>
 </div>
 
@@ -1550,7 +1567,7 @@ function startMentionBlink(chatName) {
   let toggle = false;
   mentionBlinkInterval = setInterval(() => {
     toggle = !toggle;
-    document.title = toggle ? '🔔 @' + username + ' in ' + chatName : originalTitle;
+    document.title = toggle ? '🔔 @' + myUsername() + ' in ' + chatName : originalTitle;
   }, 800);
 }
 
@@ -2077,26 +2094,6 @@ function setupPresenceHeartbeat() {
 }
 
 // ════════════════════════════════════════════════
-// CHECK IF BANNED
-// ════════════════════════════════════════════════
-async function checkIfBanned() {
-  if (!currentUser) return;
-  try {
-    const banned=await dbGet(`bannedUsers/${myUid()}`);
-    if (!banned) return;
-    if (banned.expiresAt&&new Date(banned.expiresAt)<=new Date()) { await dbDel(`bannedUsers/${myUid()}`); return; }
-    showBannedScreen(banned.reason||'No reason.',banned.expiresAt);
-  } catch(e) {}
-}
-function showBannedScreen(reason, expiresAt) {
-  document.getElementById('bannedReasonText').textContent=reason;
-  const expEl=document.getElementById('bannedExpiry');
-  expEl.textContent=expiresAt?'Ban expires: '+new Date(expiresAt).toLocaleString():'This ban is permanent.';
-  document.getElementById('bannedOverlay').classList.add('show');
-}
-document.getElementById('bannedOkBtn').addEventListener('click', async()=>{ await doSignOut(); });
-
-// ════════════════════════════════════════════════
 // BOOT (init things that don't need auth)
 // ════════════════════════════════════════════════
 (function boot() {
@@ -2196,24 +2193,6 @@ function showBannedScreen(reason, expiresAt) {
 }
 document.getElementById('bannedOkBtn').addEventListener('click', async()=>{ await doSignOut(); });
 
-// ── ANNOUNCEMENT ──────────────────────────────
-function renderAnnouncementOverlay(text) {
-  document.getElementById('announceOverlayText').textContent = text;
-  document.getElementById('announceOverlay').classList.add('show');
-  clearTimeout(window._announceTimer);
-  window._announceTimer = setTimeout(() => document.getElementById('announceOverlay').classList.remove('show'), 8000);
-}
-document.getElementById('announceCloseBtn').addEventListener('click', () => {
-  clearTimeout(window._announceTimer);
-  document.getElementById('announceOverlay').classList.remove('show');
-});
-function renderAnnouncement(text) {
-  const el = document.createElement('div');
-  el.className = 'msg-system announcement'; el.textContent = '\uD83D\uDCE2 ' + text;
-  document.getElementById('messagesInner').appendChild(el);
-  if (autoScroll) document.getElementById('messagesWrap').scrollTop = 999999;
-}
-
 // ════════════════════════════════════════════════
 // GLOBAL MESSAGES LISTENER
 // ════════════════════════════════════════════════
@@ -2230,42 +2209,6 @@ function listenGlobalMessages() {
     msgs.forEach(([k,m])=>renderMessage({...m,key:k},false));
     if(autoScroll) setTimeout(()=>{ document.getElementById('messagesWrap').scrollTop=999999; },50);
   });
-}
-
-// ════════════════════════════════════════════════
-// PRESENCE
-// ════════════════════════════════════════════════
-function setupPresence() {
-  if (!currentUser||!myUsername()) return;
-  const uid=myUid(), presRef=dbRef(`presence/${uid}`);
-  onValue(dbRef('.info/connected'), snap=>{
-    if(snap.val()===false) return;
-    onDisconnect(presRef).remove();
-    set(presRef,{ uid, username:myUsername(), avatar:myAvatar(), online:true, lastSeen:Date.now(),
-      status:myStatus&&new Date(myStatus.expiresAt)>new Date()?{emoji:myStatus.emoji,text:myStatus.text,expiresAt:myStatus.expiresAt}:null });
-  });
-}
-function listenPresence() {
-  onValue(dbRef('presence'), snap=>{
-    const data=snap.val()||{};
-    const users=Object.values(data).filter(u=>u.online);
-    document.getElementById('onlineCount').textContent=users.length;
-    const listEl=document.getElementById('onlineList');
-    if(!users.length){listEl.innerHTML='<em style="color:#64748b">No one online</em>';return;}
-    listEl.innerHTML=users.map(u=>{
-      const st=u.status&&new Date(u.status.expiresAt)>new Date()?u.status:null;
-      const stHtml=st?` <span style="font-size:11px;color:#94a3b8;">${esc(st.emoji||'')} ${esc(st.text)}</span>`:'';
-      return `<div class="online-tooltip-row"><div class="online-tooltip-dot"></div><span style="color:${colorFor(u.username)};font-weight:600">${esc(u.username)}</span>${u.uid===myUid()?'<span style="color:#64748b;font-size:10px;margin-left:2px">(you)</span>':''}${stHtml}</div>`;
-    }).join('');
-  });
-}
-function setupPresenceHeartbeat() {
-  if(presenceInterval) clearInterval(presenceInterval);
-  presenceInterval=setInterval(async()=>{
-    if(!currentUser||!myUsername()) return;
-    await dbUpd(`presence/${myUid()}`,{lastSeen:Date.now()}).catch(()=>{});
-    await checkMuteStatus();
-  },30000);
 }
 
 function updateAnnounceDropdown() {
@@ -2391,19 +2334,6 @@ function startDmUnreadPolling() {
     renderSidebar(document.getElementById('sidebarSearch').value||'');
   },5000);
 }
-  
-// ════════════════════════════════════════════════
-// REPLY
-// ════════════════════════════════════════════════
-let replyTo = null;
-function setReply(msgId, senderName, text) {
-  replyTo = { id:msgId, username:senderName, text };
-  document.getElementById('replyBar').classList.add('show');
-  document.getElementById('replyBarText').innerHTML = 'Replying to <strong>'+esc(senderName)+'</strong>: '+esc(text.slice(0,60))+(text.length>60?'\u2026':'');
-  document.getElementById('msgInput').focus();
-}
-function clearReply() { replyTo = null; document.getElementById('replyBar').classList.remove('show'); }
-document.getElementById('replyCancelBtn').addEventListener('click', clearReply);
 
 // ════════════════════════════════════════════════
 // RENDER MESSAGE
@@ -2594,7 +2524,7 @@ imgDz.addEventListener('drop', async e => {
 });
 document.getElementById('imgSendBtn').addEventListener('click', async () => {
   if (!pendingImageData) return;
-  if (!username) { showBanner('Set a username first', 'red'); return; }
+  if (!myUsername()) { showBanner('Set a username first', 'red'); return; }
   if (isMuted) { showBanner('🔕 You are muted.', 'red'); return; }
   document.getElementById('imgModal').classList.remove('open');
   const imgPayload={uid:myUid(),username:myUsername(),text:pendingImageData,type:'image',timestamp:Date.now()};
@@ -2739,7 +2669,7 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
   if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });document.getElementById('msgInput').addEventListener('input', function() {
   this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-  if (!username) return;
+  if (!myUsername()) return;
   // Typing indicator (Firebase has no broadcast channel — typing is local only)
   // @ mention
   const val = this.value;
@@ -2778,7 +2708,7 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
   inputArea.addEventListener('drop', async e => {
     e.preventDefault();
     dragCounter = 0; overlay.classList.remove('show');
-    if (!username) { showBanner('Set a username first', 'red'); return; }
+    if (!myUsername()) { showBanner('Set a username first', 'red'); return; }
     if (isMuted)   { showBanner('🔕 You are muted.', 'red'); return; }
     const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'));
     if (!file) return;
@@ -2808,21 +2738,6 @@ function listenGroups() {
     renderGroupList();
   });
 }
-
-function setGroupsExpanded(expanded) {
-  const section=document.getElementById('groupsSection'), arrow=document.getElementById('groupsSectionArrow');
-  if(expanded){section.style.display='block';arrow.style.transform='rotate(90deg)';localStorage.setItem(GROUPS_COLLAPSED_KEY,'false');}
-  else{section.style.display='none';arrow.style.transform='rotate(0deg)';localStorage.setItem(GROUPS_COLLAPSED_KEY,'true');}
-}
-window.toggleGroupsSection=function(){setGroupsExpanded(localStorage.getItem(GROUPS_COLLAPSED_KEY)!=='false');};
-function setDmsExpanded(expanded) {
-  const section=document.getElementById('dmsSection'), arrow=document.getElementById('dmsSectionArrow');
-  if(expanded){section.style.display='flex';section.style.flexDirection='column';arrow.style.transform='rotate(90deg)';localStorage.setItem(DMS_COLLAPSED_KEY,'false');}
-  else{section.style.display='none';arrow.style.transform='rotate(0deg)';localStorage.setItem(DMS_COLLAPSED_KEY,'true');}
-}
-window.toggleDmsSection=function(){setDmsExpanded(localStorage.getItem(DMS_COLLAPSED_KEY)!=='false');};
-function initGroupsSection(){setGroupsExpanded(localStorage.getItem(GROUPS_COLLAPSED_KEY)!=='true');}
-function initDmsSection(){setDmsExpanded(localStorage.getItem(DMS_COLLAPSED_KEY)!=='true');}
 
 function renderGroupList() {
   const el=document.getElementById('groupList');el.innerHTML='';
@@ -3108,33 +3023,6 @@ document.getElementById('adminPanelBtn').addEventListener('click', () => {
 });
 document.getElementById('adminPanelClose').addEventListener('click', () => document.getElementById('adminPanelOverlay').classList.remove('open'));
 document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open'); });
-
-// Collapsible admin sections
-document.querySelectorAll('.admin-section-toggle-header').forEach(header => {
-  header.addEventListener('click', () => {
-    header.closest('.admin-section-collapsible').classList.toggle('expanded');
-  });
-});
-
-// Save settings
-document.getElementById('apSaveSettings').addEventListener('click', async () => {
-  const settings = {
-    editWindowMinutes: parseInt(document.getElementById('settingEditWindow').value)||2,
-    cooldownMs: (parseInt(document.getElementById('settingCooldown').value)||5) * 1000,
-    maxMsgLen: parseInt(document.getElementById('settingMaxLen').value)||500,
-    pollMaxOptions: parseInt(document.getElementById('settingPollMax').value)||8
-  };
-  try {
-    await fetch(SUPABASE_URL + '/rest/v1/chat_settings', {
-      method:'POST', headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-      body: JSON.stringify({ id:1, edit_window_minutes:settings.editWindowMinutes, cooldown_ms:settings.cooldownMs, max_msg_len:settings.maxMsgLen, poll_max_options:settings.pollMaxOptions })
-    });
-    Object.assign(runtimeSettings, settings);
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(runtimeSettings));
-    await broadcastAdminCmd({ action:'settings_updated', settings });
-    showBanner('\u2705 Settings saved & broadcast', 'green');
-  } catch(e) { showBanner('\u26A0 Save failed', 'red'); }
-});
 
 // Quick Actions
 document.getElementById('apForceRefreshAll').addEventListener('click', ()=>{ location.reload(); });
@@ -3469,22 +3357,6 @@ async function adminUnmuteUser(u) {
   }catch(e){showBanner('⚠ Unmute failed','red');}
 }
   
-function showProfileImageModal(url, name) {
-  let overlay = document.getElementById('profileImgOverlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'profileImgOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;';
-    overlay.innerHTML = '<img id="profileImgBig" style="max-width:90vw;max-height:80vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">'
-      + '<div style="color:white;font-size:15px;font-weight:700;"></div>';
-    overlay.addEventListener('click', () => overlay.style.display = 'none');
-    document.body.appendChild(overlay);
-  }
-  overlay.querySelector('img').src = url;
-  overlay.querySelector('div').textContent = name;
-  overlay.style.display = 'flex';
-}
-  
 // ════════════════════════════════════════════════
 // CONTEXT MENU
 // ════════════════════════════════════════════════
@@ -3604,33 +3476,6 @@ function setReply(id,senderName,text){
 }
 function clearReply(){replyTo=null;document.getElementById('replyBar').classList.remove('show');}
 document.getElementById('replyCancelBtn').addEventListener('click',clearReply);
-
-// ════════════════════════════════════════════════
-// SCROLL
-// ════════════════════════════════════════════════
-const messagesWrap=document.getElementById('messagesWrap');
-const scrollBtn=document.getElementById('scrollBtn');
-messagesWrap.addEventListener('scroll',()=>{
-  const dist=messagesWrap.scrollHeight-messagesWrap.scrollTop-messagesWrap.clientHeight;
-  autoScroll=dist<60;scrollBtn.classList.toggle('show',dist>120);
-});
-scrollBtn.addEventListener('click',()=>{autoScroll=true;messagesWrap.scrollTop=999999;scrollBtn.classList.remove('show');});
-
-// ════════════════════════════════════════════════
-// COOLDOWN
-// ════════════════════════════════════════════════
-function startCooldown(){
-  const sBtn=document.getElementById('sendBtn'),inp=document.getElementById('msgInput');
-  const bWrap=document.getElementById('cooldownWrap'),bar=document.getElementById('cooldownBar');
-  sBtn.disabled=true;inp.disabled=true;bWrap.classList.add('active');bar.style.width='0%';
-  const start=Date.now();
-  const tick=()=>{
-    const e=Date.now()-start;bar.style.width=Math.min(e/runtimeSettings.cooldownMs*100,100)+'%';
-    if(e<runtimeSettings.cooldownMs){cooldownRaf=requestAnimationFrame(tick);}
-    else{if(!isMuted&&myUsername()){sBtn.disabled=false;inp.disabled=false;}bWrap.classList.remove('active');bar.style.width='0%';inp.focus();}
-  };
-  cooldownRaf=requestAnimationFrame(tick);
-}
 
 // ════════════════════════════════════════════════
 // ANNOUNCEMENT OVERLAY
