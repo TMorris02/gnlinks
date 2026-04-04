@@ -1128,9 +1128,14 @@ body:not(.dark-mode){
   <button class="group-create-btn" id="groupCreateBtn">＋ New Group</button>
   <div id="groupList" style="padding:0 0 4px;"></div>
 </div>
-    <div class="sidebar-section-label" style="padding-top:8px;">👤 Direct Messages</div>
-    <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
-    <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
+    <div class="sidebar-section-label" id="dmsSectionLabel" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-right:10px;padding-top:8px;" onclick="toggleDmsSection()">
+      <span>👤 Direct Messages</span>
+      <span id="dmsSectionArrow" style="font-size:10px;transition:transform 0.2s;">▶</span>
+    </div>
+    <div id="dmsSection" style="display:flex;flex-direction:column;">
+      <input class="sidebar-search" id="sidebarSearch" type="text" placeholder="Search users...">
+      <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">Loading users...</div></div>
+    </div>
   <div class="status-bar" id="statusBar">
       <div class="status-display" id="statusDisplay" style="display:none;">
         <span class="s-emoji" id="statusDisplayEmoji"></span>
