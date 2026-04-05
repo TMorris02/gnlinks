@@ -570,7 +570,7 @@ body:not(.dark-mode){
 <body class="dark-mode">
 
 <!-- GOOGLE SIGN-IN MODAL -->
-<div class="modal-overlay open" id="signinModal">
+<div class="modal-overlay" id="signinModal">
   <div class="modal" style="max-width:380px;text-align:center;">
     <div style="font-size:48px;margin-bottom:12px;">💬</div>
     <div class="modal-title" style="text-align:center;">Welcome to GN Chat</div>
@@ -634,7 +634,7 @@ body:not(.dark-mode){
 
     <!-- Leave / Delete account row -->
     <div id="accountActionsRow" style="display:none;gap:8px;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
-      <button id="leaveAccountBtn" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🚪 Leave</button>
+      <button id="leaveAccountBtn" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🚪 Sign Out</button>
       <button id="deleteAccountBtn" style="flex:1;padding:9px;border:1px solid #ef4444;border-radius:var(--radius);background:none;color:#ef4444;font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🗑 Delete</button>
     </div>
 
@@ -861,9 +861,6 @@ body:not(.dark-mode){
       <button class="modal-btn" id="cloakApplyBtn" style="padding:8px;font-size:13px;">Apply Cloak</button>
       <button class="ban-cancel-btn" id="cloakClearBtn" style="padding:8px;font-size:13px;margin:0;">Clear</button>
     </div>
-  </div>
-  <div class="settings-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px;">
-    <button id="signOutBtn" style="width:100%;padding:9px;border:1px solid #ef4444;border-radius:var(--radius);background:none;color:#ef4444;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">🚪 Sign Out</button>
   </div>
 </div>
 
@@ -1336,7 +1333,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-function triggerNotif(type, senderName, groupName) {
+function triggerNotif(type, senderName, groupName, msgText) {
   if (notifPref === 'none') return;
   if (type === 'global' && notifPref === 'dm') return;
   if (type === 'dm' && notifPref === 'global') return;
@@ -1350,6 +1347,11 @@ function triggerNotif(type, senderName, groupName) {
   else if (type === 'global') { unreadGlobal++; updateGlobalBadge(); }
   else if (type === 'mention') { mentionUnread[senderName] = (mentionUnread[senderName] || 0) + 1; }
   if (tabFocused) return;
+  // System notification when tab is hidden
+  if (type === 'dm') sendSystemNotif(`💬 ${senderName}`, msgText || 'New message', avatarForUid(Object.entries(allUsers).find(([uid,u])=>u.username===senderName)?.[0]||''));
+  else if (type === 'group') sendSystemNotif(`👥 ${groupName}`, `${senderName}: ${msgText||'New message'}`);
+  else if (type === 'global') sendSystemNotif(`🌐 GN Chat`, `${senderName}: ${msgText||'New message'}`);
+  else if (type === 'mention') sendSystemNotif(`🔔 ${senderName} mentioned you`, msgText||'');
   const total = unreadGlobal + Object.values(unreadDm).reduce((a,b)=>a+b,0) + Object.values(unreadGroup).reduce((a,b)=>a+b,0);
   if (total > 0) {
     if (type === 'dm') document.title = `💬 (${total}) ${senderName}`;
@@ -1616,6 +1618,40 @@ function showBanner(msg, color) {
 }
 
 // ════════════════════════════════════════════════
+// SYSTEM NOTIFICATIONS
+// ════════════════════════════════════════════════
+let notifPermission = 'default';
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') { notifPermission = 'granted'; return; }
+  if (Notification.permission !== 'denied') {
+    const result = await Notification.requestPermission();
+    notifPermission = result;
+  } else {
+    notifPermission = 'denied';
+  }
+}
+
+function sendSystemNotif(title, body, icon) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (!document.hidden) return; // only when tab is not visible
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: icon || 'https://tmorris01.github.io/gnlinks/favicon.ico',
+      badge: icon || 'https://tmorris01.github.io/gnlinks/favicon.ico',
+      tag: 'gn-chat',
+      renotify: true,
+      silent: false
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+    setTimeout(() => n.close(), 6000);
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════════
 // AVATAR RENDERING
 // ════════════════════════════════════════════════
 function makeAvatarEl(avatarUrl, name, size) {
@@ -1876,15 +1912,13 @@ async function doSignOut() {
   await signOut(auth);
   location.reload();
 }
-// Sign out buttons (settings panel + profile modal)
-document.getElementById('signOutBtn').addEventListener('click', async () => {
-  if (!confirm('Sign out? Your data stays intact.')) return;
-  await doSignOut();
-});
 
 // ════════════════════════════════════════════════
 // AUTH STATE
 // ════════════════════════════════════════════════
+// Hide signin modal immediately if Firebase already has a session cached
+auth.currentUser && document.getElementById('signinModal').classList.remove('open');
+
 onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
@@ -1913,6 +1947,7 @@ onAuthStateChanged(auth, async user => {
     checkIfBanned();
     initAvatarPicker();
     initEmojiPicker();
+    requestNotifPermission();
   } else {
     currentUser = null; myProfile = null;
     document.getElementById('signinModal').classList.add('open');
@@ -1980,6 +2015,11 @@ document.getElementById('changeUsernameBtn').addEventListener('click', ()=>{
   } else {
     openUsernameModal(true);
   }
+});
+document.getElementById('leaveAccountBtn').addEventListener('click', async ()=>{
+  if (!confirm('Sign out? Your data stays intact.')) return;
+  document.getElementById('usernameModal').classList.remove('open');
+  await doSignOut();
 });
 
 async function submitUsername() {
@@ -2340,7 +2380,10 @@ function startDmUnreadPolling() {
       const unread=sortedMsgs.filter(([k,m])=>m.uid!==myUid()&&(!seenDmIds[otherUid]||k>seenDmIds[otherUid]));
       const prevCount=dmUnreadMap[otherUid]||0;
       dmUnreadMap[otherUid]=unread.length;
-      if(unread.length>prevCount) triggerNotif('dm',allUsers[otherUid]?.username||'Someone');
+      if(unread.length>prevCount) {
+        const lastMsg=unread[unread.length-1][1];
+        triggerNotif('dm',allUsers[otherUid]?.username||'Someone',null,lastMsg.text||'');
+      }
     });
     renderSidebar(document.getElementById('sidebarSearch').value||'');
   },5000);
