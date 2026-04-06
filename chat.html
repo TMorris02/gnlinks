@@ -839,6 +839,16 @@ body:not(.dark-mode){
       <option value="none">None</option>
     </select>
   </div>
+  <div class="settings-row">
+    <div>
+      <div class="settings-label">Push Notifications</div>
+      <div class="settings-sub">System alerts when tab is hidden</div>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="pushNotifToggle" checked>
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
   <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;padding-top:10px;">
     <div class="settings-label">Tab Cloak</div>
     <div class="settings-sub" style="margin-bottom:6px;">Custom tab title and favicon. Overridden by notifications.</div>
@@ -1328,7 +1338,8 @@ document.addEventListener('visibilitychange', () => {
     else if (!groupMode && !dmMode) { unreadGlobal = 0; updateGlobalBadge(); }
     const key = groupMode && activeGroup ? activeGroup.name : dmMode && dmPartner ? dmPartner.username : 'global';
     if (mentionUnread[key]) mentionUnread[key] = 0;
-    if (Object.values(mentionUnread).every(v => v === 0)) { clearInterval(mentionBlinkInterval); mentionBlinkInterval = null; stopTitleBlink(); }
+    if (Object.values(mentionUnread).every(v => v === 0)) { clearInterval(mentionBlinkInterval); mentionBlinkInterval = null; }
+    document.title = originalTitle;
     renderGroupList();
   }
 });
@@ -1350,7 +1361,6 @@ function triggerNotif(type, senderName, groupName, msgText) {
   // System notification when tab is hidden
   if (type === 'dm') sendSystemNotif(`💬 ${senderName}`, msgText || 'New message', avatarForUid(Object.entries(allUsers).find(([uid,u])=>u.username===senderName)?.[0]||''));
   else if (type === 'group') sendSystemNotif(`👥 ${groupName}`, `${senderName}: ${msgText||'New message'}`);
-  else if (type === 'global') sendSystemNotif(`🌐 GN Chat`, `${senderName}: ${msgText||'New message'}`);
   else if (type === 'mention') sendSystemNotif(`🔔 ${senderName} mentioned you`, msgText||'');
   const total = unreadGlobal + Object.values(unreadDm).reduce((a,b)=>a+b,0) + Object.values(unreadGroup).reduce((a,b)=>a+b,0);
   if (total > 0) {
@@ -1621,6 +1631,7 @@ function showBanner(msg, color) {
 // SYSTEM NOTIFICATIONS
 // ════════════════════════════════════════════════
 let notifPermission = 'default';
+let pushNotifEnabled = localStorage.getItem('gnChatPushNotif') !== 'false';
 
 async function requestNotifPermission() {
   if (!('Notification' in window)) return;
@@ -1634,9 +1645,10 @@ async function requestNotifPermission() {
 }
 
 function sendSystemNotif(title, body, icon) {
+  if (!pushNotifEnabled) return;
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
-  if (!document.hidden) return; // only when tab is not visible
+  if (!document.hidden) return;
   try {
     const n = new Notification(title, {
       body,
@@ -1755,6 +1767,12 @@ document.addEventListener('mousedown', e => { if (!settingsPanel.contains(e.targ
 // ════════════════════════════════════════════════
 document.getElementById('notifPref').value = notifPref;
 document.getElementById('notifPref').addEventListener('change', function() { notifPref=this.value; localStorage.setItem(NOTIF_KEY,notifPref); });
+document.getElementById('pushNotifToggle').checked = pushNotifEnabled;
+document.getElementById('pushNotifToggle').addEventListener('change', function() {
+  pushNotifEnabled = this.checked;
+  localStorage.setItem('gnChatPushNotif', pushNotifEnabled ? 'true' : 'false');
+  if (pushNotifEnabled) requestNotifPermission();
+});
 
 // ── REFRESH BUTTON ────────────────────────────
 document.getElementById('refreshBtn').addEventListener('click', () => {
@@ -1866,8 +1884,8 @@ function updateAvatarThumb() {
     img.onerror=()=>{ thumb.innerHTML=`<span style="font-size:16px;font-weight:700;color:white;">${initials(myUsername()||'?')}</span>`; thumb.style.background=colorFor(myUsername()||'?'); };
     thumb.appendChild(img);
   } else {
-    thumb.innerHTML=`<span style="font-size:16px;font-weight:700;color:white;">${initials(myUsername()||'?')}</span>`;
-    thumb.style.background=colorFor(myUsername()||'?');
+    thumb.style.cssText='width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:'+colorFor(myUsername()||'?')+';border-radius:50%;';
+    thumb.innerHTML=`<span style="font-size:16px;font-weight:700;color:white;line-height:1;">${initials(myUsername()||'?')}</span>`;
   }
   const target=document.getElementById('avatarClickTarget');
   if (target) { target.onmouseenter=()=>{ if(overlay) overlay.style.opacity='1'; }; target.onmouseleave=()=>{ if(overlay) overlay.style.opacity='0'; }; }
@@ -1881,16 +1899,18 @@ function updateAvatarPreview(url) {
     img.onerror=()=>{ wrap.innerHTML=''; const sp=document.createElement('span'); sp.style.cssText='font-size:18px;font-weight:700;color:var(--text-muted)'; sp.textContent=myUsername()?initials(myUsername()):'?'; wrap.appendChild(sp); pendingAvatar=''; document.getElementById('avatarClearBtn').classList.remove('show'); errEl.classList.add('show'); };
     wrap.appendChild(img); document.getElementById('avatarClearBtn').classList.add('show');
   } else {
-    const sp=document.createElement('span'); sp.style.cssText='font-size:18px;font-weight:700;color:var(--text-muted)'; sp.textContent=myUsername()?initials(myUsername()):'?'; wrap.appendChild(sp);
+    wrap.style.cssText='width:60px;height:60px;border-radius:50%;border:3px solid var(--primary);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px var(--primary-light);flex-shrink:0;background:'+colorFor(myUsername()||'?')+';';
+    const sp=document.createElement('span'); sp.style.cssText='font-size:18px;font-weight:700;color:white;line-height:1;'; sp.textContent=myUsername()?initials(myUsername()):'?'; wrap.appendChild(sp);
     document.getElementById('avatarClearBtn').classList.remove('show');
   }
 }
 function initAvatarPicker() {
   const dz=document.getElementById('avatarDropZone'), fi=document.getElementById('avatarFileInput');
   fi.addEventListener('change', async()=>{ const f=fi.files[0]; if(!f) return; try { updateAvatarPreview(await fileToDataUrl(f)); document.getElementById('avatarUrlInput').value=''; } catch(e){} });
+  dz.addEventListener('dragenter', e=>{ e.preventDefault(); fi.style.pointerEvents='none'; dz.classList.add('dragover'); });
   dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', ()=>dz.classList.remove('dragover'));
-  dz.addEventListener('drop', async e=>{ e.preventDefault(); dz.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')){try{updateAvatarPreview(await fileToDataUrl(f));document.getElementById('avatarUrlInput').value='';}catch(ex){}} });
+  dz.addEventListener('dragleave', ()=>{ dz.classList.remove('dragover'); fi.style.pointerEvents=''; });
+  dz.addEventListener('drop', async e=>{ e.preventDefault(); dz.classList.remove('dragover'); fi.style.pointerEvents=''; const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')){try{updateAvatarPreview(await fileToDataUrl(f));document.getElementById('avatarUrlInput').value='';}catch(ex){}} });
   document.getElementById('avatarUrlBtn').addEventListener('click', ()=>{ const u=document.getElementById('avatarUrlInput').value.trim(); if(u) updateAvatarPreview(u); });
   document.getElementById('avatarUrlInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();document.getElementById('avatarUrlBtn').click();} });
   document.getElementById('avatarClearBtn').addEventListener('click', ()=>{ document.getElementById('avatarUrlInput').value=''; updateAvatarPreview(''); });
@@ -2052,19 +2072,68 @@ document.getElementById('usernameInputFirst').addEventListener('keydown', e=>{ i
 
 // Delete account
 document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>{
-  if (!confirm('🗑 Delete your account permanently?\n\nThis will delete:\n• Your profile\n• All your public messages\n• All your DMs\n\nThis CANNOT be undone.')) return;
+  // Build a custom confirm with a checkbox
+  const confirmed = await new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border:2px solid #ef4444;border-radius:var(--radius-lg);padding:28px;max-width:380px;width:100%;box-shadow:var(--shadow-xl);">
+        <div style="font-size:1.2rem;font-weight:800;color:#ef4444;margin-bottom:8px;">🗑 Delete Account?</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">This will permanently delete your profile and DMs. <strong style="color:var(--text);">This cannot be undone.</strong></div>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-secondary);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:16px;font-size:13px;color:var(--text);font-weight:600;">
+          <input type="checkbox" id="deletePublicMsgsCheck" style="width:16px;height:16px;accent-color:#ef4444;cursor:pointer;">
+          Also delete all my public messages
+        </label>
+        <div style="display:flex;gap:8px;">
+          <button id="deleteCancelBtn" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;">Cancel</button>
+          <button id="deleteConfirmBtn" style="flex:1;padding:10px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Delete Account</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('deleteCancelBtn').onclick = () => { overlay.remove(); resolve(null); };
+    document.getElementById('deleteConfirmBtn').onclick = () => {
+      const deletePublic = document.getElementById('deletePublicMsgsCheck').checked;
+      overlay.remove();
+      resolve(deletePublic);
+    };
+  });
+  if (confirmed === null) return;
+  const deletePublicMsgs = confirmed;
   try {
-    const uid=myUid();
-    const msgs=await dbGet('messages'); const updates={};
-    Object.entries(msgs||{}).forEach(([k,v])=>{ if(v.uid===uid) updates[`messages/${k}`]=null; });
-    const dms=await dbGet('dms');
+    const uid = myUid();
+    const DELETED_UID = 'deleted_user_' + uid.slice(0,8);
+    const updates = {};
+    const msgs = await dbGet('messages');
+    Object.entries(msgs||{}).forEach(([k,v])=>{
+      if (v.uid !== uid) return;
+      if (deletePublicMsgs) {
+        updates[`messages/${k}`] = null;
+      } else {
+        updates[`messages/${k}/username`] = 'Deleted User';
+        updates[`messages/${k}/uid`] = DELETED_UID;
+        updates[`messages/${k}/avatar`] = null;
+      }
+    });
+    const dms = await dbGet('dms');
     Object.entries(dms||{}).forEach(([convKey])=>{ if(convKey.includes(uid)) updates[`dms/${convKey}`]=null; });
-    const groups=await dbGet('groups');
+    const groups = await dbGet('groups');
     Object.entries(groups||{}).forEach(([gid,g])=>{ if(g.members&&g.members[uid]) updates[`groups/${gid}/members/${uid}`]=null; });
-    const gmsgs=await dbGet('groupMessages');
-    Object.entries(gmsgs||{}).forEach(([gid,gMsgs])=>{ Object.entries(gMsgs||{}).forEach(([mid,m])=>{ if(m.uid===uid) updates[`groupMessages/${gid}/${mid}/username`]='[Deleted]'; }); });
-    updates[`users/${uid}`]=null; updates[`presence/${uid}`]=null;
-    await update(ref(db,'/'),updates);
+    const gmsgs = await dbGet('groupMessages');
+    Object.entries(gmsgs||{}).forEach(([gid,gMsgs])=>{
+      Object.entries(gMsgs||{}).forEach(([mid,m])=>{
+        if (m.uid !== uid) return;
+        if (deletePublicMsgs) {
+          updates[`groupMessages/${gid}/${mid}`] = null;
+        } else {
+          updates[`groupMessages/${gid}/${mid}/username`] = 'Deleted User';
+          updates[`groupMessages/${gid}/${mid}/uid`] = DELETED_UID;
+          updates[`groupMessages/${gid}/${mid}/avatar`] = null;
+        }
+      });
+    });
+    updates[`users/${uid}`] = null;
+    updates[`presence/${uid}`] = null;
+    await update(ref(db,'/'), updates);
     await deleteUser(currentUser);
     location.reload();
   } catch(e) { showBanner('⚠ Delete failed: '+e.message,'red'); }
