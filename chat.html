@@ -83,7 +83,8 @@ body:not(.dark-mode){
 .body-wrap{display:flex;flex:1;overflow:hidden;}
 
 /* ── SIDEBAR ── */
-.sidebar{width:260px;flex-shrink:0;background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.25s cubic-bezier(0.4,0,0.2,1);}
+.sidebar{width:260px;flex-shrink:0;background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.25s cubic-bezier(0.4,0,0.2,1);height:100%;}
+.status-bar{margin-top:auto;}
 .sidebar.collapsed{width:0;border-right:none;}
 .sidebar-header{padding:12px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
 .sidebar-search{margin:10px 10px 6px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;flex-shrink:0;width:calc(100% - 20px);}
@@ -158,30 +159,6 @@ body:not(.dark-mode){
 .msg-edit{display:none;position:absolute;top:-8px;right:18px;background:#6366f1;border:2px solid var(--bg);color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:10px;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background 0.15s;z-index:10;line-height:1;}
 .msg-bubble-wrap:hover .msg-edit{display:flex;}
 .msg-edit:hover{background:#4f46e5;}
-.msg-react-btn{display:none;position:absolute;top:-8px;right:42px;background:#f59e0b;border:2px solid var(--bg);color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:10px;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:background 0.15s;z-index:10;line-height:1;}
-.msg-bubble-wrap:hover .msg-react-btn{display:flex;}
-.msg-react-btn:hover{background:#d97706;}
-
-/* ── REACTIONS ── */
-.msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-width:320px;align-items:center;}
-.reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all 0.15s;position:relative;user-select:none;}
-.reaction-chip:hover{background:var(--surface-hover);border-color:var(--primary);}
-.reaction-chip.mine{background:var(--primary-light);border-color:var(--primary);}
-.reaction-chip .r-count{font-size:11px;font-weight:700;color:var(--text-muted);}
-.reaction-chip.mine .r-count{color:var(--primary);}
-.reaction-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;border-radius:8px;padding:5px 9px;font-size:11px;white-space:nowrap;box-shadow:var(--shadow-lg);display:none;z-index:100;pointer-events:none;border:1px solid rgba(255,255,255,0.1);}
-.reaction-chip:hover .reaction-tooltip{display:block;}
-.reaction-overflow{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text-muted);font-weight:600;position:relative;}
-.reaction-overflow:hover{background:var(--surface-hover);}
-.reaction-overflow-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;border-radius:8px;padding:8px 10px;font-size:12px;white-space:nowrap;box-shadow:var(--shadow-lg);display:none;z-index:100;border:1px solid rgba(255,255,255,0.1);line-height:1.6;}
-.reaction-overflow:hover .reaction-overflow-tooltip{display:block;}
-
-/* ── EMOJI PICKER ── */
-.emoji-picker-popup{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:10px;width:280px;display:none;}
-.emoji-picker-popup.open{display:block;animation:pop-in 0.15s cubic-bezier(0.4,0,0.2,1);}
-.emoji-picker-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
-.emoji-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;transition:background 0.1s;line-height:1;}
-.emoji-btn:hover{background:var(--surface-hover);}
 
 /* ── POLLS ── */
 .poll-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:2px;min-width:200px;max-width:300px;}
@@ -481,11 +458,6 @@ body:not(.dark-mode){
 .img-cancel-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;}
 .img-cancel-btn:hover{background:var(--surface-hover);color:var(--text);}
 
-.msg-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:-8px;margin-bottom:4px;padding:0 4px;}
-.reaction-chip{display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:20px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-size:12px;transition:all 0.15s;box-shadow:var(--shadow-xs);user-select:none;}
-.reaction-chip.mine{background:var(--primary-light);border-color:var(--primary);}
-.msg.mine .msg-reactions{justify-content:flex-end;}
-
 /* ── GROUP CHAT ── */
 .sidebar-section-label{padding:8px 14px 4px;font-size:10px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;}
 .group-avatar-stack{width:30px;height:30px;position:relative;flex-shrink:0;}
@@ -526,7 +498,7 @@ body:not(.dark-mode){
 .pinned-unpin{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0;}
 .pinned-unpin:hover{color:#ef4444;}
 
-.status-bar{padding:6px 10px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-secondary);}
+.status-bar{padding:6px 10px;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg-secondary);margin-top:auto;}
 .status-bar.has-status{padding:4px 10px;}
 .status-bar.has-status .status-duration-row{display:none;}
 .status-bar.has-status .status-set-btn{display:none;}
@@ -561,6 +533,24 @@ body:not(.dark-mode){
 .recovery-notif-icon{font-size:48px;margin-bottom:12px;}
 .recovery-notif-title{font-size:1.2rem;font-weight:800;margin-bottom:8px;color:var(--text);}
 .recovery-notif-body{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;}
+
+/* ── ADMIN PANEL ── */
+.admin-tab-btn.active{color:var(--primary)!important;border-bottom-color:var(--primary)!important;}
+.admin-tab-btn:hover{color:var(--text)!important;background:var(--surface-hover);}
+.admin-tab-panel{display:none;}
+.admin-tab-panel.active-panel{display:block!important;}
+
+/* ── ROLE TAGS ── */
+.role-tag{display:inline-flex;align-items:center;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.4px;margin-left:5px;vertical-align:middle;cursor:default;flex-shrink:0;}
+.role-tag-admin{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;}
+.role-tag-mod{background:linear-gradient(135deg,#10b981,#059669);color:white;}
+
+/* ── WARNING / BAN MODALS ── */
+.warning-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);z-index:99990;display:none;align-items:center;justify-content:center;padding:1rem;}
+.warning-overlay.show{display:flex;animation:pop-in 0.3s cubic-bezier(0.4,0,0.2,1);}
+.warning-card{background:var(--surface);border-radius:var(--radius-lg);padding:32px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-xl);}
+.warning-card.warn-style{border:2px solid #f59e0b;box-shadow:0 0 40px rgba(245,158,11,0.25);}
+.warning-card.ban-style{border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.25);}
 
 /* ── AVATAR COMPACT TOGGLE ── */
 #avatarToggleBtn:hover .avatar-preview-img { box-shadow: 0 0 0 3px var(--primary); }
@@ -632,6 +622,18 @@ body:not(.dark-mode){
       <button class="ban-cancel-btn" id="avatarSectionCloseBtn" style="margin-top:6px;">↑ Close photo editor</button>
     </div>
 
+    <!-- Role tag row (admin/mod only) -->
+    <div id="roleTagRow" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Your Role Tag</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="roleTagInput" class="modal-input" type="text" placeholder="e.g. Admin" maxlength="16" style="margin-bottom:0;flex:1;font-size:13px;padding:8px 10px;">
+        <input id="roleTagColor" type="color" value="#ef4444" style="width:36px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:2px;background:none;">
+        <button id="roleTagSaveBtn" style="padding:8px 12px;border:none;border-radius:var(--radius-sm);background:var(--primary);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Save</button>
+        <button id="roleTagClearBtn" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;">✕</button>
+      </div>
+      <div id="roleTagPreview" style="margin-top:8px;font-size:12px;color:var(--text-muted);">Preview: <span id="roleTagPreviewSpan"></span></div>
+    </div>
+
     <!-- Leave / Delete account row -->
     <div id="accountActionsRow" style="display:none;gap:8px;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
       <button id="leaveAccountBtn" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--radius);background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;">🚪 Sign Out</button>
@@ -646,14 +648,14 @@ body:not(.dark-mode){
   </div>
 </div>
 
-<!-- KICK MODAL -->
+<!-- WARN MODAL -->
 <div class="modal-overlay" id="kickModal">
-  <div class="modal ban-modal">
-    <div class="modal-title">👢 Kick User</div>
-    <div class="modal-sub">Kicking <strong id="kickTargetName"></strong>.</div>
+  <div class="modal" style="max-width:380px;border:2px solid #f59e0b;">
+    <div class="modal-title" style="color:#f59e0b;">⚠️ Warn User</div>
+    <div class="modal-sub">Warning <strong id="kickTargetName"></strong>. They will see a modal they must dismiss.</div>
     <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason</div>
-    <textarea class="ban-reason-input" id="kickReasonInput" placeholder="e.g. Spamming..."></textarea>
-    <button class="ban-confirm-btn" id="kickConfirmBtn">👢 Confirm Kick</button>
+    <textarea class="ban-reason-input" id="kickReasonInput" placeholder="e.g. Please stop spamming." style="border-color:#f59e0b;"></textarea>
+    <button class="ban-confirm-btn" id="kickConfirmBtn" style="background:linear-gradient(135deg,#f59e0b,#d97706);">⚠️ Send Warning</button>
     <button class="ban-cancel-btn" id="kickCancelBtn">Cancel</button>
   </div>
 </div>
@@ -661,8 +663,8 @@ body:not(.dark-mode){
 <!-- BAN MODAL -->
 <div class="modal-overlay" id="banModal">
   <div class="modal ban-modal">
-    <div class="modal-title">⛔ Ban Device</div>
-    <div class="modal-sub">Banning <strong id="banTargetName"></strong>.</div>
+    <div class="modal-title">🚫 Restrict from Chat</div>
+    <div class="modal-sub">Restricting <strong id="banTargetName"></strong> from sending in global chat.</div>
     <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason</div>
     <textarea class="ban-reason-input" id="banReasonInput" placeholder="e.g. Severe harassment..."></textarea>
     <div class="ban-duration-label">Duration (blank = permanent)</div>
@@ -791,6 +793,27 @@ body:not(.dark-mode){
   </div>
 </div>
 
+<!-- WARNING OVERLAY -->
+<div class="warning-overlay" id="warningOverlay">
+  <div class="warning-card warn-style" id="warningCard">
+    <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
+    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;margin-bottom:8px;">Warning</div>
+    <div style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-sm);border-left:3px solid #f59e0b;text-align:left;" id="warningText">No reason provided.</div>
+    <button style="padding:12px 32px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#f59e0b,#d97706);color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;" id="warningOkBtn">I understand ✓</button>
+  </div>
+</div>
+
+<!-- CHAT BAN OVERLAY -->
+<div class="warning-overlay" id="chatBanOverlay">
+  <div class="warning-card ban-style" id="chatBanCard">
+    <div style="font-size:48px;margin-bottom:12px;">🚫</div>
+    <div style="font-size:1.3rem;font-weight:800;color:#ef4444;margin-bottom:8px;">You've Been Restricted</div>
+    <div style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-sm);border-left:3px solid #ef4444;text-align:left;" id="chatBanText">No reason provided.</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">You can still read messages but cannot send them in global chat.</div>
+    <button style="padding:12px 32px;border:none;border-radius:var(--radius);background:var(--gradient-primary);color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;" id="chatBanOkBtn">Got it</button>
+  </div>
+</div>
+
 <!-- BANNED OVERLAY -->
 <div class="banned-overlay" id="bannedOverlay">
   <div class="banned-card" id="bannedCard">
@@ -808,11 +831,6 @@ body:not(.dark-mode){
 
 <!-- MOD PROMOTION POPUP -->
 <div id="modPromotionPopup" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981;border-radius:12px;padding:14px 24px;font-size:14px;font-weight:700;color:#065f46;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:99998;animation:pop-in 0.25s ease;white-space:nowrap;">⭐ You've been promoted to Moderator!</div>
-
-<!-- EMOJI PICKER -->
-<div class="emoji-picker-popup" id="emojiPickerPopup">
-  <div class="emoji-picker-grid" id="emojiPickerGrid"></div>
-</div>
 
 <!-- SETTINGS PANEL -->
 <div class="settings-panel" id="settingsPanel">
@@ -838,16 +856,6 @@ body:not(.dark-mode){
       <option value="dm">DMs only</option>
       <option value="none">None</option>
     </select>
-  </div>
-  <div class="settings-row">
-    <div>
-      <div class="settings-label">Push Notifications</div>
-      <div class="settings-sub">System alerts when tab is hidden</div>
-    </div>
-    <label class="toggle-switch">
-      <input type="checkbox" id="pushNotifToggle" checked>
-      <span class="toggle-slider"></span>
-    </label>
   </div>
   <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;padding-top:10px;">
     <div class="settings-label">Tab Cloak</div>
@@ -903,221 +911,153 @@ body:not(.dark-mode){
 <div class="conn-banner" id="connBanner"></div>
 
 <!-- ADMIN PANEL OVERLAY -->
-<div class="admin-panel-overlay" id="adminPanelOverlay">
-  <div class="admin-panel" id="adminPanel">
-    <div class="admin-panel-header">
-      <div class="admin-panel-title">🛡 Admin Panel</div>
-      <button class="admin-panel-close" id="adminPanelClose">✕</button>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="admin-section-collapsible" id="apQuickActions">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">⚡ Quick Actions</span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body">
-        <button class="admin-action-btn" id="apForceRefreshAll">🔄 Force Refresh All Users (Chat)</button>
-        <button class="admin-action-btn" id="apSuperRefreshAll">🔃 Super Refresh — Reload Everyone's Tab</button>
-        <button class="admin-action-btn" id="apPushVersionUpdate">🆕 Push Version Update (Force Reload All)</button>
-        <button class="admin-action-btn danger" id="apClearAllMessages">🗑 Clear ALL Messages</button>
-      </div>
-    </div>
-
-    <!-- Alert Global Toggle -->
-    <div class="admin-section-collapsible" id="apAlertGlobalSection">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">📣 Global Alert Log</span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body">
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text);">
+<div id="adminPanelOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9990;display:none;align-items:flex-start;justify-content:flex-end;">
+  <div id="adminPanel" style="width:min(680px,100vw);height:100vh;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;box-shadow:var(--shadow-xl);animation:slide-in-right 0.2s cubic-bezier(0.4,0,0.2,1);">
+    
+    <!-- Admin header -->
+    <div style="padding:0;flex-shrink:0;">
+      <div style="background:linear-gradient(135deg,#ef4444,#dc2626);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🛡</span>
           <div>
-            <span style="font-weight:600;">Alert Global Chat</span>
-            <div style="font-size:11px;color:var(--text-muted);">Post mod actions to global chat</div>
+            <div style="font-size:16px;font-weight:800;color:white;">Admin Panel</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);">GN Chat Control Center</div>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="alertGlobalToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
         </div>
+        <button id="adminPanelClose" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      <!-- Tab bar -->
+      <div style="display:flex;background:var(--bg-secondary);border-bottom:1px solid var(--border);overflow-x:auto;" id="adminTabBar">
+        <button class="admin-tab-btn active" data-tab="users" style="padding:12px 18px;border:none;background:none;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid var(--primary);white-space:nowrap;flex-shrink:0;">👥 Users</button>
+        <button class="admin-tab-btn" data-tab="moderation" style="padding:12px 18px;border:none;background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">🛡 Moderation</button>
+        <button class="admin-tab-btn" data-tab="messages" style="padding:12px 18px;border:none;background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">💬 Messages</button>
+        <button class="admin-tab-btn" data-tab="broadcast" style="padding:12px 18px;border:none;background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">📢 Broadcast</button>
+        <button class="admin-tab-btn" data-tab="settings" style="padding:12px 18px;border:none;background:none;color:var(--text-muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;">⚙️ Settings</button>
       </div>
     </div>
 
-    <!-- Announcement -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">📢 Broadcast Announcement</span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body">
-        <div class="announce-target-row">
-          <select class="announce-target-select" id="announceTarget"><option value="all">→ Everyone</option></select>
+    <!-- Tab content -->
+    <div style="flex:1;overflow-y:auto;" id="adminTabContent">
+
+      <!-- USERS TAB -->
+      <div id="adminTab-users" class="admin-tab-panel" style="padding:16px;display:block;">
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;">
+          <input id="adminUserSearch" type="text" placeholder="Search users..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;">
+          <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;" id="apUserCount"></div>
         </div>
-        <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
-        <button class="announce-send-btn" id="announceSendBtn">📢 Send</button>
+        <div id="adminUserList" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
-    </div>
 
-    <!-- Impersonate -->
-    <div class="admin-section-collapsible" id="apImpersonateSection">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">🎭 Send As User</span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body">
-        <select class="impersonate-target-select" id="impersonateDest">
-          <option value="global">→ Global Chat</option>
-        </select>
-        <div class="impersonate-row">
-          <select class="impersonate-select" id="impersonateUser"><option value="">Pick user...</option></select>
-          <input class="impersonate-input" id="impersonateText" type="text" placeholder="Message text...">
-        </div>
-        <button class="admin-action-btn" id="impersonateSendBtn">🎭 Send</button>
-      </div>
-    </div>
-
-    <!-- All Users -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">👥 All Users <span id="apUserCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body" style="padding:10px 16px;">
-        <div class="admin-user-list" id="adminUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
-      </div>
-    </div>
-
-    <!-- Muted Users -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">🔕 Muted Users <span id="apMutedCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body" style="padding:10px 16px;">
-        <div class="admin-user-list" id="mutedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">None muted.</div></div>
-      </div>
-    </div>
-
-    <!-- Blocked Devices -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">⛔ Blocked Devices <span id="apBlockedCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body" style="padding:10px 16px;">
-        <div class="admin-user-list" id="blockedUserList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div></div>
-      </div>
-    </div>
-
-    <!-- Reports -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">🚨 Reports <span id="apReportCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body" style="padding:10px 16px;">
-        <div id="reportsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No reports.</div></div>
-      </div>
-    </div>
-
-    <!-- Banned Words -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">🚫 Banned Words</span>
-        <span class="admin-section-toggle-arrow">▼</span>
-      </div>
-      <div class="admin-section-body">
+      <!-- MODERATION TAB -->
+      <div id="adminTab-moderation" class="admin-tab-panel" style="padding:16px;display:none;">
+        <!-- Muted -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">🔕 Muted Users <span id="apMutedCount"></span></div>
+        <div id="mutedUserList" style="margin-bottom:20px;display:flex;flex-direction:column;gap:4px;"><div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">None muted.</div></div>
+        <!-- Chat banned -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">🚫 Chat Restricted <span id="apBlockedCount"></span></div>
+        <div id="blockedUserList" style="margin-bottom:20px;display:flex;flex-direction:column;gap:4px;"><div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">None restricted.</div></div>
+        <!-- Banned words -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">🚫 Banned Words</div>
         <div class="word-chips-wrap" id="wordChipsWrap"></div>
-        <div class="word-add-row">
-          <input class="word-add-input" id="wordAddInput" type="text" placeholder="Add word...">
-          <button class="word-add-btn" id="wordAddBtn">Add</button>
-        </div>
+        <div class="word-add-row"><input class="word-add-input" id="wordAddInput" type="text" placeholder="Add word..."><button class="word-add-btn" id="wordAddBtn">Add</button></div>
+        <!-- Reports -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin:20px 0 8px;">🚨 Reports <span id="apReportCount"></span></div>
+        <div id="reportsList"><div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">No reports.</div></div>
       </div>
-    </div>
 
-    <!-- DM Viewer -->
-    <div class="admin-section-collapsible">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">🔐 View Private Messages</span>
-        <span class="admin-section-toggle-arrow">▼</span>
+      <!-- MESSAGES TAB -->
+      <div id="adminTab-messages" class="admin-tab-panel" style="padding:16px;display:none;">
+        <!-- Recent messages -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">🕐 Recent Messages</div>
+        <button class="admin-action-btn" id="loadRecentMsgsBtn" style="margin-bottom:10px;">🔄 Load Recent</button>
+        <div id="recentMsgsList" style="margin-bottom:20px;"></div>
+        <!-- DM Viewer -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">🔐 DM Viewer</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div><div style="font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">1) User</div><div class="admin-mini-list" id="dmViewerUsers"></div></div>
+          <div><div style="font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">2) Conversation</div><div class="admin-mini-list" id="dmViewerPartners"></div></div>
+        </div>
+        <div class="admin-dm-transcript" id="dmViewerTranscript"><div style="font-size:12px;color:var(--text-muted);">Select a user and conversation.</div></div>
+        <!-- Group viewer -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin:20px 0 8px;">👥 Group Viewer</div>
+        <div class="admin-mini-list" id="adminGroupList" style="margin-bottom:8px;"></div>
+        <div class="admin-dm-transcript" id="adminGroupTranscript"><div style="font-size:12px;color:var(--text-muted);">Select a group.</div></div>
       </div>
-      <div class="admin-section-body">
-        <div class="admin-split">
-          <div>
-            <div class="admin-subsection-title">1) Pick User</div>
-            <div class="admin-mini-list" id="dmViewerUsers"></div>
+
+      <!-- BROADCAST TAB -->
+      <div id="adminTab-broadcast" class="admin-tab-panel" style="padding:16px;display:none;">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">📢 Announcement</div>
+        <div class="announce-target-row"><select class="announce-target-select" id="announceTarget"><option value="all">→ Everyone</option></select></div>
+        <textarea class="announce-textarea" id="announceText" placeholder="Type your announcement..."></textarea>
+        <button class="announce-send-btn" id="announceSendBtn" style="margin-bottom:16px;">📢 Send</button>
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;" id="apImpersonateSectionLabel">🎭 Send As User</div>
+        <div id="apImpersonateSection">
+          <select class="impersonate-target-select" id="impersonateDest"><option value="global">→ Global Chat</option></select>
+          <div class="impersonate-row">
+            <select class="impersonate-select" id="impersonateUser"><option value="">Pick user...</option></select>
+            <input class="impersonate-input" id="impersonateText" type="text" placeholder="Message text...">
           </div>
-          <div>
-            <div class="admin-subsection-title">2) Pick Conversation</div>
-            <div class="admin-mini-list" id="dmViewerPartners"></div>
+          <button class="admin-action-btn" id="impersonateSendBtn">🎭 Send</button>
+        </div>
+        <!-- Alert global toggle -->
+        <div id="apAlertGlobalSection" style="margin-top:16px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-sm);">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:600;color:var(--text);">Post mod actions to global chat</div><div style="font-size:11px;color:var(--text-muted);">Announces bans, mutes, warnings</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="alertGlobalToggle" checked><span class="toggle-slider"></span></label>
           </div>
         </div>
-        <div class="admin-dm-transcript" id="dmViewerTranscript"><div style="font-size:12px;color:var(--text-muted);">Select a user and conversation to view DMs.</div></div>
       </div>
-    </div>
 
-    <!-- Adjustable Settings -->
-    <div class="admin-section-collapsible" id="apAdjustableSection">
-      <div class="admin-section-toggle-header">
-        <span class="admin-section-title">⚙️ Adjustable Settings</span>
-        <span class="admin-section-toggle-arrow">▼</span>
+      <!-- SETTINGS TAB -->
+      <div id="adminTab-settings" class="admin-tab-panel" style="padding:16px;display:none;">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:12px;">⚡ Quick Actions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
+          <button class="admin-action-btn" id="apForceRefreshAll" style="margin:0;">🔄 Refresh My Chat</button>
+          <button class="admin-action-btn" id="apSuperRefreshAll" style="margin:0;">🔃 Reload Everyone</button>
+          <button class="admin-action-btn" id="apPushVersionUpdate" style="margin:0;">🆕 Push Version</button>
+          <button class="admin-action-btn danger" id="apClearAllMessages" style="margin:0;">🗑 Clear All Messages</button>
+        </div>
+        <div id="apAdjustableSection">
+          <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:12px;">⚙️ Settings</div>
+          <div style="display:grid;gap:8px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-sm);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--text);">Edit Window (minutes)</div><div style="font-size:11px;color:var(--text-muted);">How long users can edit</div></div>
+              <input class="admin-settings-input" id="settingEditWindow" type="number" min="0" value="2">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-sm);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--text);">Cooldown (seconds)</div><div style="font-size:11px;color:var(--text-muted);">Message send delay</div></div>
+              <input class="admin-settings-input" id="settingCooldown" type="number" min="1" value="5">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-sm);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--text);">Max Message Length</div><div style="font-size:11px;color:var(--text-muted);">Character limit</div></div>
+              <input class="admin-settings-input" id="settingMaxLen" type="number" min="50" value="500">
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius-sm);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--text);">Poll Max Options</div><div style="font-size:11px;color:var(--text-muted);">Max poll choices</div></div>
+              <input class="admin-settings-input" id="settingPollMax" type="number" min="2" value="8">
+            </div>
+          </div>
+          <button class="admin-save-settings-btn" id="apSaveSettings">💾 Save Settings</button>
+        </div>
+        <!-- Account Recovery -->
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.7px;margin:20px 0 8px;">🔑 Account Recovery <span id="apRecoveryCount"></span></div>
+        <div id="recoveryRequestsList"><div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">No pending requests.</div></div>
       </div>
-      <div class="admin-section-body">
-        <div class="admin-settings-row">
-          <div><div class="admin-settings-label">Edit Window (minutes)</div><div class="admin-settings-sub">How long users can edit their messages</div></div>
-          <input class="admin-settings-input" id="settingEditWindow" type="number" min="0" value="2">
-        </div>
-        <div class="admin-settings-row">
-          <div><div class="admin-settings-label">Cooldown (seconds)</div><div class="admin-settings-sub">Message send cooldown</div></div>
-          <input class="admin-settings-input" id="settingCooldown" type="number" min="1" value="5">
-        </div>
-        <div class="admin-settings-row">
-          <div><div class="admin-settings-label">Max Message Length</div><div class="admin-settings-sub">Character limit per message</div></div>
-          <input class="admin-settings-input" id="settingMaxLen" type="number" min="50" value="500">
-        </div>
-        <div class="admin-settings-row">
-          <div><div class="admin-settings-label">Poll Max Options</div><div class="admin-settings-sub">Max choices in a poll</div></div>
-          <input class="admin-settings-input" id="settingPollMax" type="number" min="2" value="8">
-        </div>
-        <button class="admin-save-settings-btn" id="apSaveSettings">💾 Save Settings</button>
-      </div>
+
     </div>
-    <!-- Recent Messages -->
-<div class="admin-section-collapsible">
-  <div class="admin-section-toggle-header">
-    <span class="admin-section-title">🕐 Recent Messages (All Chats)</span>
-    <span class="admin-section-toggle-arrow">▼</span>
-  </div>
-  <div class="admin-section-body" style="padding:10px 16px;">
-    <div id="recentMsgsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Click to load</div></div>
-    <button class="admin-action-btn" id="loadRecentMsgsBtn" style="margin-top:8px;">🔄 Load Recent</button>
   </div>
 </div>
 
-<!-- Account Recovery Requests -->
-<div class="admin-section-collapsible">
-  <div class="admin-section-toggle-header">
-    <span class="admin-section-title">🔑 Account Recovery <span id="apRecoveryCount" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-    <span class="admin-section-toggle-arrow">▼</span>
-  </div>
-  <div class="admin-section-body" style="padding:10px 16px;">
-    <div id="recoveryRequestsList"><div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No pending requests.</div></div>
-  </div>
-</div>
-  
-<!-- Group Viewer -->
-<div class="admin-section-collapsible">
-  <div class="admin-section-toggle-header">
-    <span class="admin-section-title">👥 Group Chat Viewer</span>
-    <span class="admin-section-toggle-arrow">▼</span>
-  </div>
-  <div class="admin-section-body">
-    <div class="admin-subsection-title">Pick Group</div>
-    <div class="admin-mini-list" id="adminGroupList"></div>
-    <div class="admin-dm-transcript" id="adminGroupTranscript" style="margin-top:10px;"><div style="font-size:12px;color:var(--text-muted);">Select a group to view messages.</div></div>
-  </div>
-</div>
+<!-- USER DETAIL MODAL (admin) -->
+<div id="adminUserDetailOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:9995;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div id="adminUserDetailCard" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:pop-in 0.2s cubic-bezier(0.4,0,0.2,1);">
+    <div style="padding:20px 20px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:800;color:var(--text);">👤 User Details</div>
+        <button id="adminUserDetailClose" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px;">✕</button>
+      </div>
+      <div id="adminUserDetailBody"></div>
+    </div>
   </div>
 </div>
 
@@ -1125,7 +1065,7 @@ body:not(.dark-mode){
 <div class="body-wrap">
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header" style="flex-direction:column;align-items:stretch;gap:6px;padding-bottom:10px;">
-      <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat <span id="globalUnreadBadge" style="display:none;background:white;color:#f97316;font-size:10px;font-weight:800;border-radius:10px;padding:1px 6px;margin-left:auto;"></span></button>
+      <button id="globalChatBtn" style="background:var(--gradient-primary);color:white;border:none;border-radius:var(--radius-sm);padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:opacity 0.2s;">🌐 Global Chat <span id="globalUnreadBadge" style="display:none;background:#1e293b;color:white;font-size:10px;font-weight:800;border-radius:10px;padding:1px 6px;margin-left:auto;border:1px solid rgba(255,255,255,0.3);"></span></button>
     </div>
     <div class="sidebar-section-label" id="groupsSectionLabel" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-right:10px;" onclick="toggleGroupsSection()">
   <span>💬 Groups</span>
@@ -1281,9 +1221,6 @@ const CLOAK_KEY = 'gnChatCloak';
 let runtimeSettings = { editWindowMinutes: 2, cooldownMs: 5000, maxMsgLen: 500, pollMaxOptions: 8 };
 try { const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null'); if(s) Object.assign(runtimeSettings,s); } catch(e) {}
 
-// ── REACTION EMOJIS ────────────────────────────
-const REACTION_EMOJIS = ['👍','❤️','😂','😮','😢','😡','🔥','🎉','👀','💯','🤣','😍','🙏','👏','💪','🤔','😎','🥹','💀','⭐','🫡','🤝','😤','🥲'];
-
 // ════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════
@@ -1305,7 +1242,6 @@ let titleBlinkInterval = null, mentionBlinkInterval = null;
 let tabFocused = true;
 let myStatus = null;
 let myGroups = [];
-let emojiPickerTarget = null;
 let ctxReportTarget = null;
 let ctxTarget = null;
 let ctxJustOpened = false;
@@ -1326,6 +1262,8 @@ let kickTarget = null, banTarget = null, muteTarget = null;
 let selectedStatusDurMins = 30;
 let lastRenderedUid = null, lastRenderedDate = null;
 let globalUnsubscribe = null;
+let isChatBanned = false;
+let myRoleTag = null; // { label, color } or null
 
 // ════════════════════════════════════════════════
 // NOTIFICATIONS & TAB FOCUS
@@ -1348,6 +1286,7 @@ function triggerNotif(type, senderName, groupName, msgText) {
   if (notifPref === 'none') return;
   if (type === 'global' && notifPref === 'dm') return;
   if (type === 'dm' && notifPref === 'global') return;
+  // Don't count if user is already viewing that channel
   if (tabFocused) {
     if (type === 'global' && !dmMode && !groupMode) return;
     if (type === 'dm' && dmMode && dmPartner && dmPartner.uid === myUid()) return;
@@ -1357,16 +1296,12 @@ function triggerNotif(type, senderName, groupName, msgText) {
   else if (type === 'dm') { unreadDm[senderName] = (unreadDm[senderName] || 0) + 1; }
   else if (type === 'global') { unreadGlobal++; updateGlobalBadge(); }
   else if (type === 'mention') { mentionUnread[senderName] = (mentionUnread[senderName] || 0) + 1; }
-  if (tabFocused) return;
-  // System notification when tab is hidden
-  if (type === 'dm') sendSystemNotif(`💬 ${senderName}`, msgText || 'New message', avatarForUid(Object.entries(allUsers).find(([uid,u])=>u.username===senderName)?.[0]||''));
-  else if (type === 'group') sendSystemNotif(`👥 ${groupName}`, `${senderName}: ${msgText||'New message'}`);
-  else if (type === 'mention') sendSystemNotif(`🔔 ${senderName} mentioned you`, msgText||'');
+  // Tab title always updates (even when tab is focused but user is in a different channel)
   const total = unreadGlobal + Object.values(unreadDm).reduce((a,b)=>a+b,0) + Object.values(unreadGroup).reduce((a,b)=>a+b,0);
   if (total > 0) {
     if (type === 'dm') document.title = `💬 (${total}) ${senderName}`;
     else if (type === 'group') document.title = `👥 (${total}) ${groupName}`;
-    else document.title = `🌐 (${total}) GN Chat`;
+    else if (type === 'global') document.title = `🌐 (${total}) GN Chat`;
   }
 }
 
@@ -1502,10 +1437,11 @@ function insertMention(uname) {
 }
 
 async function loadGlobalPin() {
-  try {
-    const pin = await dbGet('globalPin');
+  onValue(dbRef('globalPin'), snap => {
+    const pin = snap.val();
     if (pin && pin.text) showGlobalPinnedBar(pin);
-  } catch(e) {}
+    else document.getElementById('pinnedBar').classList.remove('show');
+  });
 }
 function showGlobalPinnedBar(pin) {
   if (groupMode || dmMode) return;
@@ -1628,42 +1564,6 @@ function showBanner(msg, color) {
 }
 
 // ════════════════════════════════════════════════
-// SYSTEM NOTIFICATIONS
-// ════════════════════════════════════════════════
-let notifPermission = 'default';
-let pushNotifEnabled = localStorage.getItem('gnChatPushNotif') !== 'false';
-
-async function requestNotifPermission() {
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'granted') { notifPermission = 'granted'; return; }
-  if (Notification.permission !== 'denied') {
-    const result = await Notification.requestPermission();
-    notifPermission = result;
-  } else {
-    notifPermission = 'denied';
-  }
-}
-
-function sendSystemNotif(title, body, icon) {
-  if (!pushNotifEnabled) return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
-  if (!document.hidden) return;
-  try {
-    const n = new Notification(title, {
-      body,
-      icon: icon || 'https://tmorris01.github.io/gnlinks/favicon.ico',
-      badge: icon || 'https://tmorris01.github.io/gnlinks/favicon.ico',
-      tag: 'gn-chat',
-      renotify: true,
-      silent: false
-    });
-    n.onclick = () => { window.focus(); n.close(); };
-    setTimeout(() => n.close(), 6000);
-  } catch(e) {}
-}
-
-// ════════════════════════════════════════════════
 // AVATAR RENDERING
 // ════════════════════════════════════════════════
 function makeAvatarEl(avatarUrl, name, size) {
@@ -1767,12 +1667,6 @@ document.addEventListener('mousedown', e => { if (!settingsPanel.contains(e.targ
 // ════════════════════════════════════════════════
 document.getElementById('notifPref').value = notifPref;
 document.getElementById('notifPref').addEventListener('change', function() { notifPref=this.value; localStorage.setItem(NOTIF_KEY,notifPref); });
-document.getElementById('pushNotifToggle').checked = pushNotifEnabled;
-document.getElementById('pushNotifToggle').addEventListener('change', function() {
-  pushNotifEnabled = this.checked;
-  localStorage.setItem('gnChatPushNotif', pushNotifEnabled ? 'true' : 'false');
-  if (pushNotifEnabled) requestNotifPermission();
-});
 
 // ── REFRESH BUTTON ────────────────────────────
 document.getElementById('refreshBtn').addEventListener('click', () => {
@@ -1943,6 +1837,24 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
     document.getElementById('signinModal').classList.remove('open');
+    // Check if this account was deleted by admin
+    const deletionNotice = await dbGet(`deletedAccounts/${user.uid}`).catch(()=>null);
+    if (deletionNotice) {
+      await dbDel(`deletedAccounts/${user.uid}`).catch(()=>{});
+      await new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+        ov.innerHTML=`<div style="background:var(--surface);border:2px solid #ef4444;border-radius:var(--radius-lg);padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-xl);">
+          <div style="font-size:48px;margin-bottom:12px;">🗑</div>
+          <div style="font-size:1.2rem;font-weight:800;color:#ef4444;margin-bottom:8px;">Account Deleted</div>
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Your account data has been removed by an administrator.</div>
+          <div style="padding:10px 14px;background:var(--bg-secondary);border-radius:var(--radius-sm);border-left:3px solid #ef4444;text-align:left;font-size:13px;color:var(--text-muted);margin-bottom:20px;"><strong style="color:var(--text);display:block;margin-bottom:4px;">Reason</strong>${esc(deletionNotice.reason||'No reason provided.')}</div>
+          <button id="deletionOkBtn" style="padding:12px 32px;border:none;border-radius:var(--radius);background:var(--gradient-primary);color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Start Fresh</button>
+        </div>`;
+        document.body.appendChild(ov);
+        document.getElementById('deletionOkBtn').onclick=()=>{ov.remove();resolve();};
+      });
+    }
     const profile = await dbGet(`users/${user.uid}`);
     if (profile) { myProfile = profile; }
     else { myProfile = { uid: user.uid, email: user.email, username: '', avatar: '', createdAt: Date.now() }; }
@@ -1955,6 +1867,7 @@ onAuthStateChanged(auth, async user => {
     listenAllUsers();
     listenGlobalMessages();
     listenGroups();
+    listenGroupUnreads();
     listenMods();
     listenBannedWords();
     listenSettings();
@@ -1966,14 +1879,15 @@ onAuthStateChanged(auth, async user => {
     updateInputState();
     checkIfBanned();
     initAvatarPicker();
-    initEmojiPicker();
-    requestNotifPermission();
+    listenWarningsAndBans();
   } else {
     currentUser = null; myProfile = null;
     document.getElementById('signinModal').classList.add('open');
     document.getElementById('headerUsername').textContent = 'Sign in';
     disableInput();
     updateAdminVisibility();
+    // Guests can still see global messages
+    listenGlobalMessages();
   }
 });
 
@@ -1981,11 +1895,12 @@ onAuthStateChanged(auth, async user => {
 // INPUT STATE
 // ════════════════════════════════════════════════
 function updateInputState() {
-  const hasUser=!!currentUser, hasUsername=!!myUsername(), canType=hasUser&&hasUsername&&!isMuted;
+  const hasUser=!!currentUser, hasUsername=!!myUsername();
+  const canType=hasUser&&hasUsername&&!isMuted&&!(isChatBanned&&!dmMode&&!groupMode);
   document.getElementById('msgInput').disabled=!canType;
   document.getElementById('sendBtn').disabled=!canType;
   document.getElementById('plusBtn').disabled=!canType;
-  document.getElementById('msgInput').placeholder=!hasUser?'Sign in to chat...':!hasUsername?'Set a username to chat...':isMuted?'You are muted...':'Type a message... (Enter to send)';
+  document.getElementById('msgInput').placeholder=!hasUser?'Sign in to chat...':!hasUsername?'Set a username to chat...':isMuted?'You are muted...':(isChatBanned&&!dmMode&&!groupMode)?'You are restricted from global chat...':'Type a message... (Enter to send)';
 }
 function enableInput() { updateInputState(); }
 function disableInput() { document.getElementById('msgInput').disabled=true; document.getElementById('sendBtn').disabled=true; document.getElementById('plusBtn').disabled=true; }
@@ -2019,6 +1934,14 @@ function openUsernameModal(isChange=false) {
     document.getElementById('usernameNote').textContent='Pick a name — you can change it later.';
   }
   document.getElementById('accountActionsRow').style.display=isChange&&myUsername()?'flex':'none';
+  // Show role tag editor for admins/mods
+  const rtRow = document.getElementById('roleTagRow');
+  if (isChange && isAdmin()) {
+    rtRow.style.display = 'block';
+    const saved = myProfile?.roleTag;
+    if (saved) { document.getElementById('roleTagInput').value = saved.label||''; document.getElementById('roleTagColor').value = saved.color||'#ef4444'; }
+    updateRoleTagPreview();
+  } else { rtRow.style.display = 'none'; }
   document.getElementById('usernameModal').classList.add('open');
   setTimeout(()=>{ uInput.focus(); if(myUsername()) uInput.select(); },30);
 }
@@ -2036,6 +1959,31 @@ document.getElementById('changeUsernameBtn').addEventListener('click', ()=>{
     openUsernameModal(true);
   }
 });
+function updateRoleTagPreview() {
+  const label = document.getElementById('roleTagInput').value.trim() || 'Admin';
+  const color = document.getElementById('roleTagColor').value;
+  const span = document.getElementById('roleTagPreviewSpan');
+  span.innerHTML = `<span class="role-tag" style="background:${color};color:white;">${esc(label)}</span>`;
+}
+document.getElementById('roleTagInput').addEventListener('input', updateRoleTagPreview);
+document.getElementById('roleTagColor').addEventListener('input', updateRoleTagPreview);
+document.getElementById('roleTagSaveBtn').addEventListener('click', async () => {
+  const label = document.getElementById('roleTagInput').value.trim();
+  const color = document.getElementById('roleTagColor').value;
+  if (!label) { showBanner('Enter a tag label', 'red'); return; }
+  const tag = { label, color };
+  await dbUpd(`users/${myUid()}`, { roleTag: tag }).catch(()=>{});
+  myProfile.roleTag = tag; myRoleTag = tag;
+  showBanner('✅ Tag saved', 'green');
+});
+document.getElementById('roleTagClearBtn').addEventListener('click', async () => {
+  await dbUpd(`users/${myUid()}`, { roleTag: null }).catch(()=>{});
+  myProfile.roleTag = null; myRoleTag = null;
+  document.getElementById('roleTagInput').value = '';
+  updateRoleTagPreview();
+  showBanner('✅ Tag removed', 'green');
+});
+
 document.getElementById('leaveAccountBtn').addEventListener('click', async ()=>{
   if (!confirm('Sign out? Your data stays intact.')) return;
   document.getElementById('usernameModal').classList.remove('open');
@@ -2133,8 +2081,8 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>
     });
     updates[`users/${uid}`] = null;
     updates[`presence/${uid}`] = null;
-    await update(ref(db,'/'), updates);
-    await deleteUser(currentUser);
+    await update(ref(db,'/'),updates);
+    await signOut(auth);
     location.reload();
   } catch(e) { showBanner('⚠ Delete failed: '+e.message,'red'); }
 });
@@ -2211,6 +2159,35 @@ function setupPresenceHeartbeat() {
     await dbUpd(`presence/${myUid()}`,{lastSeen:Date.now()}).catch(()=>{});
     await checkMuteStatus();
   },30000);
+}
+
+function listenWarningsAndBans() {
+  if (!currentUser) return;
+  // Warnings
+  onValue(dbRef(`userWarnings/${myUid()}`), snap => {
+    const w = snap.val();
+    if (!w) return;
+    document.getElementById('warningText').textContent = w.reason || 'No reason provided.';
+    document.getElementById('warningOverlay').style.display = 'flex';
+    // Clear after showing so it doesn't re-show on refresh
+    dbDel(`userWarnings/${myUid()}`).catch(()=>{});
+  });
+  // Chat bans
+  onValue(dbRef(`chatBannedUsers/${myUid()}`), snap => {
+    const b = snap.val();
+    if (!b) { isChatBanned = false; updateInputState(); return; }
+    if (b.expiresAt && new Date(b.expiresAt) <= new Date()) { dbDel(`chatBannedUsers/${myUid()}`).catch(()=>{}); return; }
+    isChatBanned = true;
+    document.getElementById('chatBanText').textContent = b.reason || 'No reason provided.';
+    document.getElementById('chatBanOverlay').style.display = 'flex';
+    updateInputState();
+  });
+  // Mute (real-time)
+  onValue(dbRef(`users/${myUid()}/mutedUntil`), snap => {
+    const mu = snap.val();
+    if (mu && new Date(mu) > new Date()) { isMuted=true; muteUntil=new Date(mu); applyMute(); }
+    else if (isMuted) { isMuted=false; muteUntil=null; removeMute(); }
+  });
 }
 
 // ════════════════════════════════════════════════
@@ -2312,7 +2289,9 @@ function showBannedScreen(reason, expiresAt) {
   document.getElementById('bannedOverlay').classList.add('show');
 }
 document.getElementById('bannedOkBtn').addEventListener('click', async()=>{ await doSignOut(); });
-
+document.getElementById('warningOkBtn').addEventListener('click', ()=>{ document.getElementById('warningOverlay').style.display='none'; });
+document.getElementById('chatBanOkBtn').addEventListener('click', ()=>{ document.getElementById('chatBanOverlay').style.display='none'; });
+  
 // ════════════════════════════════════════════════
 // GLOBAL MESSAGES LISTENER
 // ════════════════════════════════════════════════
@@ -2492,7 +2471,12 @@ function renderMessage(msg, isDm) {
   if(isDm) el.dataset.dmKey=msg.key; else el.dataset.msgKey=msg.key;
   el.dataset.senderUid=senderUid;
   const metaDiv=document.createElement('div'); metaDiv.className='msg-meta';
-  if(!isMe){const uSpan=document.createElement('span');uSpan.className='msg-username';uSpan.style.color=colorFor(senderName);uSpan.dataset.username=senderName;uSpan.dataset.uid=senderUid;uSpan.textContent=senderName;metaDiv.appendChild(uSpan);}
+  if(!isMe){
+    const uSpan=document.createElement('span');uSpan.className='msg-username';uSpan.style.color=colorFor(senderName);uSpan.dataset.username=senderName;uSpan.dataset.uid=senderUid;uSpan.textContent=senderName;
+    metaDiv.appendChild(uSpan);
+    const senderUser=allUsers[senderUid];
+    if(senderUser?.roleTag?.label){const tagEl=document.createElement('span');tagEl.className='role-tag';tagEl.style.cssText=`background:${senderUser.roleTag.color||'#ef4444'};color:white;`;tagEl.textContent=senderUser.roleTag.label;metaDiv.appendChild(tagEl);}
+  }
   const tSpan=document.createElement('span'); tSpan.className='msg-time'; tSpan.textContent=fmtTime(msg.timestamp||Date.now()); metaDiv.appendChild(tSpan);
   if(isDm){const dm=document.createElement('span');dm.className='dm-indicator';dm.textContent='DM';metaDiv.appendChild(dm);}
   const rowDiv=document.createElement('div'); rowDiv.className='msg-row';
@@ -2513,7 +2497,6 @@ function renderMessage(msg, isDm) {
   }
   bWrap.appendChild(bubble);
   const rBtn=document.createElement('button');rBtn.className='msg-reply msg-reply-btn';rBtn.title='Reply';rBtn.dataset.id=msg.key;rBtn.dataset.sender=senderName;rBtn.dataset.text=msg.text||'';rBtn.textContent='↩';bWrap.appendChild(rBtn);
-  const reactBtn=document.createElement('button');reactBtn.className='msg-react-btn';reactBtn.title='React';reactBtn.textContent='😄';reactBtn.addEventListener('click',e=>{e.stopPropagation();openEmojiPicker(e,msg.key,isDm);});bWrap.appendChild(reactBtn);
   if(isAdmin()&&!isDm){
     const pinBtn=document.createElement('button');pinBtn.className='msg-edit';pinBtn.title='Pin';pinBtn.textContent='📌';pinBtn.style.right='66px';
     pinBtn.addEventListener('click',async e=>{e.stopPropagation();try{await dbSet('globalPin',{msgKey:msg.key,text:msg.text,pinnedBy:myUsername(),pinnedAt:Date.now()});showGlobalPinnedBar({msgKey:msg.key,text:msg.text,pinnedBy:myUsername()});showBanner('📌 Pinned','green');}catch(err){showBanner('⚠ Pin failed','red');}});
@@ -2530,61 +2513,10 @@ function renderMessage(msg, isDm) {
     dBtn.addEventListener('click',async e=>{e.stopPropagation();const msgEl=dBtn.closest('.msg');try{const path=isDm?`dms/${genDmKey(myUid(),dmPartner?.uid||'x')}/${msg.key}`:`messages/${msg.key}`;await dbDel(path);if(msgEl)msgEl.remove();}catch(err){showBanner('⚠ Delete failed','red');}});
     bWrap.appendChild(dBtn);
   }
-  const reactionsRow=document.createElement('div');reactionsRow.className='msg-reactions';reactionsRow.dataset.msgKey=msg.key;reactionsRow.dataset.isDm=isDm?'1':'0';
-  loadReactionsForMsg(msg.key,isDm,reactionsRow);
-  rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv); el.appendChild(reactionsRow);
+  rowDiv.appendChild(bWrap); el.appendChild(metaDiv); el.appendChild(rowDiv);
   container.appendChild(el);
   lastRenderedUid=senderUid; lastRenderedDate=thisMsgDate||new Date();
   if(autoScroll) document.getElementById('messagesWrap').scrollTop=999999;
-}
-
-// ════════════════════════════════════════════════
-// REACTIONS
-// ════════════════════════════════════════════════
-function initEmojiPicker() {
-  const grid=document.getElementById('emojiPickerGrid');
-  REACTION_EMOJIS.forEach(emoji=>{
-    const btn=document.createElement('button');btn.className='emoji-btn';btn.textContent=emoji;
-    btn.addEventListener('click',async()=>{ closeEmojiPicker(); if(!emojiPickerTarget) return; await toggleReaction(emojiPickerTarget.msgKey,emojiPickerTarget.isDm,emoji); });
-    grid.appendChild(btn);
-  });
-  document.addEventListener('mousedown',e=>{ const picker=document.getElementById('emojiPickerPopup'); if(!picker.contains(e.target)&&!e.target.classList.contains('msg-react-btn')) closeEmojiPicker(); });
-}
-function openEmojiPicker(e,msgKey,isDm){e.stopPropagation();emojiPickerTarget={msgKey,isDm};const picker=document.getElementById('emojiPickerPopup');picker.style.left=Math.min(e.clientX,window.innerWidth-300)+'px';picker.style.top=Math.min(e.clientY+10,window.innerHeight-200)+'px';picker.classList.add('open');}
-function closeEmojiPicker(){document.getElementById('emojiPickerPopup').classList.remove('open');emojiPickerTarget=null;}
-async function toggleReaction(msgKey,isDm,emoji){
-  if(!myUsername()){showBanner('Set a username first','red');return;}
-  const path=isDm?`dmReactions/${genDmKey(myUid(),dmPartner?.uid||'x')}/${msgKey}/${myUid()}`:`reactions/${msgKey}/${myUid()}`;
-  try{
-    const existing=await dbGet(path);
-    if(existing&&existing.emoji===emoji){await dbDel(path);}
-    else{await dbSet(dbRef(path),{emoji,username:myUsername(),uid:myUid()});}
-    const selector=isDm?`[data-dm-key="${msgKey}"]`:`[data-msg-key="${msgKey}"]`;
-    const msgEl=document.querySelector(selector);
-    if(msgEl){const rRow=msgEl.querySelector('.msg-reactions');if(rRow)loadReactionsForMsg(msgKey,isDm,rRow);}
-  }catch(e){showBanner('⚠ Reaction failed','red');}
-}
-function loadReactionsForMsg(msgKey,isDm,container){
-  const path=isDm?`dmReactions/${genDmKey(myUid(),dmPartner?.uid||'x')}/${msgKey}`:`reactions/${msgKey}`;
-  onValue(dbRef(path),snap=>{
-    const rows=Object.values(snap.val()||{});
-    renderReactions(rows,container,msgKey,isDm);
-  });
-}
-function renderReactions(rows,container,msgKey,isDm){
-  container.innerHTML='';
-  if(!rows.length) return;
-  const groups={};
-  rows.forEach(r=>{if(!groups[r.emoji])groups[r.emoji]=[];groups[r.emoji].push(r.username||r.uid);});
-  Object.entries(groups).slice(0,5).forEach(([emoji,users])=>{
-    const chip=document.createElement('div');chip.className='reaction-chip'+(users.includes(myUsername())?' mine':'');
-    const emojiSpan=document.createElement('span');emojiSpan.textContent=emoji;
-    const count=document.createElement('span');count.className='r-count';count.textContent=users.length;
-    const tooltip=document.createElement('div');tooltip.className='reaction-tooltip';tooltip.textContent=users.slice(0,8).join(', ')+(users.length>8?' +'+(users.length-8)+' more':'');
-    chip.appendChild(emojiSpan);chip.appendChild(count);chip.appendChild(tooltip);
-    chip.addEventListener('click',e=>{e.stopPropagation();toggleReaction(msgKey,isDm,emoji);});
-    container.appendChild(chip);
-  });
 }
 
 // ════════════════════════════════════════════════
@@ -2862,6 +2794,28 @@ function listenGroups() {
   });
 }
 
+function listenGroupUnreads() {
+  onValue(dbRef('groups'), snap => {
+    const allGroups = snap.val() || {};
+    Object.entries(allGroups).forEach(([gid, g]) => {
+      if (!g.members || !g.members[myUid()]) return;
+      const gmQ = query(dbRef(`groupMessages/${gid}`), orderByChild('timestamp'), limitToLast(20));
+      onValue(gmQ, snap2 => {
+        if (groupMode && activeGroup && activeGroup.id === gid) return; // already viewing
+        const msgs2 = Object.entries(snap2.val() || {}).sort((a,b)=>a[1].timestamp-b[1].timestamp);
+        if (!msgs2.length) return;
+        const lastKey = msgs2[msgs2.length-1][0];
+        const prevSeen = groupLastSeenIds[gid] || '';
+        const newOnes = msgs2.filter(([k,m]) => k > prevSeen && m.uid !== myUid());
+        if (newOnes.length > 0) {
+          const lastMsg = newOnes[newOnes.length-1][1];
+          triggerNotif('group', lastMsg.username || 'Someone', g.name, lastMsg.text || '');
+        }
+      });
+    });
+  });
+}
+
 function renderGroupList() {
   const el=document.getElementById('groupList');el.innerHTML='';
   const totalGroupUnread=Object.values(unreadGroup).reduce((a,b)=>a+b,0);
@@ -2921,6 +2875,13 @@ async function openGroup(group) {
   avContainer.appendChild(buildGroupAvatarStack(group,32));
   document.getElementById('msgInput').placeholder=`Message ${group.name}...`;
   renderGroupList();
+  // Live pin listener for this group
+  onValue(dbRef(`groups/${group.id}/pinnedMessage`), snap => {
+    if (!groupMode || !activeGroup || activeGroup.id !== group.id) return;
+    const pin = snap.val();
+    if (pin && pin.text) { activeGroup.pinnedMessage = pin; showPinnedBar(activeGroup); }
+    else { activeGroup.pinnedMessage = null; document.getElementById('pinnedBar').classList.remove('show'); }
+  });
   if(groupMsgListener){groupMsgListener();groupMsgListener=null;}
   const gmQ=query(dbRef(`groupMessages/${group.id}`),orderByChild('timestamp'),limitToLast(200));
   groupMsgListener=onValue(gmQ, snap=>{
@@ -2929,8 +2890,11 @@ async function openGroup(group) {
     const data=snap.val()||{};
     const msgs=Object.entries(data).sort((a,b)=>a[1].timestamp-b[1].timestamp);
     if(!msgs.length){inner.innerHTML=`<div class="empty-state"><div class="ei">💬</div><p>No messages yet in ${esc(group.name)}</p></div>`;return;}
+    const lastKey=msgs[msgs.length-1][0];
+    const prevSeen=groupLastSeenIds[group.id]||'';
+    const newMsgs=msgs.filter(([k,m])=>k>prevSeen&&m.uid!==myUid());
     msgs.forEach(([k,m])=>renderGroupMessage({...m,key:k}));
-    const lastKey=msgs[msgs.length-1][0];groupLastSeenIds[group.id]=lastKey;saveGroupLastSeen();
+    groupLastSeenIds[group.id]=lastKey;saveGroupLastSeen();
     if(group.pinnedMessage) showPinnedBar(group);
     if(autoScroll) setTimeout(()=>{ document.getElementById('messagesWrap').scrollTop=999999; },50);
   });
@@ -2960,7 +2924,12 @@ function renderGroupMessage(msg) {
   el.className=['msg',isMe?'mine':'theirs',sameSender?'same-sender':''].filter(Boolean).join(' ');
   el.dataset.groupMsgKey=msg.key;el.dataset.senderUid=msg.uid||'';
   const metaDiv=document.createElement('div');metaDiv.className='msg-meta';
-  if(!isMe){const uSpan=document.createElement('span');uSpan.className='msg-username';uSpan.style.color=colorFor(senderName);uSpan.textContent=senderName;metaDiv.appendChild(uSpan);}
+  if(!isMe){
+      const uSpan=document.createElement('span');uSpan.className='msg-username';uSpan.style.color=colorFor(senderName);uSpan.textContent=senderName;
+      metaDiv.appendChild(uSpan);
+      const sUser=allUsers[msg.uid||''];
+      if(sUser?.roleTag?.label){const tagEl=document.createElement('span');tagEl.className='role-tag';tagEl.style.cssText=`background:${sUser.roleTag.color||'#ef4444'};color:white;`;tagEl.textContent=sUser.roleTag.label;metaDiv.appendChild(tagEl);}
+    }
   const tSpan=document.createElement('span');tSpan.className='msg-time';tSpan.textContent=fmtTime(msg.timestamp||Date.now());metaDiv.appendChild(tSpan);
   const rowDiv=document.createElement('div');rowDiv.className='msg-row';
   if(!isMe){const avEl=makeAvatarEl(avatarForUid(msg.uid||'')||'',senderName,28);avEl.className='msg-avatar';avEl.dataset.username=senderName;avEl.dataset.uid=msg.uid||'';rowDiv.appendChild(avEl);}
@@ -3134,19 +3103,36 @@ function startCooldown() {
 // ADMIN PANEL
 // ════════════════════════════════════════════════
 document.getElementById('adminPanelBtn').addEventListener('click', () => {
-  document.getElementById('apAlertGlobalSection').style.display = isHeadAdmin() ? '' : 'none';
-  document.getElementById('apImpersonateSection').style.display = isHeadAdmin() ? '' : 'none';
-  document.getElementById('apAdjustableSection').style.display = isHeadAdmin() ? '' : 'none';
-  document.getElementById('apQuickActions').querySelector('#apClearAllMessages').style.display = isHeadAdmin() ? '' : 'none';
-  document.getElementById('adminPanelOverlay').classList.add('open');
+  if (!isHeadAdmin()) {
+    document.getElementById('apImpersonateSection').style.display = 'none';
+    document.getElementById('apImpersonateSectionLabel').style.display = 'none';
+    document.getElementById('apAdjustableSection').style.display = 'none';
+    document.getElementById('apAlertGlobalSection').style.display = 'none';
+  }
+  document.getElementById('adminPanelOverlay').style.display = 'flex';
   loadAdminUserList();
   loadBannedWordsUI();
   loadReportsUI();
   loadAdminGroupList();
 });
-document.getElementById('adminPanelClose').addEventListener('click', () => document.getElementById('adminPanelOverlay').classList.remove('open'));
-document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').classList.remove('open'); });
+document.getElementById('adminPanelClose').addEventListener('click', () => { document.getElementById('adminPanelOverlay').style.display='none'; });
+document.getElementById('adminPanelOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminPanelOverlay')) document.getElementById('adminPanelOverlay').style.display='none'; });
 
+// Admin tab switching
+document.getElementById('adminTabBar').addEventListener('click', e => {
+  const btn = e.target.closest('.admin-tab-btn'); if (!btn) return;
+  document.querySelectorAll('.admin-tab-btn').forEach(b => {
+    b.classList.remove('active'); b.style.color='var(--text-muted)'; b.style.borderBottomColor='transparent';
+  });
+  btn.classList.add('active'); btn.style.color='var(--primary)'; btn.style.borderBottomColor='var(--primary)';
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display='none');
+  const panel = document.getElementById('adminTab-'+btn.dataset.tab);
+  if (panel) panel.style.display = 'block';
+});
+
+document.getElementById('adminUserDetailClose').addEventListener('click', () => { document.getElementById('adminUserDetailOverlay').style.display='none'; });
+document.getElementById('adminUserDetailOverlay').addEventListener('mousedown', e => { if (e.target === document.getElementById('adminUserDetailOverlay')) document.getElementById('adminUserDetailOverlay').style.display='none'; });
+  
 // Quick Actions
 document.getElementById('apForceRefreshAll').addEventListener('click', ()=>{ location.reload(); });
 document.getElementById('apSuperRefreshAll').addEventListener('click', async()=>{
@@ -3196,71 +3182,171 @@ document.getElementById('impersonateSendBtn').addEventListener('click', async()=
 // ════════════════════════════════════════════════
 // ADMIN USER LIST
 // ════════════════════════════════════════════════
+async function openAdminUserDetail(u) {
+  const overlay = document.getElementById('adminUserDetailOverlay');
+  const body = document.getElementById('adminUserDetailBody');
+  overlay.style.display = 'flex';
+  body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</div>';
+  try {
+    const freshUser = await dbGet(`users/${u.uid}`) || u;
+    const isMutedUser = freshUser.mutedUntil && new Date(freshUser.mutedUntil) > new Date();
+    const isModUser = modUsers.has(u.uid);
+    const chatBanned = await dbGet(`chatBannedUsers/${u.uid}`);
+    body.innerHTML = '';
+    // Avatar + name header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:16px;background:var(--bg-secondary);border-radius:var(--radius);';
+    const av = makeAvatarEl(freshUser.avatar||'', freshUser.username||'?', 52); av.style.flexShrink='0';
+    const info = document.createElement('div'); info.style.flex='1'; info.style.minWidth='0';
+    info.innerHTML = `
+      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:2px;">${esc(freshUser.username||'Unknown')}</div>
+      <div style="font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;word-break:break-all;">${esc(freshUser.email||'No email')}</div>
+      <div style="font-size:11px;color:var(--text-light);margin-top:4px;">UID: <span style="font-family:'JetBrains Mono',monospace;font-size:10px;">${esc(u.uid)}</span></div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+        ${isModUser?'<span style="font-size:10px;background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:6px;font-weight:700;">MOD</span>':''}
+        ${isMutedUser?'<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;font-weight:700;">MUTED</span>':''}
+        ${chatBanned?'<span style="font-size:10px;background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:6px;font-weight:700;">CHAT BANNED</span>':''}
+      </div>
+    `;
+    hdr.appendChild(av); hdr.appendChild(info); body.appendChild(hdr);
+
+    // Actions grid
+    const actGrid = document.createElement('div');
+    actGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;';
+    const mkAct = (label, color, cb) => {
+      const b = document.createElement('button');
+      b.style.cssText = `padding:10px;border:1px solid ${color};border-radius:var(--radius-sm);background:none;color:${color};font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;`;
+      b.textContent = label; b.onmouseenter=()=>{b.style.background=color+'22';};b.onmouseleave=()=>{b.style.background='none';};
+      b.onclick = cb; return b;
+    };
+    actGrid.appendChild(mkAct(isMutedUser?'🔊 Unmute':'🔕 Mute','#f59e0b',()=>{ overlay.style.display='none'; isMutedUser?adminUnmuteUser(u):openMuteModal(u); }));
+    if (isHeadAdmin()) {
+      actGrid.appendChild(mkAct(isModUser?'🛡 Remove Mod':'⭐ Make Mod','#10b981',()=>{ adminToggleMod(u,!isModUser); overlay.style.display='none'; }));
+      actGrid.appendChild(mkAct('⚠️ Warn','#f59e0b',()=>{ overlay.style.display='none'; openKickModal(u); }));
+      actGrid.appendChild(mkAct('🚫 Chat Ban','#ef4444',()=>{ overlay.style.display='none'; openBanModal(u); }));
+      actGrid.appendChild(mkAct('🗑 Clear Messages','#6366f1',()=>{ overlay.style.display='none'; adminDeleteAllFrom(u); }));
+    }
+    body.appendChild(actGrid);
+
+    // Delete account section
+    if (isHeadAdmin()) {
+      const delSec = document.createElement('div');
+      delSec.style.cssText = 'border-top:1px solid var(--border);padding-top:16px;margin-top:4px;';
+      delSec.innerHTML = `<div style="font-size:11px;font-weight:800;color:#ef4444;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">⚠ Account Deletion</div>`;
+      const reasonInput = document.createElement('input');
+      reasonInput.type='text'; reasonInput.placeholder='Reason for deletion (shown to user)...';
+      reasonInput.style.cssText='width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text);font-family:\'Syne\',sans-serif;font-size:13px;outline:none;margin-bottom:8px;box-sizing:border-box;';
+      delSec.appendChild(reasonInput);
+      const chkRow = document.createElement('label');
+      chkRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:var(--text);cursor:pointer;';
+      chkRow.innerHTML='<input type="checkbox" id="adminDelPublicMsgs" style="accent-color:#ef4444;"> Also delete all public messages';
+      delSec.appendChild(chkRow);
+      const delBtn = document.createElement('button');
+      delBtn.style.cssText='width:100%;padding:11px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;';
+      delBtn.textContent='🗑 Delete This Account';
+      delBtn.onclick = async () => {
+        if(!confirm(`Delete ${u.username}'s account? This cannot be undone.`)) return;
+        const reason = reasonInput.value.trim() || 'Account removed by admin.';
+        const deletePublic = document.getElementById('adminDelPublicMsgs').checked;
+        const DELETED_UID = 'deleted_user_'+u.uid.slice(0,8);
+        try {
+          const updates = {};
+          const msgs = await dbGet('messages');
+          Object.entries(msgs||{}).forEach(([k,v]) => {
+            if(v.uid!==u.uid) return;
+            if(deletePublic){updates[`messages/${k}`]=null;}
+            else{updates[`messages/${k}/username`]='Deleted User';updates[`messages/${k}/uid`]=DELETED_UID;updates[`messages/${k}/avatar`]=null;}
+          });
+          const dmsData = await dbGet('dms');
+          Object.entries(dmsData||{}).forEach(([convKey]) => { if(convKey.includes(u.uid)) updates[`dms/${convKey}`]=null; });
+          const groups = await dbGet('groups');
+          Object.entries(groups||{}).forEach(([gid,g]) => { if(g.members&&g.members[u.uid]) updates[`groups/${gid}/members/${u.uid}`]=null; });
+          const gmsgs = await dbGet('groupMessages');
+          Object.entries(gmsgs||{}).forEach(([gid,gMsgs]) => {
+            Object.entries(gMsgs||{}).forEach(([mid,m]) => {
+              if(m.uid!==u.uid) return;
+              if(deletePublic){updates[`groupMessages/${gid}/${mid}`]=null;}
+              else{updates[`groupMessages/${gid}/${mid}/username`]='Deleted User';updates[`groupMessages/${gid}/${mid}/uid`]=DELETED_UID;updates[`groupMessages/${gid}/${mid}/avatar`]=null;}
+            });
+          });
+          updates[`users/${u.uid}`] = null;
+          updates[`presence/${u.uid}`] = null;
+          updates[`mods/${u.uid}`] = null;
+          // Store a deletion notice so the user sees it on next login
+          updates[`deletedAccounts/${u.uid}`] = { reason, deletedBy: myUsername(), deletedAt: Date.now() };
+          await update(ref(db,'/'), updates);
+          overlay.style.display='none';
+          showBanner('✅ Account deleted: '+u.username,'green');
+          loadAdminUserList();
+        } catch(e) { showBanner('⚠ Delete failed: '+e.message,'red'); }
+      };
+      delSec.appendChild(delBtn);
+      body.appendChild(delSec);
+    }
+  } catch(e) { body.innerHTML = '<div style="color:#ef4444;padding:16px;">Failed to load user details.</div>'; }
+}
+
 async function loadAdminUserList() {
-  const listEl=document.getElementById('adminUserList'), blockedEl=document.getElementById('blockedUserList'), mutedEl=document.getElementById('mutedUserList');
-  listEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
-  try{
-    const users=await dbGet('users');
-    const blocked=await dbGet('bannedUsers')||{};
-    const otherUsers=Object.entries(users||{}).filter(([uid])=>uid!==myUid()).map(([uid,u])=>({...u,uid}));
-    document.getElementById('apUserCount').textContent='('+otherUsers.length+')';
-    listEl.innerHTML='';
-    if(!otherUsers.length){listEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No other users yet</div>';}
-    otherUsers.forEach(u=>{
-      const isMutedUser=u.mutedUntil&&new Date(u.mutedUntil)>new Date();
-      const isModUser=modUsers.has(u.uid);
-      const row=document.createElement('div');row.className='admin-user-row'+(isMutedUser?' muted':'');
-      const avEl=makeAvatarEl(u.avatar||'',u.username,28);avEl.className='admin-user-av';
-      const info=document.createElement('div');info.className='admin-user-info';
-      const nameDiv=document.createElement('div');nameDiv.className='admin-user-name';nameDiv.textContent=u.username||u.uid;
-      if(isMutedUser){const b=document.createElement('span');b.className='muted-badge';b.textContent='muted';nameDiv.appendChild(document.createTextNode(' '));nameDiv.appendChild(b);}
-      if(isModUser){const b=document.createElement('span');b.className='mod-badge';b.textContent='mod';nameDiv.appendChild(document.createTextNode(' '));nameDiv.appendChild(b);}
-      const metaDiv=document.createElement('div');metaDiv.className='admin-user-meta';metaDiv.textContent=u.email||u.uid;
-      info.appendChild(nameDiv);info.appendChild(metaDiv);
-      const actions=document.createElement('div');actions.className='admin-user-actions';
-      const mkBtn=(emoji,title,cls,cb)=>{const b=document.createElement('button');b.className='admin-user-btn'+(cls?' '+cls:'');b.title=title;b.textContent=emoji;b.onclick=cb;return b;};
-      actions.appendChild(mkBtn(isMutedUser?'🔊':'🔕',isMutedUser?'Unmute':'Mute','warn',()=>isMutedUser?adminUnmuteUser(u):openMuteModal(u)));
-      if(isHeadAdmin()){
-        actions.appendChild(mkBtn(isModUser?'🛡':'⭐','Mod/Unmod','',()=>adminToggleMod(u,!isModUser)));
-        actions.appendChild(mkBtn('🗑','Clear messages','',()=>adminDeleteAllFrom(u)));
-        actions.appendChild(mkBtn('👢','Kick','danger',()=>{document.getElementById('adminPanelOverlay').classList.remove('open');openKickModal(u);}));
-        actions.appendChild(mkBtn('⛔','Ban','danger',()=>{document.getElementById('adminPanelOverlay').classList.remove('open');openBanModal(u);}));
-      }
-      row.appendChild(avEl);row.appendChild(info);row.appendChild(actions);listEl.appendChild(row);
-    });
-    const mutedUsers=otherUsers.filter(u=>u.mutedUntil&&new Date(u.mutedUntil)>new Date());
-    document.getElementById('apMutedCount').textContent='('+mutedUsers.length+')';
-    mutedEl.innerHTML=mutedUsers.length?'':'<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">None muted.</div>';
+  const listEl = document.getElementById('adminUserList');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">Loading...</div>';
+  try {
+    const users = await dbGet('users');
+    const otherUsers = Object.entries(users||{}).filter(([uid])=>uid!==myUid()).map(([uid,u])=>({...u,uid}));
+    document.getElementById('apUserCount').textContent = '('+otherUsers.length+' users)';
+    const search = document.getElementById('adminUserSearch');
+    if (search && !search._hasListener) { search._hasListener=true; search.addEventListener('input', ()=>renderAdminUserRows(otherUsers, search.value.toLowerCase())); }
+    renderAdminUserRows(otherUsers, '');
+    // Also populate muted/blocked in moderation tab
+    const mutedUsers = otherUsers.filter(u=>u.mutedUntil&&new Date(u.mutedUntil)>new Date());
+    document.getElementById('apMutedCount').textContent = '('+mutedUsers.length+')';
+    const mutedEl = document.getElementById('mutedUserList'); mutedEl.innerHTML='';
+    if(!mutedUsers.length) mutedEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">None muted.</div>';
     mutedUsers.forEach(u=>{
-      const row=document.createElement('div');row.className='admin-user-row muted';
-      const info=document.createElement('div');info.className='admin-user-info';
-      const nm=document.createElement('div');nm.className='admin-user-name';nm.textContent=u.username;
-      const meta=document.createElement('div');meta.className='admin-user-meta';meta.textContent='Until: '+new Date(u.mutedUntil).toLocaleString();
-      info.appendChild(nm);info.appendChild(meta);
-      const actions=document.createElement('div');actions.className='admin-user-actions';
-      const ub=document.createElement('button');ub.className='admin-user-btn';ub.title='Unmute';ub.textContent='🔊';ub.onclick=()=>adminUnmuteUser(u);
-      actions.appendChild(ub);row.appendChild(info);row.appendChild(actions);mutedEl.appendChild(row);
+      const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);margin-bottom:4px;';
+      row.innerHTML=`<span style="flex:1;font-size:13px;font-weight:600;color:var(--text);">${esc(u.username)}</span><span style="font-size:11px;color:var(--text-muted);">Until: ${new Date(u.mutedUntil).toLocaleString()}</span>`;
+      const ub=document.createElement('button');ub.style.cssText='border:1px solid var(--border);background:none;color:var(--text-muted);padding:4px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:11px;';ub.textContent='🔊 Unmute';ub.onclick=()=>adminUnmuteUser(u);
+      row.appendChild(ub);mutedEl.appendChild(row);
     });
-    const blockedList=Object.entries(blocked);
+    const blocked = await dbGet('chatBannedUsers')||{};
+    const blockedList = Object.entries(blocked);
     document.getElementById('apBlockedCount').textContent='('+blockedList.length+')';
-    blockedEl.innerHTML='';
-    if(!blockedList.length)blockedEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No blocked users</div>';
+    const blockedEl=document.getElementById('blockedUserList');blockedEl.innerHTML='';
+    if(!blockedList.length)blockedEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">None restricted.</div>';
     blockedList.forEach(([uid,b])=>{
-      const row=document.createElement('div');row.className='admin-user-row';
-      const info=document.createElement('div');info.className='admin-user-info';
-      const n=document.createElement('div');n.className='admin-user-name';n.textContent=b.username||uid;
-      const m=document.createElement('div');m.className='admin-user-meta';m.textContent=(b.reason||'No reason')+' • '+(b.expiresAt?'Expires: '+new Date(b.expiresAt).toLocaleString():'Permanent');
-      info.appendChild(n);info.appendChild(m);
-      const actions=document.createElement('div');actions.className='admin-user-actions';
-      const ub=document.createElement('button');ub.className='admin-user-btn';ub.title='Unban';ub.textContent='✅';ub.onclick=()=>adminUnbanUser(uid,b.username||uid);
-      actions.appendChild(ub);row.appendChild(info);row.appendChild(actions);blockedEl.appendChild(row);
+      const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);margin-bottom:4px;';
+      row.innerHTML=`<span style="flex:1;font-size:13px;font-weight:600;color:var(--text);">${esc(b.username||uid)}</span><span style="font-size:11px;color:var(--text-muted);">${esc(b.reason||'No reason')} • ${b.expiresAt?'Expires '+new Date(b.expiresAt).toLocaleString():'Permanent'}</span>`;
+      const ub=document.createElement('button');ub.style.cssText='border:1px solid var(--border);background:none;color:var(--text-muted);padding:4px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:11px;';ub.textContent='✅ Lift';ub.onclick=async()=>{await dbDel(`chatBannedUsers/${uid}`);showBanner('✅ Restriction lifted','green');loadAdminUserList();};
+      row.appendChild(ub);blockedEl.appendChild(row);
     });
     renderDmViewerUsers(otherUsers);
     document.getElementById('settingEditWindow').value=runtimeSettings.editWindowMinutes;
     document.getElementById('settingCooldown').value=Math.round(runtimeSettings.cooldownMs/1000);
     document.getElementById('settingMaxLen').value=runtimeSettings.maxMsgLen;
     document.getElementById('settingPollMax').value=runtimeSettings.pollMaxOptions;
-  }catch(e){listEl.innerHTML='<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Error loading</div>';}
+  } catch(e) { if(listEl)listEl.innerHTML='<div style="font-size:12px;color:#ef4444;text-align:center;padding:12px;">Error loading</div>'; }
+}
+
+function renderAdminUserRows(allUsersList, filter) {
+  const listEl = document.getElementById('adminUserList'); if(!listEl) return;
+  const filtered = filter ? allUsersList.filter(u=>(u.username||'').toLowerCase().includes(filter)||(u.email||'').toLowerCase().includes(filter)) : allUsersList;
+  listEl.innerHTML = '';
+  if (!filtered.length) { listEl.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px;">No users found</div>'; return; }
+  filtered.forEach(u => {
+    const isMutedUser = u.mutedUntil && new Date(u.mutedUntil) > new Date();
+    const isModUser = modUsers.has(u.uid);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-secondary);cursor:pointer;transition:background 0.15s;';
+    row.onmouseenter=()=>row.style.background='var(--surface-hover)';row.onmouseleave=()=>row.style.background='var(--bg-secondary)';
+    const av = makeAvatarEl(u.avatar||'',u.username||'?',36); av.style.flexShrink='0';
+    const info = document.createElement('div'); info.style.cssText='flex:1;min-width:0;';
+    const tags = [isModUser?'<span style="font-size:9px;background:#d1fae5;color:#065f46;padding:1px 5px;border-radius:4px;font-weight:700;">MOD</span>':'', isMutedUser?'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;font-weight:700;">MUTED</span>':''].filter(Boolean).join(' ');
+    info.innerHTML = `<div style="font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">${esc(u.username||'Unknown')} ${tags}</div><div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(u.email||u.uid)}</div>`;
+    const chevron = document.createElement('span'); chevron.textContent='›'; chevron.style.cssText='color:var(--text-muted);font-size:18px;';
+    row.appendChild(av); row.appendChild(info); row.appendChild(chevron);
+    row.onclick = () => openAdminUserDetail(u);
+    listEl.appendChild(row);
+  });
 }
 
 // ════════════════════════════════════════════════
@@ -3384,11 +3470,17 @@ async function loadDmTranscript() {
 async function adminToggleMod(u, makemod) {
   if(!isHeadAdmin()) return;
   try{
-    if(makemod) await dbSet(dbRef(`mods/${u.uid}`),{username:u.username,grantedBy:myUsername(),grantedAt:Date.now()});
-    else await dbDel(`mods/${u.uid}`);
+    if(makemod){
+      await set(ref(db,`mods/${u.uid}`),{username:u.username,grantedBy:myUsername(),grantedAt:Date.now()});
+    } else {
+      await remove(ref(db,`mods/${u.uid}`));
+    }
     showBanner('✅ '+(makemod?'Modded':'Unmodded')+' '+u.username,'green');
     loadAdminUserList();
-  }catch(e){showBanner('⚠ Failed: '+e.message,'red');}
+  }catch(e){
+    console.error('Mod toggle error:',e);
+    showBanner('⚠ Failed: '+e.message+' — check Firebase rules','red');
+  }
 }
 async function adminUnbanUser(uid, label) {
   if(!confirm('Unban '+label+'?')) return;
@@ -3413,17 +3505,13 @@ function openKickModal(u){kickTarget=u;document.getElementById('kickTargetName')
 document.getElementById('kickCancelBtn').addEventListener('click',()=>{document.getElementById('kickModal').classList.remove('open');kickTarget=null;});
 document.getElementById('kickConfirmBtn').addEventListener('click',async()=>{
   if(!kickTarget) return;
-  const reason=document.getElementById('kickReasonInput').value.trim()||'No reason.';
+  const reason=document.getElementById('kickReasonInput').value.trim()||'No reason provided.';
   document.getElementById('kickModal').classList.remove('open');
   try{
-    const uid=kickTarget.uid;
-    const msgs=await dbGet('messages');const updates={};
-    Object.entries(msgs||{}).forEach(([k,v])=>{if(v.uid===uid)updates[`messages/${k}`]=null;});
-    updates[`users/${uid}`]=null;updates[`presence/${uid}`]=null;
-    await update(ref(db,'/'),updates);
-    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} kicked ${kickTarget.username}||reason:${reason}`,type:'system',timestamp:Date.now()});
-    showBanner('✅ Kicked '+kickTarget.username,'green');kickTarget=null;loadAdminUserList();
-  }catch(e){showBanner('⚠ Kick failed: '+(e.message||''),'red');}
+    await dbSet(dbRef(`userWarnings/${kickTarget.uid}`),{reason,warnedBy:myUsername(),ts:Date.now()});
+    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`⚠️ ${myUsername()} warned ${kickTarget.username}||reason:${reason}`,type:'system',timestamp:Date.now()});
+    showBanner('✅ Warning sent to '+kickTarget.username,'green');kickTarget=null;loadAdminUserList();
+  }catch(e){showBanner('⚠ Warn failed: '+(e.message||''),'red');}
 });
 
 // ════════════════════════════════════════════════
@@ -3440,13 +3528,9 @@ document.getElementById('banConfirmBtn').addEventListener('click',async()=>{
   document.getElementById('banModal').classList.remove('open');
   try{
     const uid=banTarget.uid;
-    await dbSet(dbRef(`bannedUsers/${uid}`),{uid,username:banTarget.username,reason,bannedBy:myUsername(),expiresAt,bannedAt:Date.now()});
-    const msgs=await dbGet('messages');const updates={};
-    Object.entries(msgs||{}).forEach(([k,v])=>{if(v.uid===uid)updates[`messages/${k}`]=null;});
-    updates[`users/${uid}`]=null;updates[`presence/${uid}`]=null;
-    await update(ref(db,'/'),updates);
-    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🛡 ${myUsername()} banned ${banTarget.username}${expiresAt?' (until '+new Date(expiresAt).toLocaleString()+')':' (permanent)'}||reason:${reason}`,type:'system',timestamp:Date.now()});
-    showBanner('✅ Banned '+banTarget.username,'green');banTarget=null;loadAdminUserList();
+    await dbSet(dbRef(`chatBannedUsers/${uid}`),{uid,username:banTarget.username,reason,bannedBy:myUsername(),expiresAt,bannedAt:Date.now()});
+    if(alertGlobalEnabled) await dbPush('messages',{uid:myUid(),username:'🛡 Admin',text:`🚫 ${myUsername()} restricted ${banTarget.username} from global chat${expiresAt?' (until '+new Date(expiresAt).toLocaleString()+')':' (permanent)'}||reason:${reason}`,type:'system',timestamp:Date.now()});
+    showBanner('✅ Chat-banned '+banTarget.username,'green');banTarget=null;loadAdminUserList();
   }catch(e){showBanner('⚠ Ban failed: '+(e.message||''),'red');}
 });
 
@@ -3495,8 +3579,16 @@ function showCtxMenu(e, targetUsername, targetUid) {
   avHeader.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;';
   const avEl=makeAvatarEl(avatarUrl,targetUsername,36);avEl.style.cursor=avatarUrl?'pointer':'default';
   if(avatarUrl){avEl.addEventListener('click',e=>{e.stopPropagation();ctxMenu.classList.remove('open');showProfileImageModal(avatarUrl,targetUsername);});}
-  const nameSpan=document.createElement('span');nameSpan.style.cssText='font-size:14px;font-weight:700;color:var(--text);';nameSpan.textContent=targetUsername;
-  avHeader.appendChild(avEl);avHeader.appendChild(nameSpan);
+  const nameCol=document.createElement('div');
+  const nameSpan=document.createElement('span');nameSpan.style.cssText='font-size:14px;font-weight:700;color:var(--text);display:block;';nameSpan.textContent=targetUsername;
+  nameCol.appendChild(nameSpan);
+  const userStatus=allUsers[targetUid]?.status;
+  if(userStatus&&userStatus.text&&new Date(userStatus.expiresAt)>new Date()){
+    const stSpan=document.createElement('span');stSpan.style.cssText='font-size:12px;color:var(--text-muted);margin-top:2px;display:block;';
+    stSpan.textContent=(userStatus.emoji||'')+(userStatus.emoji?' ':'')+userStatus.text;
+    nameCol.appendChild(stSpan);
+  }
+  avHeader.appendChild(avEl);avHeader.appendChild(nameCol);
   document.getElementById('ctxMenuName').after(avHeader);
   if(isAdmin()){
     const isMutedUser=user.mutedUntil&&new Date(user.mutedUntil)>new Date();
