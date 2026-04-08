@@ -3,15 +3,15 @@
     <head>
         <base href="https://cdn.jsdelivr.net/gh/gn-math/gn-math-DONTDMCA@main/">
 
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
-    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="icon" type="image/png" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
+    <link rel="apple-touch-icon" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
     <script>
-        window.addEventListener('beforeunload', function (event) {
-            event.preventDefault();
-            event.returnValue = '';
-            return 'Are you sure you want to leave? Any unsaved changes will be lost.';
-        });
+        //window.addEventListener('beforeunload', function (event) {
+            //event.preventDefault();
+            //event.returnValue = '';
+            //return 'Are you sure you want to leave? Any unsaved changes will be lost.';
+        //});
     </script>
     <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-WX5VS54ZDW"></script>
     <script>
@@ -25,7 +25,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gn-math</title>
+    <title>Home - Classroom</title>
     <meta name="title" content="GN-Math">
     <meta name="description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on GN-Math. Fast, free, no downloads—perfect for school or home.">
     <meta property="og:type" content="website">
@@ -38,10 +38,10 @@
     <meta name="twitter:description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on GN-Math. Fast, free, no downloads—perfect for school or home.">
     <style>
         :root {
-    --primary: #fc2651;
-    --primary-hover: #e91e47;
-    --primary-light: rgba(252, 38, 81, 0.1);
-    --primary-lighter: rgba(252, 38, 81, 0.05);
+    --primary: #FFA500;
+    --primary-hover: #FFA500;
+    --primary-light: rgba(255, 165, 0, 0.1);
+    --primary-lighter: rgba(255, 165, 0, 0.05);
     --accent: #8b5cf6;
     --accent-light: rgba(139, 92, 246, 0.1);
     --success: #10b981;
@@ -66,16 +66,16 @@
     --radius-sm: 8px;
     --radius-lg: 16px;
     --radius-xl: 20px;
-    --gradient-primary: linear-gradient(135deg, #fc2651 0%, #e91e47 100%);
+    --gradient-primary: linear-gradient(135deg, #ffa500 0%, #ff8800 100%);
     --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     --gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .dark-mode {
-    --primary: #fc2651;
-    --primary-hover: #ff4d75;
-    --primary-light: rgba(252, 38, 81, 0.15);
-    --primary-lighter: rgba(252, 38, 81, 0.08);
+    --primary: #FFA500;
+    --primary-hover: #FFA500;
+    --primary-light: rgba(255, 165, 0, 0.15);
+    --primary-lighter: rgba(255, 165, 0, 0.08);
     --accent: #a855f7;
     --accent-light: rgba(168, 85, 247, 0.15);
     --success: #34d399;
@@ -96,7 +96,7 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.7);
     --shadow-glow: 0 0 20px rgba(252, 38, 81, 0.4);
-    --gradient-primary: linear-gradient(135deg, #fc2651 0%, #ff4d75 100%);
+    --gradient-primary: linear-gradient(135deg, #ffa500 0%, #ff8800 100%);
     --gradient-accent: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
     --gradient-surface: linear-gradient(135deg, #1e293b 0%, #334155 100%);
 }
@@ -719,7 +719,7 @@ footer {
 
     <header>
         <div class="header-content">
-            <div class="logo">gn-math</div>
+            <div class="logo"></div>
             <div class="search-container">
                 <input type="text" id="searchBar" placeholder="Search zones..." oninput="filterZones()">
                 <select id="sortOptions" onchange="sortZones()">
@@ -735,6 +735,14 @@ footer {
                 </select>
             </div>
             <div class="control-buttons">
+				<button id="random" class="control-button" title="Choose Random Game">
+                    <img src="https://image2url.com/r2/default/images/1771506138990-709f1212-63e4-42b3-bb9d-5f5b0d41cd54.png" alt="random">
+                </button>
+				<a href="https://tmorris01.github.io/gnlinks/">
+               		<button id="home" class="control-button" title="Go to GN-Links Home">
+                		<img src="https://image2url.com/r2/default/images/1768575858641-7bd74adf-2632-4120-bd89-92e4ef3c3f7e.png" alt="home">
+               		</button>
+             	</a>
                 <button id="refresh" class="control-button" title="Refresh all the zones" onclick="listZones()">
                     <img src="refresh-icon.png" alt="refresh">
                 </button>
@@ -795,6 +803,7 @@ footer {
         </div>
     </div>
 
+	<footer>
     <div class="footer-links">
             <a href="#" onclick="loadDMCA(); return false;">DMCA</a>
             <a href="#" onclick="showContact(); return false;">Contact</a>
@@ -802,6 +811,7 @@ footer {
             <a href="javascript:saveData()">Export Data</a>
             <a href="#" onclick="document.getElementById('importData').click(); return false;">Import Data</a>
             <input type="file" id="importData" style="display: none;" onchange="loadData(event)">
+			<a href="#" onclick="showMinecraft(); return false;">Minecraft</a>
         </div>
     </footer>
 
@@ -1404,7 +1414,7 @@ function cloakIcon(url) {
     const link = document.querySelector("link[rel~='icon']");
     link.rel = "icon";
     if ((url+"").trim().length === 0) {
-        link.href = "favicon.png";
+        link.href = "https://www.gstatic.com/classroom/logo_square_rounded.svg";
     } else {
         link.href = url;
     }
@@ -1412,7 +1422,7 @@ function cloakIcon(url) {
 }
 function cloakName(string) {
     if ((string+"").trim().length === 0) {
-        document.title = "gn-math";
+        document.title = "Home - Classroom";
         return;
     }
     document.title = string;
@@ -1455,6 +1465,23 @@ function showContact() {
     popupBody.innerHTML = `
     <p>Discord: https://discord.gg/NAFw4ykZ7n</p>
     <p>Email: gn.math.business@gmail.com</p>`;
+    popupBody.contentEditable = false;
+    document.getElementById('popupOverlay').style.display = "flex";
+}
+
+function showMinecraft() {
+    document.getElementById('popupTitle').textContent = "Minecraft";
+    const popupBody = document.getElementById('popupBody');
+    popupBody.innerHTML = `
+    <h4 style="text-align: center">
+               <a href="https://tmorris01.github.io/gnlinks/1.12.html">
+                   <button class="settings-button" style="width: 40%; margin-right: 5%;">Minecraft 1.12</button>
+               </a>
+               <a href="https://tmorris01.github.io/gnlinks/1.8.html">
+                   <button class="settings-button" style="width: 40%;">Minecraft 1.8</button>
+               </a>
+           </h4>
+    `;
     popupBody.contentEditable = false;
     document.getElementById('popupOverlay').style.display = "flex";
 }
@@ -1637,6 +1664,20 @@ listZones();
 HTMLCanvasElement.prototype.toDataURL = function (...args) {
     return "";
 };
+
+document.getElementById('random').addEventListener('click', function() {
+    // Generate a random number between 2 and 720
+    const min = 2;
+    const max = 720;
+    const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // Option A: Update URL and RELOAD the page to the new ID
+    window.location.search = `?id=${randomNumber}`;
+
+    // Option B: Update URL WITHOUT reloading (useful for single-page apps)
+    // const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${randomNumber}`;
+    // window.history.pushState({path:newUrl}, '', newUrl);
+});
 </script>
     <script>
       try {
