@@ -7,6 +7,11 @@
     <link rel="icon" id="faviconLink" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
 <link rel="stylesheet" href="style.css">
 <style>
+@keyframes gnpulse {
+  0%, 100% { box-shadow: 0 0 0 3px #FFA500, 0 0 18px 4px rgba(255,165,0,0.5); }
+  50%       { box-shadow: 0 0 0 3px #FFA500, 0 0 6px 1px rgba(255,165,0,0.2); }
+}
+    
 .main-toggle-btn {
 position: fixed;
 bottom: 20px;
@@ -106,8 +111,7 @@ window.location.href = 'https://classroom.google.com/';
 <br><br>
 <a href="https://tmorris01.github.io/gnlinks/gn.html"><button class="settings-button" style="width: 85%;">Open Gn-Math</button></a>
 <br><br>
-<a href="https://tmorris01.github.io/gnlinks/chat.html"><button class="settings-button" style="width: 40%; margin-right: 5%;">GN Chat</button></a>
-<a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%;">Minecraft</button></a>
+<a href="https://tmorris01.github.io/gnlinks/chat.html" id="gnChatLink1"><button class="settings-button" id="gnChatBtn1" style="width: 40%; margin-right: 5%; position:relative; box-shadow: 0 0 0 3px #FFA500, 0 0 18px 4px rgba(255,165,0,0.5); animation: gnpulse 1.8s ease-in-out infinite;">💬 GN Chat</button></a><a><button id="minecraft" class="settings-button minecraft-btn" style="width: 40%;">Minecraft</button></a>
 <br><br>
 <a href="https://tmorris01.github.io/gnlinks/drive-mad-new"><button class="settings-button" style="width: 40%; margin-right: 5%;">Drive Mad</button></a>
 <a><button id="rocketgoal" class="settings-button rocket-btn" style="width: 40%;">Rocketgoal.io</button></a>
@@ -395,6 +399,40 @@ window.location.href = 'https://classroom.google.com/';
     .btn-save:hover { background: #1557b0; }
     .btn-reset { border: 1px solid #f28b82; background: transparent; color: #c5221f; margin-right: auto; }
     .btn-reset:hover { background-color: #fce8e6; }
+/* ── GN CHAT HIGHLIGHT ── */
+@keyframes gnpulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,165,0,0.7), 0 1px 3px rgba(0,0,0,0.12); }
+  50%       { box-shadow: 0 0 0 6px rgba(255,165,0,0.0), 0 1px 3px rgba(0,0,0,0.12); }
+}
+@keyframes gnpulse-dark {
+  0%, 100% { box-shadow: 0 0 0 3px #FFA500, 0 0 18px 4px rgba(255,165,0,0.5); }
+  50%       { box-shadow: 0 0 0 3px #FFA500, 0 0 6px 1px rgba(255,165,0,0.2); }
+}
+.gn-chat-highlight {
+  animation: gnpulse 1.8s ease-in-out infinite;
+  position: relative;
+}
+.gn-chat-highlight::after {
+  content: '✨ New';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #FFA500;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.gn-chat-sidebar-highlight {
+  background-color: rgba(255,165,0,0.15) !important;
+  animation: gnpulse 1.8s ease-in-out infinite;
+  position: relative;
+}
 </style>
 
 <!-- HEADER -->
@@ -1100,6 +1138,80 @@ allMineBtns.forEach(btn => {
 function closePopup() {
     document.getElementById('popupOverlay').style.display = "none";
 }
+
+// ── GN CHAT HIGHLIGHT ──────────────────────────────────────────────────────
+(function() {
+  const SEEN_KEY = 'gnChatSeen';
+
+  function markSeen() {
+    localStorage.setItem(SEEN_KEY, '1');
+    // Remove all highlights
+    document.querySelectorAll('.gn-chat-highlight, .gn-chat-sidebar-highlight, #gnChatBtn1').forEach(el => {
+      el.classList.remove('gn-chat-highlight', 'gn-chat-sidebar-highlight');
+      el.style.animation = 'none';
+      el.style.boxShadow = '';
+    });
+    const badge = document.querySelector('.gn-chat-highlight::after');
+    // Remove badge via class — CSS handles it
+  }
+
+  if (localStorage.getItem(SEEN_KEY)) return; // already seen, no highlight
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // Site 1 button
+    const btn1 = document.getElementById('gnChatBtn1');
+    if (btn1) {
+      btn1.addEventListener('mouseenter', markSeen);
+      btn1.addEventListener('click', markSeen);
+    }
+
+    // Site 2 card — find the card that links to chat.html
+    const allCards = document.querySelectorAll('.class-card');
+    allCards.forEach(card => {
+      const link = card.closest('a') || card;
+      if ((link.href || '').includes('chat.html') || (link.getAttribute && (link.getAttribute('href') || '').includes('chat.html'))) {
+        link.classList.add('gn-chat-highlight');
+        link.addEventListener('mouseenter', markSeen);
+        link.addEventListener('click', markSeen);
+      }
+    });
+
+    // Site 2 sidebar chat icon (the svg chat bubble link)
+    const sidebarLinks = document.querySelectorAll('#site2 .sidebar-item');
+    sidebarLinks.forEach(link => {
+      if ((link.getAttribute('href') || '').includes('chat.html')) {
+        link.classList.add('gn-chat-sidebar-highlight');
+        link.addEventListener('mouseenter', markSeen);
+        link.addEventListener('click', markSeen);
+      }
+    });
+  });
+
+  // Also handle cards rendered after DOMContentLoaded (renderCards is called after)
+  // Use a MutationObserver on the grid
+  window.addEventListener('load', () => {
+    if (localStorage.getItem(SEEN_KEY)) return;
+    const grid = document.getElementById('classesGrid');
+    if (!grid) return;
+    const observer = new MutationObserver(() => {
+      grid.querySelectorAll('a.class-card').forEach(card => {
+        if (card._gnHighlightDone) return;
+        // Check if this card goes to chat.html — look at the onclick or href
+        // We identify it by the card containing "GN Chat" or having the chat URL
+        const nameEl = card.querySelector('.class-name');
+        if (nameEl && (nameEl.textContent.toLowerCase().includes('chat') || nameEl.textContent.includes('GN'))) {
+          card._gnHighlightDone = true;
+          if (!localStorage.getItem(SEEN_KEY)) {
+            card.classList.add('gn-chat-highlight');
+            card.addEventListener('mouseenter', markSeen);
+            card.addEventListener('click', markSeen);
+          }
+        }
+      });
+    });
+    observer.observe(grid, { childList: true });
+  });
+})();
 </script>
 
 </body>
