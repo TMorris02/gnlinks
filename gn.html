@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <base href="https://cdn.jsdelivr.net/gh/freebuisness/freebuisness.github.io@main/">
+        <base href="https://cdn.jsdelivr.net/gh/gn-math/gn-math-DONTDMCA@main/">
+
     <link rel="icon" type="image/png" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
     <link rel="apple-touch-icon" href="https://www.gstatic.com/classroom/logo_square_rounded.svg">
@@ -886,9 +887,9 @@ async function listZones() {
                             popup.style.borderRadius = "5px";
                             popup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.1)";
                             popup.style.fontFamily = "Arial, sans-serif";
-                            
+
                             popup.innerHTML = `Play more games at <a href="https://gn-math.dev" target="_blank" style="color:#004085; font-weight:bold;">https://gn-math.dev</a>!`;
-                            
+
                             const closeBtn = document.createElement("button");
                             closeBtn.innerText = "?";
                             closeBtn.style.marginLeft = "10px";
@@ -897,7 +898,7 @@ async function listZones() {
                             closeBtn.style.cursor = "pointer";
                             closeBtn.style.color = "#004085";
                             closeBtn.style.fontWeight = "bold";
-                            
+
                             closeBtn.onclick = () => popup.remove();
                             popup.appendChild(closeBtn);
                             document.body.appendChild(popup);
@@ -940,7 +941,7 @@ async function listZones() {
         }
     } catch (error) {
         console.error(error);
-        container.innerHTML = `Error loading zones: ${error}`;
+        container.innerHTML = `Error loading zones:<br><strong>IT WON'T FIX UNTIL ACTUAL SITE GET FIXED</strong></br> ${error}`;
     }
 }
 async function fetchPopularity(duration) {
@@ -1193,18 +1194,18 @@ function sanitizeData(obj, maxStringLen = 1000, maxArrayLen = 10000) {
     if (typeof obj === 'string') {
       return obj.length > maxStringLen ? obj.slice(0, maxStringLen) + '...[truncated]' : obj;
     }
-    
+
     if (obj instanceof Uint8Array) {
       if (obj.length > maxArrayLen) {
         return `[Uint8Array too large (${obj.length} bytes), truncated]`;
       }
       return obj;
     }
-    
+
     if (Array.isArray(obj)) {
       return obj.map(item => sanitizeData(item, maxStringLen, maxArrayLen));
     }
-    
+
     if (obj && typeof obj === 'object') {
       const newObj = {};
       for (const key in obj) {
@@ -1214,7 +1215,7 @@ function sanitizeData(obj, maxStringLen = 1000, maxArrayLen = 10000) {
       }
       return newObj;
     }
-    
+
     return obj;
   }
 
@@ -1290,7 +1291,7 @@ async function saveData() {
         });
       }
     }
-  
+
     alert("Done, wait for the download to come");
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([JSON.stringify(result)], {
@@ -1301,7 +1302,7 @@ async function saveData() {
     link.click();
     document.body.removeChild(link);
   }
-  
+
   async function loadData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1313,19 +1314,19 @@ async function saveData() {
               document.cookie = cookie.trim();
             });
           }
-        
+
           if (data.localStorage) {
             for (const key in data.localStorage) {
               localStorage.setItem(key, data.localStorage[key]);
             }
           }
-        
+
           if (data.sessionStorage) {
             for (const key in data.sessionStorage) {
               sessionStorage.setItem(key, data.sessionStorage[key]);
             }
           }
-        
+
           if (data.indexedDB) {
             for (const dbName in data.indexedDB) {
               const stores = data.indexedDB[dbName];
@@ -1344,7 +1345,7 @@ async function saveData() {
                   const transaction = db.transaction(Object.keys(stores), 'readwrite');
                   transaction.onerror = () => reject(transaction.error);
                   let pendingStores = Object.keys(stores).length;
-        
+
                   for (const storeName in stores) {
                     const objectStore = transaction.objectStore(storeName);
                     objectStore.clear().onsuccess = () => {
@@ -1360,12 +1361,12 @@ async function saveData() {
               });
             }
           }
-        
+
           if (data.caches) {
             for (const cacheName in data.caches) {
               const cache = await caches.open(cacheName);
               await cache.keys().then(keys => Promise.all(keys.map(k => cache.delete(k)))); // clear existing
-        
+
               for (const entry of data.caches[cacheName]) {
                 let responseBody;
                 if (entry.contentType.includes('application/json')) {
