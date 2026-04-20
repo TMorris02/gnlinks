@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>67 Speed</title>
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/11196/11196687.png">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -105,8 +106,8 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
 .fire-overlay{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.4s;background:radial-gradient(ellipse at center,transparent 40%,rgba(255,51,0,0.25) 100%);}
 .fire-overlay.show{opacity:1;animation:fireFlicker 0.3s ease-in-out infinite alternate;}
 @keyframes fireFlicker{from{opacity:0.7}to{opacity:1}}
-#videoEl{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
-#gameCanvas{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1);}
+#videoEl{width:100%;height:100%;object-fit:contain;transform:scaleX(-1);background:#000;}
+#gameCanvas{position:absolute;inset:0;width:100%;height:100%);}
 .fire-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:4rem;font-weight:900;color:var(--fire);text-shadow:0 0 40px var(--fire);opacity:0;pointer-events:none;z-index:20;animation:none;}
 .fire-badge.show{animation:fireBadgeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;}
 @keyframes fireBadgeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}70%{transform:translate(-50%,-50%) scale(0.95)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
@@ -124,7 +125,7 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
 #setupOverlay{position:fixed;inset:0;z-index:650;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:20px;}
 #setupOverlay.show{display:flex;}
 #setupVideo{width:min(500px,90vw);height:min(360px,60vw);object-fit:cover;border-radius:12px;border:2px solid var(--border);transform:scaleX(-1);background:#000;}
-#setupCanvas{position:absolute;border-radius:12px;pointer-events:none;transform:scaleX(-1);}
+#setupCanvas{position:absolute;border-radius:12px;pointer-events:none;}
 .setup-status{font-family:var(--font-mono);font-size:12px;letter-spacing:0.1em;color:var(--muted);text-align:center;}
 .hands-detected{color:var(--green);}
 .setup-confirm-btn{padding:14px 48px;border:none;border-radius:6px;background:var(--accent);color:var(--bg);font-family:var(--font-display);font-size:1.1rem;font-weight:900;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;opacity:0.4;pointer-events:none;}
@@ -213,16 +214,33 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
 
 /* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .lb-row{grid-template-columns:40px 1fr 80px;} 
+  .header{padding:10px 14px;}
+  .logo{font-size:1.2rem;}
+  .sign-in-btn,.guest-btn{padding:5px 10px;font-size:11px;}
+  .hero{padding:90px 16px 40px;}
+  .hero-title{font-size:clamp(3.5rem,18vw,7rem);}
+  .hero-sub{font-size:11px;}
+  .play-btn{padding:14px 40px;font-size:1rem;}
+  .hero-stats{gap:20px;}
+  .stat-num{font-size:1.6rem;}
+  .lb-section{padding:30px 14px 80px;}
+  .lb-row{grid-template-columns:36px 1fr 72px;}
   .lb-date{display:none;}
-  .hero-title{font-size:clamp(4rem,20vw,8rem);}
+  .card{padding:22px;}
+  .admin-card{width:100vw;}
+  .game-score-display{font-size:3.5rem;}
+  .game-timer{font-size:1.6rem;}
+  #setupVideo{width:min(340px,92vw);height:min(260px,55vw);}
 }
+
+.home-btn:hover{border-color:var(--accent)!important;color:var(--accent)!important;}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header class="header">
+  <a href="https://tmorris01.github.io/gnlinks" class="home-btn" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:20px;transition:all 0.2s;letter-spacing:0.08em;">← HOME</a>
   <a class="logo" href="#"><span>67</span> SPEED</a>
   <div class="header-right">
     <div id="userPill" class="user-pill" style="display:none;" onclick="openProfileModal()">
@@ -274,6 +292,7 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
     </button>
     <div class="btn-row" style="margin-top:12px;">
       <button class="btn btn-ghost" onclick="closeSignInModal()">Cancel</button>
+      <button class="btn btn-ghost" onclick="enterGuestMode()">Play as Guest</button>
     </div>
   </div>
 </div>
@@ -385,6 +404,12 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
   <div class="admin-card">
     <div class="admin-title">🛡 Admin <button class="admin-close" onclick="closeAdminPanel()">✕</button></div>
     <div class="admin-section">
+      <div class="admin-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        Active Players <span id="activeCount" style="font-size:10px;background:var(--green);color:var(--bg);padding:2px 7px;border-radius:8px;font-weight:700;"></span>
+      </div>
+      <div id="adminActivePlayers"><div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px 0;">Loading...</div></div>
+    </div>
+    <div class="admin-section" style="border-top:1px solid var(--border);padding-top:20px;">
       <div class="admin-section-title">All Players</div>
       <div id="adminUserList"></div>
     </div>
@@ -435,6 +460,7 @@ const HEAD_ADMIN_EMAIL = 'isaac.r.lambert@eskymos.com';
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let currentUser = null;
 let myProfile = null;
+let isGuest = false;
 let gameScore = 0;
 let gameTimeLeft = 20;
 let gameInterval = null;
@@ -444,8 +470,13 @@ let cameraStream = null;
 let mpHands = null;
 let setupHands = null;
 let handPositions = []; // [{x, y, index}] — wrist Y positions per detected hand
-let lastCrossingState = null; // 'left_high' | 'right_high'
+let lastCrossingState = null;
 let crossingCooldown = false;
+// Movement tracking
+let prevHandPositions = [];
+let smallMovementStreak = 0;
+const MOVEMENT_THRESHOLD = 0.018; // fraction of frame height
+const SMALL_MOVE_WARN_AFTER = 8; // consecutive low-movement crossings before warning
 let recordEnabled = false;
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -497,6 +528,8 @@ onAuthStateChanged(auth, async user => {
     }
     loadLeaderboard();
     loadStats();
+    publishHomePresence();
+    window.addEventListener('beforeunload', removeSession);
   } else {
     document.getElementById('signInHeaderBtn').style.display = '';
     document.getElementById('userPill').style.display = 'none';
@@ -507,16 +540,82 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
+// Listen for admin-forced sign out
+onAuthStateChanged(auth, user => {
+  if (user) {
+    onValue(ref(db, `67speed/forceSignout/${user.uid}`), async snap => {
+      if (snap.exists()) {
+        await remove(ref(db, `67speed/forceSignout/${user.uid}`));
+        await signOut(auth);
+        showNotif('Your account has been removed', 'error');
+      }
+    });
+  }
+});
+
 // ── SIGN IN / PROFILE ─────────────────────────────────────────────────────────
 window.openSignInModal = () => document.getElementById('signInOverlay').classList.add('show');
 window.closeSignInModal = () => document.getElementById('signInOverlay').classList.remove('show');
 
+window.enterGuestMode = () => {
+  isGuest = true;
+  closeSignInModal();
+  document.getElementById('signInHeaderBtn').style.display = 'none';
+  document.getElementById('userPill').style.display = 'flex';
+  document.getElementById('headerUsername').textContent = 'Guest';
+  const dot = document.querySelector('.user-dot');
+  if (dot) dot.style.background = 'var(--muted)';
+  showNotif('Playing as guest — scores won\'t be saved', 'info');
+};
+
 window.openProfileModal = () => {
+  if (isGuest) { openSignInModal(); return; }
   document.getElementById('usernameInp').value = myProfile?.username || '';
   document.getElementById('unCancelBtn').style.display = '';
   document.getElementById('unModalTitle').textContent = 'Edit Profile';
+  // Show sign out + delete buttons
+  const card = document.querySelector('#usernameOverlay .card');
+  let actRow = document.getElementById('profileActRow');
+  if (!actRow) {
+    actRow = document.createElement('div');
+    actRow.id = 'profileActRow';
+    actRow.style.cssText = 'display:flex;gap:8px;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;';
+    actRow.innerHTML = `
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="doSignOut()">Sign Out</button>
+      <button class="btn btn-danger" style="flex:1;font-size:13px;background:none;border:1px solid #ef4444;color:#ef4444;" onclick="confirmDeleteAccount()">Delete Account</button>`;
+    card.appendChild(actRow);
+  }
   document.getElementById('usernameOverlay').classList.add('show');
   setTimeout(() => document.getElementById('usernameInp').focus(), 50);
+};
+
+window.doSignOut = async () => {
+  if (!confirm('Sign out?')) return;
+  await signOut(auth);
+  isGuest = false;
+  document.getElementById('userPill').style.display = 'none';
+  document.getElementById('signInHeaderBtn').style.display = '';
+  document.getElementById('adminBtn').style.display = 'none';
+  closeUsernameModal();
+  showNotif('Signed out', 'info');
+};
+
+window.confirmDeleteAccount = async () => {
+  if (!confirm('Delete your account and all scores permanently? This cannot be undone.')) return;
+  if (!currentUser) return;
+  try {
+    const uid = currentUser.uid;
+    await Promise.all([
+      remove(DB.users(uid)),
+      remove(DB.lbUser(uid)),
+      remove(DB.attempts(uid))
+    ]);
+    // Write force-signout flag
+    await set(ref(db, `67speed/forceSignout/${uid}`), { ts: Date.now() });
+    await signOut(auth);
+    showNotif('Account deleted', 'info');
+    closeUsernameModal();
+  } catch(e) { showNotif('Failed to delete account', 'error'); }
 };
 window.openUsernameModal = () => {
   document.getElementById('usernameOverlay').classList.add('show');
@@ -541,27 +640,24 @@ window.saveUsername = async () => {
 };
 
 // ── LEADERBOARD ───────────────────────────────────────────────────────────────
-async function loadLeaderboard() {
-  const lbEl = document.getElementById('lbTable');
-  try {
-    const snap = await get(DB.lb());
+function loadLeaderboard() {
+  onValue(DB.lb(), snap => {
     allLeaderboard = snap.val() || {};
     renderLbTable(allLeaderboard);
-  } catch(e) {
-    lbEl.innerHTML = '<div class="lb-empty">Failed to load</div>';
-  }
+  });
 }
 
-async function loadStats() {
-  try {
-    const [lbSnap, usersSnap] = await Promise.all([get(DB.lb()), get(DB.allUsers())]);
-    const lb = lbSnap.val() || {};
-    const users = usersSnap.val() || {};
+function loadStats() {
+  onValue(DB.lb(), snap => {
+    const lb = snap.val() || {};
     const scores = Object.values(lb).map(e => e.score || 0);
     document.getElementById('statTotal').textContent = scores.length || '0';
     document.getElementById('statTopScore').textContent = scores.length ? Math.max(...scores) : '0';
-    document.getElementById('statPlayers').textContent = Object.keys(users).length || '0';
-  } catch(e) {}
+  });
+  onValue(DB.allUsers(), snap => {
+    const users = snap.val() || {};
+    document.getElementById('statPlayers').textContent = Object.keys(users).filter(uid => !users[uid].guest).length || '0';
+  });
 }
 
 function renderLbTable(lb) {
@@ -651,7 +747,7 @@ async function openUserAttempts(uid, username) {
         <div class="att-rank">#${i+1}</div>
         <div class="att-score" style="font-size:1.3rem;">${att.score}</div>
         <div class="att-date">${fmtDate(att.ts)}</div>
-        <div class="att-vid">${att.hasVideo ? '<button class="att-vid-btn" disabled title="Download only available to account owner">📹</button>' : ''}</div>
+        <div class="att-vid">${(att.hasVideo && currentUser && uid === currentUser.uid) ? '<button class="att-vid-btn" onclick="downloadMyAttemptVideo()">📹 Download</button>' : ''}</div>
         <div></div>`;
       popup.appendChild(row);
     });
@@ -660,8 +756,8 @@ async function openUserAttempts(uid, username) {
 
 // ── GAME FLOW ─────────────────────────────────────────────────────────────────
 window.startGame = () => {
-  if (!currentUser) { openSignInModal(); return; }
-  if (!myProfile?.username) { openUsernameModal(); return; }
+  if (!currentUser && !isGuest) { openSignInModal(); return; }
+  if (!isGuest && !myProfile?.username) { openUsernameModal(); return; }
   openSetup();
 };
 
@@ -788,8 +884,50 @@ window.cancelRecordConfirm = () => {
 window.confirmRecordAndStart = () => {
   document.getElementById('recordConfirmOverlay').classList.remove('show');
   if (setupHands) { setupHands.close(); setupHands = null; }
+  if (recordEnabled) startRecordingEarly();
   startCountdown();
 };
+
+function startRecordingEarly() {
+  // Start composite recording from countdown screen
+  // We'll record a blank canvas during countdown then transition to game canvas
+  recordedChunks = [];
+  const W = window.innerWidth, H = window.innerHeight;
+  const earlyCanvas = document.createElement('canvas');
+  earlyCanvas.width = W; earlyCanvas.height = H;
+  const ctx = earlyCanvas.getContext('2d');
+  let earlyActive = true;
+  const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+  let countVal = 5;
+  const drawEarly = () => {
+    if (!earlyActive) return;
+    ctx.fillStyle = '#080c10';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(0,212,255,0.08)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'white';
+    ctx.font = '900 20vw "Barlow Condensed",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(countVal, W/2, H/2);
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '700 14px "Space Mono",monospace';
+    ctx.fillStyle = '#4a6070';
+    ctx.fillText('GET READY', W/2, H/2 + H*0.12);
+    requestAnimationFrame(drawEarly);
+  };
+  requestAnimationFrame(drawEarly);
+  // Update countdown value to match
+  let c = 5;
+  const cInt = setInterval(() => { c--; countVal = c; if (c <= 0) { earlyActive = false; clearInterval(cInt); } }, 1000);
+  try {
+    const stream = earlyCanvas.captureStream(30);
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => { recordedBlob = new Blob(recordedChunks, { type: mimeType }); };
+    mediaRecorder.start();
+  } catch(e) { recordEnabled = false; }
+}
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 function startCountdown() {
@@ -837,12 +975,37 @@ function beginGame() {
   initGameHandTracking();
 
   // Set up recording if enabled
-  if (recordEnabled) startRecording();
+  if (recordEnabled) {
+    // Stop early countdown recorder, chain into game recorder
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      mediaRecorder.onstop = () => {
+        const earlyChunks = [...recordedChunks];
+        recordedChunks = [];
+        startRecording();
+        // Prepend early chunks when game recorder also stops
+        const origStop = mediaRecorder.onstop;
+        mediaRecorder.onstop = (e) => {
+          origStop && origStop(e);
+          const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+          recordedBlob = new Blob([...earlyChunks, ...recordedChunks], { type: mimeType });
+        };
+      };
+    } else {
+      startRecording();
+    }
+  }
+
+  // Publish session presence
+  publishSession();
+  // Listen for admin commands
+  listenAdminCommands();
 
   // Timer
   gameInterval = setInterval(() => {
     gameTimeLeft--;
     document.getElementById('timerDisplay').textContent = gameTimeLeft;
+    publishSession();
     if (gameTimeLeft <= 5 && !isFireTime) {
       isFireTime = true;
       document.getElementById('timerDisplay').className = 'game-timer fire';
@@ -934,22 +1097,140 @@ function drawHandSkeletonGame(ctx, landmarks, w, h, color) {
 
 function detectCrossing() {
   if (crossingCooldown) return;
+  if (handPositions.length < 2) return;
   const h0 = handPositions[0];
   const h1 = handPositions[1];
-  // Determine which is higher (lower Y = higher on screen)
+
+  // Check both hands are actually moving
+  let bothMoving = true;
+  if (prevHandPositions.length >= 2) {
+    const move0 = Math.abs(h0.y - prevHandPositions[0].y);
+    const move1 = Math.abs(h1.y - prevHandPositions[1].y);
+    const canvasH = document.getElementById('gameCanvas').height;
+    const thresh = MOVEMENT_THRESHOLD * canvasH;
+    bothMoving = move0 > thresh && move1 > thresh;
+  }
+  prevHandPositions = [{ ...h0 }, { ...h1 }];
+
   const state = h0.y < h1.y ? 'h0_high' : 'h1_high';
   if (lastCrossingState !== null && state !== lastCrossingState) {
-    // Crossing happened!
+    if (!bothMoving) {
+      smallMovementStreak++;
+      if (smallMovementStreak >= SMALL_MOVE_WARN_AFTER) {
+        showInGameHint('Move BOTH hands more!');
+        smallMovementStreak = 0;
+      }
+      lastCrossingState = state;
+      return;
+    }
+    smallMovementStreak = 0;
     const points = isFireTime ? 2 : 1;
     gameScore += points;
     document.getElementById('scoreDisplay').textContent = gameScore;
-    // Flash feedback
     flashScoreFeedback(points);
-    // Cooldown to prevent rapid double-counts
     crossingCooldown = true;
     setTimeout(() => { crossingCooldown = false; }, 120);
   }
   lastCrossingState = state;
+}
+
+function showInGameHint(msg) {
+  let hint = document.getElementById('inGameHint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'inGameHint';
+    hint.style.cssText = 'position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(255,165,0,0.85);color:#000;font-family:"Barlow Condensed",sans-serif;font-size:1.1rem;font-weight:900;padding:10px 24px;border-radius:6px;z-index:30;letter-spacing:0.05em;pointer-events:none;transition:opacity 0.4s;';
+    document.getElementById('gameOverlay').appendChild(hint);
+  }
+  hint.textContent = msg;
+  hint.style.opacity = '1';
+  clearTimeout(hint._t);
+  hint._t = setTimeout(() => { hint.style.opacity = '0'; }, 2200);
+}
+
+let adminCmdListener = null;
+function publishSession() {
+  if (!currentUser && !isGuest) return;
+  const uid = currentUser ? currentUser.uid : 'guest_' + Math.random().toString(36).slice(2,8);
+  const data = {
+    uid,
+    username: myProfile?.username || 'Guest',
+    inGame: gameActive,
+    score: gameScore,
+    timeLeft: gameTimeLeft,
+    isFireTime,
+    ts: Date.now()
+  };
+  set(ref(db, `67speed/sessions/${uid}`), data).catch(() => {});
+}
+
+function publishHomePresence() {
+  if (!currentUser) return;
+  set(ref(db, `67speed/sessions/${currentUser.uid}`), {
+    uid: currentUser.uid,
+    username: myProfile?.username || '?',
+    inGame: false,
+    ts: Date.now()
+  }).catch(() => {});
+}
+
+function removeSession() {
+  if (!currentUser) return;
+  remove(ref(db, `67speed/sessions/${currentUser.uid}`)).catch(() => {});
+}
+
+function listenAdminCommands() {
+  if (!currentUser) return;
+  if (adminCmdListener) { adminCmdListener(); adminCmdListener = null; }
+  adminCmdListener = onValue(ref(db, `67speed/adminCommands/${currentUser.uid}`), snap => {
+    const cmd = snap.val();
+    if (!cmd) return;
+    // Clear after reading
+    remove(ref(db, `67speed/adminCommands/${currentUser.uid}`)).catch(() => {});
+    if (!gameActive) return;
+    switch (cmd.type) {
+      case 'freeze_timer':
+        clearInterval(gameInterval);
+        showInGameHint('⏸ Timer frozen by admin');
+        setTimeout(() => {
+          // Restart timer
+          gameInterval = setInterval(() => {
+            gameTimeLeft--;
+            document.getElementById('timerDisplay').textContent = gameTimeLeft;
+            publishSession();
+            if (gameTimeLeft <= 5 && !isFireTime) {
+              isFireTime = true;
+              document.getElementById('timerDisplay').className = 'game-timer fire';
+              document.getElementById('fireOverlay').classList.add('show');
+              document.getElementById('x2Label').classList.add('show');
+              const badge = document.getElementById('fireBadge');
+              badge.classList.add('show');
+              setTimeout(() => badge.classList.remove('show'), 1800);
+            }
+            if (gameTimeLeft <= 0) endGame();
+          }, 1000);
+        }, 3000);
+        break;
+      case 'end_game':
+        showInGameHint('Game ended by admin');
+        setTimeout(() => endGame(), 1000);
+        break;
+      case 'popup':
+        showInGameHint('💬 ' + (cmd.message || ''));
+        break;
+      case 'flip_score':
+        gameScore = Math.max(0, gameScore - (gameScore % 2 === 0 ? 1 : 0));
+        gameScore = parseInt(String(gameScore).split('').reverse().join('')) || 0;
+        document.getElementById('scoreDisplay').textContent = gameScore;
+        showInGameHint('🔀 Score flipped!');
+        break;
+      case 'set_score':
+        gameScore = cmd.value || 0;
+        document.getElementById('scoreDisplay').textContent = gameScore;
+        showInGameHint('Score set to ' + gameScore + ' by admin');
+        break;
+    }
+  });
 }
 
 function flashScoreFeedback(points) {
@@ -965,47 +1246,80 @@ function flashScoreFeedback(points) {
 
 // ── RECORDING ─────────────────────────────────────────────────────────────────
 function startRecording() {
-  const canvas = document.getElementById('gameCanvas');
+  const gameCanvas = document.getElementById('gameCanvas');
   const video = document.getElementById('videoEl');
-  // Composite canvas: video + overlay
+  const W = window.innerWidth, H = window.innerHeight;
   const compositeCanvas = document.createElement('canvas');
-  compositeCanvas.width = window.innerWidth;
-  compositeCanvas.height = window.innerHeight;
-  const compCtx = compositeCanvas.getContext('2d');
+  compositeCanvas.width = W; compositeCanvas.height = H;
+  const ctx = compositeCanvas.getContext('2d');
 
+  let recActive = true;
   const drawFrame = () => {
-    if (!gameActive && gameTimeLeft > 0) return;
-    compCtx.save();
-    compCtx.scale(-1, 1);
-    compCtx.drawImage(video, -compositeCanvas.width, 0, compositeCanvas.width, compositeCanvas.height);
-    compCtx.restore();
-    compCtx.drawImage(canvas, 0, 0);
-    // Score overlay
-    compCtx.fillStyle = 'rgba(0,0,0,0.5)';
-    compCtx.fillRect(16, 16, 140, 70);
-    compCtx.fillStyle = '#00d4ff';
-    compCtx.font = 'bold 40px "Barlow Condensed", sans-serif';
-    compCtx.fillText(gameScore, 28, 58);
-    compCtx.fillStyle = '#4a6070';
-    compCtx.font = '11px "Space Mono", monospace';
-    compCtx.fillText('SCORE', 28, 74);
+    if (!recActive) return;
+    // Draw mirrored video (match what user sees)
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, W, H);
+    ctx.restore();
+    // Draw hand overlay canvas (already correct coords)
+    ctx.drawImage(gameCanvas, 0, 0, W, H);
+    // Fire overlay when active
+    if (isFireTime) {
+      const grad = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.7);
+      grad.addColorStop(0, 'rgba(255,51,0,0)');
+      grad.addColorStop(1, 'rgba(255,51,0,0.28)');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+    }
+    // HUD — score
+    ctx.fillStyle = 'rgba(8,12,16,0.7)';
+    ctx.beginPath(); ctx.roundRect(14, 14, 130, 68, 8); ctx.fill();
+    ctx.fillStyle = '#00d4ff';
+    ctx.font = '900 48px "Barlow Condensed",sans-serif';
+    ctx.fillText(gameScore, 26, 60);
+    ctx.fillStyle = '#4a6070';
+    ctx.font = '700 11px "Space Mono",monospace';
+    ctx.fillText('SCORE', 26, 74);
+    // HUD — timer
+    ctx.fillStyle = 'rgba(8,12,16,0.7)';
+    ctx.beginPath(); ctx.roundRect(W-130, 14, 116, 68, 8); ctx.fill();
+    ctx.fillStyle = isFireTime ? '#ff3300' : '#e8f0f7';
+    ctx.font = '700 48px "Space Mono",monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(gameTimeLeft, W-18, 60);
+    ctx.fillStyle = '#4a6070';
+    ctx.font = '700 11px "Space Mono",monospace';
+    ctx.fillText('TIME', W-18, 74);
+    ctx.textAlign = 'left';
+    // x2 label
+    if (isFireTime) {
+      ctx.fillStyle = '#ff3300';
+      ctx.font = '900 22px "Barlow Condensed",sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('×2 FIRE TIME!', W/2, 40);
+      ctx.textAlign = 'left';
+    }
     requestAnimationFrame(drawFrame);
   };
   requestAnimationFrame(drawFrame);
 
+  const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
   try {
     const stream = compositeCanvas.captureStream(30);
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
     mediaRecorder.onstop = () => {
-      recordedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+      recActive = false;
+      recordedBlob = new Blob(recordedChunks, { type: mimeType });
     };
-    // Record for 25 seconds (5s countdown + 20s game)
     mediaRecorder.start();
-    setTimeout(() => { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 25000);
+    // 5s countdown + 20s game + 5s reaction = 30s
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    }, 30000);
   } catch(e) {
     showNotif('Recording not supported in this browser', 'error');
     recordEnabled = false;
+    recActive = false;
   }
 }
 
@@ -1013,9 +1327,17 @@ function startRecording() {
 function endGame() {
   gameActive = false;
   clearInterval(gameInterval);
+  if (adminCmdListener) { adminCmdListener(); adminCmdListener = null; }
   if (mpHands) { mpHands.close(); mpHands = null; }
   document.getElementById('gameOverlay').classList.remove('show');
+  removeSession();
   lastGameScore = gameScore;
+  // Stop recording 5s after game ends (reaction time)
+  if (recordEnabled && mediaRecorder && mediaRecorder.state === 'recording') {
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    }, 5000);
+  }
   showResult();
 }
 
@@ -1052,6 +1374,8 @@ async function showResult() {
   } catch(e) {}
 
   // Download row
+  // Give recorder time to finalize
+  await new Promise(r => setTimeout(r, 600));
   if (recordEnabled && recordedBlob) {
     document.getElementById('downloadRow').style.display = 'flex';
   } else {
@@ -1059,6 +1383,7 @@ async function showResult() {
   }
 
   document.getElementById('resultOverlay').classList.add('show');
+  updateResultForGuest();
 }
 
 function triggerPbBurst() {
@@ -1095,7 +1420,7 @@ function triggerPbBurst() {
 }
 
 window.saveResult = async () => {
-  if (!currentUser) { openSignInModal(); return; }
+  if (!currentUser || isGuest) { showNotif('Sign in to save scores', 'info'); return; }
   document.getElementById('saveResultBtn').disabled = true;
   document.getElementById('saveResultBtn').textContent = 'Saving...';
   try {
@@ -1119,6 +1444,15 @@ window.saveResult = async () => {
   }
 };
 
+// Show guest note on result
+function updateResultForGuest() {
+  if (isGuest) {
+    document.getElementById('saveResultBtn').disabled = true;
+    document.getElementById('saveResultBtn').textContent = 'Sign In to Save';
+    document.getElementById('resultPosition').innerHTML = '<span style="color:var(--muted)">Sign in to appear on the leaderboard</span>';
+  }
+}
+
 window.discardResult = () => {
   document.getElementById('resultOverlay').classList.remove('show');
   stopCamera();
@@ -1128,7 +1462,7 @@ window.downloadRecording = () => {
   if (!recordedBlob) { showNotif('No recording available', 'error'); return; }
   const url = URL.createObjectURL(recordedBlob);
   const a = document.createElement('a');
-  a.href = url; a.download = `67speed_${gameScore}_pts.webm`; a.click();
+  a.href = url; a.download = `67speed_${gameScore}_pts.mp4`; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
   showNotif('Downloading...', 'success');
 };
@@ -1138,35 +1472,234 @@ function stopCamera() {
 }
 
 // ── ADMIN ─────────────────────────────────────────────────────────────────────
+// Admin state
+let adminActiveSessions = {};
+let adminSpectateUid = null;
+
+// Listen for active sessions (players currently playing or on page)
+function listenActiveSessions() {
+  onValue(ref(db, '67speed/sessions'), snap => {
+    adminActiveSessions = snap.val() || {};
+    if (document.getElementById('adminPanel').classList.contains('show')) {
+      renderAdminActivePlayers();
+    }
+    if (adminSpectateUid && adminActiveSessions[adminSpectateUid]) {
+      updateSpectateView(adminActiveSessions[adminSpectateUid]);
+    }
+  });
+}
+
+function renderAdminActivePlayers() {
+  const el = document.getElementById('adminActivePlayers');
+  if (!el) return;
+  const sessions = Object.entries(adminActiveSessions);
+  const countEl = document.getElementById('activeCount');
+  if (countEl) countEl.textContent = sessions.length;
+  if (!sessions.length) { el.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px 0;">No active players</div>'; return; }
+  el.innerHTML = '';
+  sessions.forEach(([uid, s]) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;';
+    const statusDot = s.inGame ? '🔴' : '🟢';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;">${statusDot} ${esc(s.username||'Guest')}</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${s.inGame ? `In game — Score: ${s.score||0} / Time: ${s.timeLeft||0}s` : 'On home page'}</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="admin-act-btn" onclick="adminSpectate('${uid}')">👁 Watch</button>
+        ${s.inGame ? `<button class="admin-act-btn" onclick="adminFreezeTimer('${uid}')">⏸ Freeze</button>` : ''}
+        ${s.inGame ? `<button class="admin-act-btn del" onclick="adminEndGame('${uid}')">⏹ End</button>` : ''}
+        <button class="admin-act-btn" onclick="adminSendPopup('${uid}')">💬 Message</button>
+        ${s.inGame ? `<button class="admin-act-btn" onclick="adminFlipScore('${uid}')">🔀 Flip Score</button>` : ''}
+        ${s.inGame ? `<button class="admin-act-btn" onclick="adminSetScore('${uid}')">✏️ Set Score</button>` : ''}
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
 window.openAdminPanel = async () => {
   document.getElementById('adminPanel').classList.add('show');
+  renderAdminActivePlayers();
+  loadAdminUserList();
+  listenActiveSessions();
+};
+window.closeAdminPanel = () => {
+  document.getElementById('adminPanel').classList.remove('show');
+  closeSpectateView();
+};
+
+async function loadAdminUserList() {
   const listEl = document.getElementById('adminUserList');
   listEl.innerHTML = '<div class="spinner"></div>';
   try {
-    const [usersSnap, lbSnap, attSnap] = await Promise.all([
-      get(DB.allUsers()), get(DB.lb()), get(DB.allAttempts())
-    ]);
+    const [usersSnap, lbSnap] = await Promise.all([get(DB.allUsers()), get(DB.lb())]);
     const users = usersSnap.val() || {};
     const lb = lbSnap.val() || {};
-    const allAtts = attSnap.val() || {};
     listEl.innerHTML = '';
-    Object.entries(users).forEach(([uid, u]) => {
+    const entries = Object.entries(users);
+    if (!entries.length) { listEl.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px;">No users yet.</div>'; return; }
+    entries.forEach(([uid, u]) => {
       const lbEntry = lb[uid];
-      const row = document.createElement('div');
-      row.className = 'admin-user-row';
-      row.innerHTML = `
-        <div class="admin-user-name">${esc(u.username || uid)}<br><span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${esc(u.email||'')}</span></div>
-        <div class="admin-user-score">${lbEntry ? lbEntry.score : '—'}</div>
-        <div class="admin-actions">
+      const details = document.createElement('details');
+      details.style.cssText = 'border:1px solid var(--border);border-radius:7px;margin-bottom:7px;overflow:hidden;';
+      const summary = document.createElement('summary');
+      summary.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;list-style:none;';
+      summary.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;">${esc(u.username||uid)}</div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(u.email||'')}</div>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);flex-shrink:0;">${lbEntry ? lbEntry.score : '—'}</div>`;
+      const body = document.createElement('div');
+      body.style.cssText = 'padding:10px 14px;border-top:1px solid var(--border);background:var(--surface2);';
+      body.innerHTML = `
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
           <button class="admin-act-btn" onclick="adminRename('${uid}','${esc(u.username||'')}')">Rename</button>
-          <button class="admin-act-btn del" onclick="adminDeleteUser('${uid}','${esc(u.username||'')}')">Delete</button>
-        </div>`;
-      listEl.appendChild(row);
+          <button class="admin-act-btn del" onclick="adminDeleteUser('${uid}','${esc(u.username||'')}')">Delete User</button>
+          <button class="admin-act-btn" onclick="adminViewAttempts('${uid}','${esc(u.username||'')}',this)">View Attempts ▾</button>
+        </div>
+        <div id="atts_${uid}" style="display:none;"></div>`;
+      details.appendChild(summary); details.appendChild(body);
+      listEl.appendChild(details);
     });
-    if (!Object.keys(users).length) listEl.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:12px;padding:12px;">No users yet.</div>';
   } catch(e) { listEl.innerHTML = '<div style="color:#ef4444;font-size:12px;">Failed to load</div>'; }
+}
+
+window.adminViewAttempts = async (uid, username, btn) => {
+  const container = document.getElementById(`atts_${uid}`);
+  if (container.style.display !== 'none') { container.style.display = 'none'; btn.textContent = 'View Attempts ▾'; return; }
+  container.style.display = 'block'; btn.textContent = 'Hide Attempts ▴';
+  container.innerHTML = '<div class="spinner" style="margin:8px auto;"></div>';
+  try {
+    const snap = await get(DB.attempts(uid));
+    const atts = snap.val() || {};
+    const sorted = Object.entries(atts).sort((a,b) => (b[1].score||0) - (a[1].score||0));
+    container.innerHTML = '';
+    if (!sorted.length) { container.innerHTML = '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);">No attempts saved.</div>'; return; }
+    sorted.forEach(([key, att]) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);';
+      row.innerHTML = `
+        <div style="flex:1;font-family:var(--font-mono);font-size:12px;">
+          <span style="color:var(--accent);font-weight:700;">${att.score}</span>
+          <span style="color:var(--muted);font-size:10px;margin-left:8px;">${fmtDate(att.ts)}</span>
+        </div>
+        <button class="admin-act-btn del" style="font-size:10px;" onclick="adminDeleteAttempt('${uid}','${key}',this)">Delete</button>`;
+      container.appendChild(row);
+    });
+  } catch(e) { container.innerHTML = '<div style="color:#ef4444;font-size:11px;">Failed</div>'; }
 };
-window.closeAdminPanel = () => document.getElementById('adminPanel').classList.remove('show');
+
+window.adminDeleteAttempt = async (uid, key, btn) => {
+  if (!confirm('Delete this attempt?')) return;
+  try {
+    await remove(DB.attempt(uid, key));
+    btn.closest('div[style*="display:flex"]').remove();
+    showNotif('Attempt deleted', 'success');
+    // Recalc best score
+    const snap = await get(DB.attempts(uid));
+    const atts = snap.val() || {};
+    const best = Object.values(atts).reduce((max, a) => Math.max(max, a.score||0), 0);
+    if (best > 0) {
+      const uSnap = await get(DB.users(uid));
+      const u = uSnap.val() || {};
+      await set(DB.lbUser(uid), { score: best, username: u.username||'Unknown', uid, ts: Date.now() });
+    } else {
+      await remove(DB.lbUser(uid));
+    }
+  } catch(e) { showNotif('Failed to delete', 'error'); }
+};
+
+// ── SPECTATE ──────────────────────────────────────────────────────────────────
+window.adminSpectate = (uid) => {
+  adminSpectateUid = uid;
+  let panel = document.getElementById('spectatePanel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'spectatePanel';
+    panel.style.cssText = 'position:fixed;bottom:20px;right:20px;width:300px;background:var(--surface);border:1px solid var(--accent2);border-radius:12px;z-index:9999;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);';
+    panel.innerHTML = `
+      <div style="background:var(--accent2);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:12px;font-weight:900;color:var(--bg);letter-spacing:0.05em;">👁 SPECTATING</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span id="spectateName" style="font-size:11px;font-weight:700;color:var(--bg);"></span>
+          <button onclick="closeSpectateView()" style="background:rgba(0,0,0,0.2);border:none;color:var(--bg);cursor:pointer;border-radius:4px;padding:2px 7px;font-size:13px;">✕</button>
+        </div>
+      </div>
+      <div id="spectateScreen" style="background:#000;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:center;">Waiting for game to start...</div>
+      </div>`;
+    document.body.appendChild(panel);
+  }
+  const s = adminActiveSessions[uid] || {};
+  document.getElementById('spectateName').textContent = s.username || uid;
+  updateSpectateView(s);
+};
+
+function updateSpectateView(s) {
+  const screen = document.getElementById('spectateScreen'); if (!screen) return;
+  if (!s || !s.inGame) {
+    screen.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:center;">Not in a game</div>';
+    return;
+  }
+  const fireColor = s.isFireTime ? '#ff3300' : 'var(--accent)';
+  screen.innerHTML = `
+    <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">SCORE</div>
+        <div style="font-size:3rem;font-weight:900;color:${fireColor};line-height:1;">${s.score||0}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">TIME</div>
+        <div style="font-size:3rem;font-weight:900;color:${s.isFireTime?'#ff3300':'var(--text)'};line-height:1;">${s.timeLeft||0}</div>
+      </div>
+    </div>
+    ${s.isFireTime ? '<div style="font-size:13px;font-weight:900;color:#ff3300;letter-spacing:0.1em;text-align:center;animation:none;">🔥 FIRE TIME ×2</div>' : ''}
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-align:center;margin-top:8px;">[Camera hidden by design]</div>`;
+}
+
+window.closeSpectateView = () => {
+  adminSpectateUid = null;
+  const p = document.getElementById('spectatePanel'); if (p) p.remove();
+};
+
+// ── ADMIN MOD ACTIONS ─────────────────────────────────────────────────────────
+const DB_CMD = uid => ref(db, `67speed/adminCommands/${uid}`);
+
+async function sendAdminCmd(uid, cmd) {
+  await set(DB_CMD(uid), { ...cmd, ts: Date.now() });
+}
+
+window.adminFreezeTimer = async (uid) => {
+  await sendAdminCmd(uid, { type: 'freeze_timer' });
+  showNotif('Timer frozen for ' + (adminActiveSessions[uid]?.username || uid), 'info');
+};
+
+window.adminEndGame = async (uid) => {
+  if (!confirm('Force end this player\'s game?')) return;
+  await sendAdminCmd(uid, { type: 'end_game' });
+  showNotif('Game ended', 'info');
+};
+
+window.adminSendPopup = async (uid) => {
+  const msg = prompt('Message to send to player:');
+  if (!msg) return;
+  await sendAdminCmd(uid, { type: 'popup', message: msg });
+  showNotif('Message sent', 'success');
+};
+
+window.adminFlipScore = async (uid) => {
+  await sendAdminCmd(uid, { type: 'flip_score' });
+  showNotif('Score flipped!', 'info');
+};
+
+window.adminSetScore = async (uid) => {
+  const val = prompt('Set player score to:');
+  if (val === null || isNaN(parseInt(val))) return;
+  await sendAdminCmd(uid, { type: 'set_score', value: parseInt(val) });
+  showNotif('Score set to ' + val, 'info');
+};
 
 window.adminRename = async (uid, current) => {
   const newName = prompt(`Rename "${current}" to:`, current);
