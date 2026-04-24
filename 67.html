@@ -106,8 +106,8 @@ body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-
 .fire-overlay{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.4s;background:radial-gradient(ellipse at center,transparent 40%,rgba(255,51,0,0.25) 100%);}
 .fire-overlay.show{opacity:1;animation:fireFlicker 0.3s ease-in-out infinite alternate;}
 @keyframes fireFlicker{from{opacity:0.7}to{opacity:1}}
-#videoEl{width:100%;height:100%;object-fit:contain;transform:scaleX(-1);background:#000;}
-#gameCanvas{position:absolute;inset:0;width:100%;height:100%);}
+#videoEl{width:100%;height:100%;object-fit:contain;transform:scaleX(-1);background:#000;max-width:640px;max-height:480px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scaleX(-1);}
+#gameCanvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scaleX(-1);width:640px;height:480px;max-width:100vw;}
 .fire-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:4rem;font-weight:900;color:var(--fire);text-shadow:0 0 40px var(--fire);opacity:0;pointer-events:none;z-index:20;animation:none;}
 .fire-badge.show{animation:fireBadgeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;}
 @keyframes fireBadgeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}70%{transform:translate(-50%,-50%) scale(0.95)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
@@ -530,6 +530,11 @@ onAuthStateChanged(auth, async user => {
     loadStats();
     publishHomePresence();
     window.addEventListener('beforeunload', removeSession);
+    // Also clean up any previous guest session on login
+    if (mySessionKey && mySessionKey !== currentUser.uid) {
+      remove(ref(db, `67speed/sessions/${mySessionKey}`)).catch(() => {});
+      mySessionKey = null;
+    }
   } else {
     document.getElementById('signInHeaderBtn').style.display = '';
     document.getElementById('userPill').style.display = 'none';
@@ -559,12 +564,14 @@ window.closeSignInModal = () => document.getElementById('signInOverlay').classLi
 
 window.enterGuestMode = () => {
   isGuest = true;
+  mySessionKey = null; // fresh key for this guest session
   closeSignInModal();
   document.getElementById('signInHeaderBtn').style.display = 'none';
   document.getElementById('userPill').style.display = 'flex';
   document.getElementById('headerUsername').textContent = 'Guest';
   const dot = document.querySelector('.user-dot');
   if (dot) dot.style.background = 'var(--muted)';
+  window.addEventListener('beforeunload', removeSession);
   showNotif('Playing as guest — scores won\'t be saved', 'info');
 };
 
@@ -884,50 +891,8 @@ window.cancelRecordConfirm = () => {
 window.confirmRecordAndStart = () => {
   document.getElementById('recordConfirmOverlay').classList.remove('show');
   if (setupHands) { setupHands.close(); setupHands = null; }
-  if (recordEnabled) startRecordingEarly();
   startCountdown();
 };
-
-function startRecordingEarly() {
-  // Start composite recording from countdown screen
-  // We'll record a blank canvas during countdown then transition to game canvas
-  recordedChunks = [];
-  const W = window.innerWidth, H = window.innerHeight;
-  const earlyCanvas = document.createElement('canvas');
-  earlyCanvas.width = W; earlyCanvas.height = H;
-  const ctx = earlyCanvas.getContext('2d');
-  let earlyActive = true;
-  const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
-  let countVal = 5;
-  const drawEarly = () => {
-    if (!earlyActive) return;
-    ctx.fillStyle = '#080c10';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(0,212,255,0.08)';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = 'white';
-    ctx.font = '900 20vw "Barlow Condensed",sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(countVal, W/2, H/2);
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = '700 14px "Space Mono",monospace';
-    ctx.fillStyle = '#4a6070';
-    ctx.fillText('GET READY', W/2, H/2 + H*0.12);
-    requestAnimationFrame(drawEarly);
-  };
-  requestAnimationFrame(drawEarly);
-  // Update countdown value to match
-  let c = 5;
-  const cInt = setInterval(() => { c--; countVal = c; if (c <= 0) { earlyActive = false; clearInterval(cInt); } }, 1000);
-  try {
-    const stream = earlyCanvas.captureStream(30);
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => { recordedBlob = new Blob(recordedChunks, { type: mimeType }); };
-    mediaRecorder.start();
-  } catch(e) { recordEnabled = false; }
-}
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 function startCountdown() {
@@ -975,26 +940,7 @@ function beginGame() {
   initGameHandTracking();
 
   // Set up recording if enabled
-  if (recordEnabled) {
-    // Stop early countdown recorder, chain into game recorder
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      mediaRecorder.onstop = () => {
-        const earlyChunks = [...recordedChunks];
-        recordedChunks = [];
-        startRecording();
-        // Prepend early chunks when game recorder also stops
-        const origStop = mediaRecorder.onstop;
-        mediaRecorder.onstop = (e) => {
-          origStop && origStop(e);
-          const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
-          recordedBlob = new Blob([...earlyChunks, ...recordedChunks], { type: mimeType });
-        };
-      };
-    } else {
-      startRecording();
-    }
-  }
+  if (recordEnabled) startRecording();
 
   // Publish session presence
   publishSession();
@@ -1025,8 +971,8 @@ function initGameHandTracking() {
   const canvas = document.getElementById('gameCanvas');
   video.srcObject = cameraStream;
   video.play();
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = 640;
+  canvas.height = 480;
 
   mpHands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
   mpHands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.65, minTrackingConfidence: 0.5 });
@@ -1053,16 +999,14 @@ function onGameHandResults(results) {
 
   handPositions = results.multiHandLandmarks.map((landmarks, i) => {
     const wrist = landmarks[0];
-    return { x: (1 - wrist.x) * canvas.width, y: wrist.y * canvas.height, index: i, landmarks };
+    // No mirroring on X — canvas is mirrored via CSS to match video
+    return { x: wrist.x * canvas.width, y: wrist.y * canvas.height, index: i, landmarks };
   });
 
-  // Draw dots + skeleton for each hand
   const colors = ['#00d4ff', '#ff6b35'];
   handPositions.forEach((hand, i) => {
     const color = colors[i % 2];
-    // Skeleton
     drawHandSkeletonGame(ctx, hand.landmarks, canvas.width, canvas.height, color + '55');
-    // Wrist dot
     ctx.beginPath();
     ctx.arc(hand.x, hand.y, 18, 0, Math.PI * 2);
     ctx.fillStyle = color + 'cc';
@@ -1071,10 +1015,8 @@ function onGameHandResults(results) {
     ctx.arc(hand.x, hand.y, 7, 0, Math.PI * 2);
     ctx.fillStyle = 'white';
     ctx.fill();
-    // Label
     ctx.fillStyle = color;
     ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
-    ctx.letterSpacing = '0.05em';
     ctx.fillText(`HAND ${i + 1}`, hand.x - 22, hand.y - 24);
   });
 
@@ -1089,8 +1031,8 @@ function drawHandSkeletonGame(ctx, landmarks, w, h, color) {
   connections.forEach(([a, b]) => {
     const pa = landmarks[a], pb = landmarks[b];
     ctx.beginPath();
-    ctx.moveTo((1-pa.x)*w, pa.y*h);
-    ctx.lineTo((1-pb.x)*w, pb.y*h);
+    ctx.moveTo(pa.x * w, pa.y * h);
+    ctx.lineTo(pb.x * w, pb.y * h);
     ctx.stroke();
   });
 }
@@ -1149,9 +1091,13 @@ function showInGameHint(msg) {
 }
 
 let adminCmdListener = null;
+let mySessionKey = null; // stable key for this tab's session
 function publishSession() {
   if (!currentUser && !isGuest) return;
-  const uid = currentUser ? currentUser.uid : 'guest_' + Math.random().toString(36).slice(2,8);
+  if (!mySessionKey) {
+    mySessionKey = currentUser ? currentUser.uid : 'guest_' + Math.random().toString(36).slice(2,8);
+  }
+  const uid = mySessionKey;
   const data = {
     uid,
     username: myProfile?.username || 'Guest',
@@ -1175,8 +1121,9 @@ function publishHomePresence() {
 }
 
 function removeSession() {
-  if (!currentUser) return;
-  remove(ref(db, `67speed/sessions/${currentUser.uid}`)).catch(() => {});
+  const key = mySessionKey || (currentUser ? currentUser.uid : null);
+  if (!key) return;
+  remove(ref(db, `67speed/sessions/${key}`)).catch(() => {});
 }
 
 function listenAdminCommands() {
@@ -1248,54 +1195,64 @@ function flashScoreFeedback(points) {
 function startRecording() {
   const gameCanvas = document.getElementById('gameCanvas');
   const video = document.getElementById('videoEl');
-  const W = window.innerWidth, H = window.innerHeight;
+  // Match the game display size
+  const W = 640, H = 480;
   const compositeCanvas = document.createElement('canvas');
   compositeCanvas.width = W; compositeCanvas.height = H;
   const ctx = compositeCanvas.getContext('2d');
-
+  recordedChunks = [];
   let recActive = true;
+
   const drawFrame = () => {
     if (!recActive) return;
-    // Draw mirrored video (match what user sees)
+    // Black background
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    // Draw video mirrored (same as what user sees on screen)
     ctx.save();
     ctx.translate(W, 0); ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0, W, H);
+    try { ctx.drawImage(video, 0, 0, W, H); } catch(e) {}
     ctx.restore();
-    // Draw hand overlay canvas (already correct coords)
-    ctx.drawImage(gameCanvas, 0, 0, W, H);
-    // Fire overlay when active
+    // Draw hand overlay — canvas is scaleX(-1) via CSS but we draw raw coords
+    // so we mirror them here to match
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);
+    try { ctx.drawImage(gameCanvas, 0, 0, W, H); } catch(e) {}
+    ctx.restore();
+    // Fire overlay
     if (isFireTime) {
-      const grad = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.7);
-      grad.addColorStop(0, 'rgba(255,51,0,0)');
-      grad.addColorStop(1, 'rgba(255,51,0,0.28)');
-      ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+      const grad = ctx.createRadialGradient(W/2,H/2,H*0.15,W/2,H/2,H*0.65);
+      grad.addColorStop(0,'rgba(255,51,0,0)');
+      grad.addColorStop(1,'rgba(255,51,0,0.3)');
+      ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
     }
-    // HUD — score
-    ctx.fillStyle = 'rgba(8,12,16,0.7)';
-    ctx.beginPath(); ctx.roundRect(14, 14, 130, 68, 8); ctx.fill();
+    // HUD score
+    ctx.fillStyle = 'rgba(8,12,16,0.75)';
+    ctx.beginPath(); ctx.roundRect(10,10,110,60,7); ctx.fill();
     ctx.fillStyle = '#00d4ff';
-    ctx.font = '900 48px "Barlow Condensed",sans-serif';
-    ctx.fillText(gameScore, 26, 60);
-    ctx.fillStyle = '#4a6070';
-    ctx.font = '700 11px "Space Mono",monospace';
-    ctx.fillText('SCORE', 26, 74);
-    // HUD — timer
-    ctx.fillStyle = 'rgba(8,12,16,0.7)';
-    ctx.beginPath(); ctx.roundRect(W-130, 14, 116, 68, 8); ctx.fill();
-    ctx.fillStyle = isFireTime ? '#ff3300' : '#e8f0f7';
-    ctx.font = '700 48px "Space Mono",monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(gameTimeLeft, W-18, 60);
-    ctx.fillStyle = '#4a6070';
-    ctx.font = '700 11px "Space Mono",monospace';
-    ctx.fillText('TIME', W-18, 74);
+    ctx.font = '900 42px "Barlow Condensed",sans-serif';
     ctx.textAlign = 'left';
-    // x2 label
+    ctx.fillText(gameScore, 20, 52);
+    ctx.fillStyle = '#4a6070';
+    ctx.font = '700 10px "Space Mono",monospace';
+    ctx.fillText('SCORE', 20, 64);
+    // HUD timer
+    ctx.fillStyle = 'rgba(8,12,16,0.75)';
+    ctx.beginPath(); ctx.roundRect(W-110,10,100,60,7); ctx.fill();
+    ctx.fillStyle = isFireTime ? '#ff3300' : '#e8f0f7';
+    ctx.font = '700 42px "Space Mono",monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(gameTimeLeft, W-12, 52);
+    ctx.fillStyle = '#4a6070';
+    ctx.font = '700 10px "Space Mono",monospace';
+    ctx.fillText('TIME', W-12, 64);
+    ctx.textAlign = 'left';
+    // Fire label
     if (isFireTime) {
       ctx.fillStyle = '#ff3300';
-      ctx.font = '900 22px "Barlow Condensed",sans-serif';
+      ctx.font = '900 20px "Barlow Condensed",sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('×2 FIRE TIME!', W/2, 40);
+      ctx.fillText('🔥 ×2 FIRE TIME!', W/2, 36);
       ctx.textAlign = 'left';
     }
     requestAnimationFrame(drawFrame);
@@ -1312,7 +1269,7 @@ function startRecording() {
       recordedBlob = new Blob(recordedChunks, { type: mimeType });
     };
     mediaRecorder.start();
-    // 5s countdown + 20s game + 5s reaction = 30s
+    // Safety cutoff at 30s (endGame stops it after 5s reaction time anyway)
     setTimeout(() => {
       if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
     }, 30000);
@@ -1322,7 +1279,6 @@ function startRecording() {
     recActive = false;
   }
 }
-
 // ── END GAME ──────────────────────────────────────────────────────────────────
 function endGame() {
   gameActive = false;
@@ -1342,6 +1298,16 @@ function endGame() {
 }
 
 async function showResult() {
+  // Wait for any in-progress recording to finalize
+  if (recordEnabled && mediaRecorder && mediaRecorder.state !== 'inactive') {
+    await new Promise(resolve => {
+      const orig = mediaRecorder.onstop;
+      mediaRecorder.onstop = (e) => { if(orig) orig(e); resolve(); };
+    });
+  }
+  // Extra buffer for blob construction
+  await new Promise(r => setTimeout(r, 400));
+
   document.getElementById('resultScore').textContent = gameScore;
   document.getElementById('resultPb').classList.remove('show');
   document.getElementById('pbBurst').classList.remove('show');
@@ -1375,7 +1341,6 @@ async function showResult() {
 
   // Download row
   // Give recorder time to finalize
-  await new Promise(r => setTimeout(r, 600));
   if (recordEnabled && recordedBlob) {
     document.getElementById('downloadRow').style.display = 'flex';
   } else {
@@ -1492,7 +1457,9 @@ function listenActiveSessions() {
 function renderAdminActivePlayers() {
   const el = document.getElementById('adminActivePlayers');
   if (!el) return;
-  const sessions = Object.entries(adminActiveSessions);
+  // Filter out stale sessions (not updated in last 2 minutes)
+  const TWO_MIN = 2 * 60 * 1000;
+  const sessions = Object.entries(adminActiveSessions).filter(([, s]) => Date.now() - (s.ts || 0) < TWO_MIN);
   const countEl = document.getElementById('activeCount');
   if (countEl) countEl.textContent = sessions.length;
   if (!sessions.length) { el.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px 0;">No active players</div>'; return; }
