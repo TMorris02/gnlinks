@@ -791,7 +791,7 @@ footer {
             </div>
         </div>
     </div>
-
+	<footer>
     <div class="footer-links">
             <a href="#" onclick="loadDMCA(); return false;">DMCA</a>
             <a href="#" onclick="showContact(); return false;">Contact</a>
@@ -1654,18 +1654,15 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
 };
 
 document.getElementById('random').addEventListener('click', function() {
-    // Generate a random number between 2 and 720
-    const min = 2;
-    const max = 720;
+    // Generate a random number between 1 and the number of zones
+    const min = 1; 
+    const max = zones.length;
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
-    // Option A: Update URL and RELOAD the page to the new ID
+    // Update URL and RELOAD the page to the new ID
     window.location.search = `?id=${randomNumber}`;
-
-    // Option B: Update URL WITHOUT reloading (useful for single-page apps)
-    // const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?id=${randomNumber}`;
-    // window.history.pushState({path:newUrl}, '', newUrl);
 });
+
 </script>
     <script>
       try {
