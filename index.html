@@ -118,8 +118,6 @@ window.location.href = 'https://classroom.google.com/';
 <a><button id="rocketgoal" class="settings-button rocket-btn" style="width: 40%;">Rocketgoal.io</button></a>
 <br><br>
 <a href="https://tmorris02.github.io/gnlinks/monkeymart.html"><button class="settings-button" style="width: 40%; margin-right: 5%;">Monkey Mart</button></a>
-<a><button id="retro" class="settings-button retro-btn" style="width: 40%;">Retro Bowl</button></a>
-<br><br>
 <a href="https://tmorris02.github.io/gnlinks/smashkarts.html"><button class="settings-button" style="width: 40%;">Smash Karts</button></a>
 
 </center>
@@ -514,7 +512,6 @@ const DEFAULTS = [
     { name: 'Biology',   url: 'https://tmorris02.github.io/gnlinks/drive-mad-new',   teacher: 'Drive Mad',     letter: 'D', theme: 'blue',    cardClass: '' },
     { name: 'History',   url: '',                                                    teacher: 'Rocketgoal.io', letter: 'R', theme: 'orange',  cardClass: 'rocket-btn' },
     { name: 'English',   url: 'https://tmorris02.github.io/gnlinks/monkeymart.html', teacher: 'Monkey Mart',   letter: 'M', theme: 'red',     cardClass: '' },
-    { name: 'Spanish',   url: '',                                                    teacher: 'Retro Bowl',    letter: 'R', theme: 'teal',    cardClass: 'retro-btn' },
     { name: 'Writing',   url: 'https://tmorris02.github.io/gnlinks/smashkarts.html', teacher: 'Smash Karts',   letter: 'S', theme: 'indigo',  cardClass: '' },
 
 ];
@@ -1093,20 +1090,6 @@ settings.addEventListener('click', () => {
         <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScB9014ixTNlEUrC2k3GN8nFrSPkS5GlfLRaWIOGMVW2rslmQ/viewform"
             style="width:100%; height:290px; border:none; display:block;" loading="lazy"></iframe>`;
     document.getElementById('popupOverlay').style.display = "flex";
-});
-
-const retro = document.querySelectorAll('.retro-btn');
-retro.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        document.getElementById('popupTitle').textContent = "Retro Bowl";
-        document.getElementById('popupBody').innerHTML = `
-            <h4 style="text-align: center">
-                <a href="https://tmorris02.github.io/gnlinks/rb.html"><button class="settings-button" style="width: 40%; margin-right: 5%;">Retro Bowl</button></a>
-                <a href="https://tmorris02.github.io/gnlinks/college.html"><button class="settings-button" style="width: 40%;">RB College</button></a>
-            </h4>`;
-        document.getElementById('popupOverlay').style.display = "flex";
-    });
 });
 
 const allRocketBtns = document.querySelectorAll('.rocket-btn');
